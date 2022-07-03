@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd "$(dirname "$0")" || exit
+
 print_usage() {
     printf "\t%-30s" "$1"
     printf "\t%-30s\n\n" "$2"
@@ -23,6 +25,11 @@ done
 
 python="./venv/bin/python3"
 main="./modules/main.py"
+
+if [[ ! -f "$python" ]]
+then
+    python3 -m venv venv
+fi
 
 eval "$python" "$main"
 
