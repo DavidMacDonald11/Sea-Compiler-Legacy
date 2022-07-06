@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sea_path="$(dirname "$0")"
+sea_path="$(dirname "$0" | sed s/' '/'\\ '/g)"
 working="$(pwd | sed s/' '/'\\ '/g)"
 
 print_usage() {
@@ -15,6 +15,7 @@ usage() {
 
     print_usage "-d, --debug" "writes debug information to a file."
     print_usage "-h, --help" "prints the sea command's usage information."
+    print_usage "-v, --verbose" "prints a message as actions are performed."
     printf "\n"
 
     print_usage "-c, --callback=FUNC" "specifies what to do after; depending"
@@ -76,7 +77,7 @@ get_single_arg() {
 
 mode_args="gtpcal"
 
-while getopts ":-:hdm:o:c:" arg
+while getopts ":-:hdvm:o:c:" arg
 do
     case "${arg}" in
         -)
@@ -85,7 +86,9 @@ do
                     usage
                     exit 0 ;;
                 "debug")
-                    add d ;;
+                    add "d" ;;
+                "verbose")
+                    add "v" ;;
                 "callback"|"callback="*)
                     get_arg "--callback"
                     callback="$get_arg_return" ;;
@@ -103,7 +106,9 @@ do
             usage
             exit 0 ;;
         "d")
-            add d ;;
+            add "d" ;;
+        "v")
+            add "v" ;;
         "c")
             get_arg "-c"
             callback="$get_arg_return" ;;
@@ -122,18 +127,35 @@ do
     esac
 done
 
+printv() {
+    [[ "$options" == *"v"* ]] && printf "$@"
+}
+
 for (( i=1; i<= "$#"; i++ ))
 do
     [[ "${!i}" == -* ]] && continue
-    files+=("${!i}")
+
+    if [[ ! -f "${!i}" && ! -d "${!i}" ]]
+    then
+        printf "'%s' is not an existing file or directory.\n" "${!i}"
+        exit 4
+    fi
+
+    file=$(echo "${!i}" | sed s/' '/'\\ '/g)
+    files+=("$file")
 done
+
+if [[ "$files" == "" ]]
+then
+    printf "Requires input files or directories to compile.\n"
+    exit 6
+fi
 
 if [[ "$callback" != "" && ! -x "$callback" ]]
 then
     [[ -f "$callback" ]] && printf "Provided callback is not executable.\n"
     [[ ! -f  "$callback" ]] && printf "Provided callback does not exist.\n"
-
-    exit 4
+    exit 5
 fi
 
 mkdir -p "$out_dir"
@@ -155,6 +177,7 @@ eval "$python" "$main" "$options" "$mode" "$out_dir" "${files[@]}"
 
 if [[ "$callback" != "" ]]
 then
+    printv "Running callback..."
     eval "$callback"
     exit $?
 fi
