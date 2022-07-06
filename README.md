@@ -1,0 +1,88 @@
+# The Sea Programming Language
+The Sea language is essentially a translation of the C language, with Python-like syntax. The goal is to make C easier to read, write, and debug. This increase in programming speed will more than make up for the small increase in compilation time.
+
+Sea - It's C, just written differently.
+
+# File Extensions and Pronunciation
+With this language comes a few file extension requirements:
+* `.sea`; equivalent to `.c`
+* `.hea`; equivalent to `.h`
+* `.seatmp`; used for temporary compiler data
+* `.sea.conf` or `.hea.conf`; generated for configured, but not compiled, files
+
+Let's set the record straight now and avoid creating a "gif" situation.
+The `.sea` file extension is pronounced like the English word "sea."
+The `.hea` file extension is pronounced like the English word "he."
+
+Sea is a play-on-words of C.
+The name matches the concept of writing C in a different way.
+For headers, `.hea` was the obvious choice as it is `.sea` with an "h" and contains the first three letters of "header." I chose the pronunciation so that it would rhyme.
+
+# Compiler Functionality
+This program includes a versatile Sea compiler, as well as language documentation.
+The compiler can run the Sea configurator (similar to C's preprocessor) or configure and transpile Sea to C.
+From there, the program can automatically use `gcc` to compile, assemble, and or link.
+You may also provide your own script to compile the generated C files if you wish.
+
+# Run Instructions
+Usage: sea [OPTIONS]... [DIR|FILE]...
+
+## OPTIONS:
+Run `sea --help` to see the usage information.
+
+If you want to see the configuration, generated tokens and AST, add the `--debug` option.
+
+If you want to recieve updates as the program runs, add the `--verbose` option.
+
+To customize the compilation of the generated C files, add the `--callback=PATH` option, where `PATH` is the path to the runnable script file.
+Once C files are created, this script will be ran.
+Without this argument, the program will call `gcc` and try to complete the process.
+Note that the compiler will create a `manifest.seatmp` file in the output directory containing a list of the output filepaths. This may be useful for your script.
+
+To stop compilation at a specific stage, use the `--mode=MODE` option, where `MODE` is one of the following (note that only the first letter is checked):
+* g, short for configure, runs the Sea configurator.
+Generates `.sea.conf` and `.hea.conf` files only.
+The `.conf` extension exists to prevent overwriting source files.
+You can remove the `.conf` extension and use as a normal Sea file.
+* t, short for transpile, does above and compiles (transpiles) Sea to C.
+Generates `.c` and `.h` files only.
+* p, short for preprocess, does above and preprocesses the C files.
+Generates `.c` files only.
+* c, short for compile, does above and compiles C to assembly.
+Generates `.s` assembly files only.
+* a, short for assemble, does above and assebles objects.
+Generates `.o` object files only.
+* l, short for link, does above and links objects into an executable.
+Generates a `main` executable file only.
+This is the default option when the `--mode` option is not specified.
+
+To specify a custom output directory, use the `--out=OUT` option, where `OUT` is the path to an existing or non-existing folder to place all output into.
+By default, `OUT` is the directory the program is ran from.
+
+## DIR|FILE
+This must come after the options, or the options will break.
+You can simply run `sea [OPTIONS] file1 file2 dir1 dir2 ...` in no particular order.
+If you enter a file, it will be compiled if it is a Sea file.
+If you enter a directory, all sea files within it and all child directories will be compiled.
+You may enter relative or absolute paths.
+If you enter a relative path, the parent directories will be recreated in the output directory.
+If the same file is input multiple times, it will only be compiled once.
+The generated output files, if mode is not l, will be the same name as the source files.
+
+# Future Development
+I'd like to...
+* rewrite the compiler in Sea, once it is finished.
+* make syntax highlighting, icons, logos, and a linter for VS Code.
+Perhaps for other IDEs as well.
+* make the compiler usable on non-Unix systems.
+* create optional libraries to make Sea more like Python.
+
+# Documentation and Syntax
+Check out the [docs folder](./docs).
+
+# Legal
+I am basing much of this code on [David Callanan's BASIC interpreter written in Python](https://github.com/davidcallanan/py-myopl-code) which is licensed under [MIT](https://github.com/davidcallanan/py-myopl-code/blob/master/LICENSE).
+
+Feel free to write your own program to interact with this code and absolutely feel free to use the Sea language. It is my intention for this language and code to be useful. If you think my current license is too strict to achieve that, let me know. See [LICENSE](./LICENSE) for details.
+
+Feel free to use my code as a basis for your own compiler, programming language, etc!
