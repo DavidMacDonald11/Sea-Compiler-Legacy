@@ -3,6 +3,10 @@
 sea_path="$(dirname "$0" | sed s/' '/'\\ '/g)"
 working="$(pwd | sed s/' '/'\\ '/g)"
 
+update() {
+    git pull origin main || sudo git pull origin main
+}
+
 print_usage() {
     printf "  %-20s" "$1"
     printf "\t%-52s\n" "$2"
@@ -15,7 +19,9 @@ usage() {
 
     print_usage "-d, --debug" "writes debug information to a file."
     print_usage "-h, --help" "prints the sea command's usage information."
+    print_usage "-u, --update" "uses git to update Sea to the latest version."
     print_usage "-v, --verbose" "prints a message as actions are performed."
+    print_usage "--version" "prints the program version information."
     printf "\n"
 
     print_usage "-c, --callback=FUNC" "specifies what to do after; depending"
@@ -77,7 +83,7 @@ get_single_arg() {
 
 mode_args="gtpcal"
 
-while getopts ":-:hdvm:o:c:" arg
+while getopts ":-:hduvm:o:c:" arg
 do
     case "${arg}" in
         -)
@@ -87,8 +93,14 @@ do
                     exit 0 ;;
                 "debug")
                     add "d" ;;
+                "update")
+                    update
+                    exit "$?" ;;
                 "verbose")
                     add "v" ;;
+                "version")
+                    printf "Sea 0.0.0\n"
+                    exit 0 ;;
                 "callback"|"callback="*)
                     get_arg "--callback"
                     callback="$get_arg_return" ;;
@@ -107,6 +119,9 @@ do
             exit 0 ;;
         "d")
             add "d" ;;
+        "u")
+            update
+            exit "$?" ;;
         "v")
             add "v" ;;
         "c")
@@ -128,7 +143,7 @@ do
 done
 
 printv() {
-    [[ "$options" == *"v"* ]] && printf "$@"
+    [[ "$options" == *"v"* ]] && printf "%s" "$@"
 }
 
 for (( i=1; i<= "$#"; i++ ))
@@ -141,11 +156,10 @@ do
         exit 4
     fi
 
-    file=$(echo "${!i}" | sed s/' '/'\\ '/g)
-    files+=("$file")
+    files+=("${!i}")
 done
 
-if [[ "$files" == "" ]]
+if [[ "${files[*]}" == "" ]]
 then
     printf "Requires input files or directories to compile.\n"
     exit 6
@@ -173,7 +187,7 @@ fi
 source venv/bin/activate
 eval cd "$working"
 
-eval "$python" "$main" "$options" "$mode" "$out_dir" "${files[@]}"
+eval "$python" "$main" "$options" "$mode" "$out_dir" "${files[*]@Q}"
 
 if [[ "$callback" != "" ]]
 then

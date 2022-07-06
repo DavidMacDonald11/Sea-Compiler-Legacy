@@ -38,12 +38,16 @@ Also be aware that without specifying an output directory, the compiler will dum
 # Run Instructions
 Usage: sea [OPTIONS]... [DIR|FILE]...
 
-### OPTIONS:
+### OPTIONS
 Run `sea --help` to see the usage information.
 
-If you want to see the configuration, generated tokens and AST, add the `--debug` option.
+To see the configuration, generated tokens and AST, add the `--debug` option.
 
-If you want to recieve updates as the program runs, add the `--verbose` option.
+To update the compiler using git, run `sea --update`.
+
+To recieve updates as the program runs, add the `--verbose` option.
+
+To check the compiler version, run `sea --version`.
 
 To customize the compilation of the generated C files, add the `--callback=PATH` option, where `PATH` is the path to the runnable script file.
 Once C files are created, this script will be ran.
