@@ -24,10 +24,21 @@ The compiler can run the Sea configurator (similar to C's preprocessor) or confi
 From there, the program can automatically use `gcc` to compile, assemble, and or link.
 You may also provide your own script to compile the generated C files if you wish.
 
+# Install Instructions
+The ideal way to install Sea is to `git clone` this repository into a permanent install location.
+
+Then, inside of a `~/.bashrc`, `~/.zshrc`, etc. file, add a global alias to `sea.bash`.
+Example:
+- `alias sea=/home/user/Downloads/Sea-Programming-Language/sea.bash`
+
+Otherwise, you may simply run the `sea.bash` command locally.
+Replace all future `sea` commands in this text with `sea.bash`.
+Also be aware that without specifying an output directory, the compiler will dump all created files in the location you run it from.
+
 # Run Instructions
 Usage: sea [OPTIONS]... [DIR|FILE]...
 
-## OPTIONS:
+### OPTIONS:
 Run `sea --help` to see the usage information.
 
 If you want to see the configuration, generated tokens and AST, add the `--debug` option.
@@ -59,7 +70,7 @@ This is the default option when the `--mode` option is not specified.
 To specify a custom output directory, use the `--out=OUT` option, where `OUT` is the path to an existing or non-existing folder to place all output into.
 By default, `OUT` is the directory the program is ran from.
 
-## DIR|FILE
+### DIR|FILE
 This must come after the options, or the options will break.
 You can simply run `sea [OPTIONS] file1 file2 dir1 dir2 ...` in no particular order.
 If you enter a file, it will be compiled if it is a Sea file.
