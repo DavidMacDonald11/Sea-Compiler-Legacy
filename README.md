@@ -93,7 +93,8 @@ Perhaps for other IDEs as well.
 * create optional libraries to make Sea more like Python.
 
 # Documentation and Syntax
-Check out the [docs folder](./docs).
+I've included documentation for the Sea language.
+Check out the [syntax summary](./docs/syntax-summary.adoc).
 
 # Legal
 I am basing much of this code on [David Callanan's BASIC interpreter written in Python](https://github.com/davidcallanan/py-myopl-code) which is licensed under [MIT](https://github.com/davidcallanan/py-myopl-code/blob/master/LICENSE).

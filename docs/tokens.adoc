@@ -1,0 +1,230 @@
+== Tokens
+
+++++
+<style>
+    .green { color: green; }
+    .red { color: red; }
+    .c {
+        background-color: #E6E6E6;
+        border-radius: 3px;
+        padding: .1em .2em;
+        word-wrap: break-word;
+    }
+</style>
+++++
+
+:tab: &nbsp;&nbsp;&nbsp;&nbsp;
+:hardbreaks-option:
+
+:lbracket: [
+:star: *
+:under: _
+
+[.c]_token_:
+{tab} [.c]_keyword_
+{tab} [.c]_identifier_
+{tab} [.c]_constant_
+{tab} [.c]_string-literal_
+{tab} [.c]_operator_
+{tab} [.c]_keyword-operator_
+{tab} [.c]_punctuator_
+
+[.c]_preprocessing-token_:
+{tab} [.c]_header-name_
+{tab} [.c]_identifier_
+{tab} [.c]_character-constant_
+{tab} [.c]_string-literal_
+{tab} [.c]_operator_
+{tab} [.c]_punctuator_
+{tab} each non-whitespace character that can't be one of the above
+
+== Keywords
+[.c]_keyword_: one of
+{tab} [.c]*align* [.c]*default* [.c]*else* [.c]*generic*
+{tab} [.c]*if* [.c]*of* [.c]*size*
+
+== Identifiers
+[.c]_identifier_:
+{tab} [.c]_identifier-nondigit_
+{tab} [.c]_identifier_ [.c]_identifier-nondigit_
+{tab} [.c]_identifier_ [.c]_digit_
+
+[.c]_identifier-nondigit_
+{tab} [.c]_nondigit_
+{tab} [.c]_universal-character-name_
+{tab} other implementation-defined characters
+
+[.c]_nondigit_: one of
+{tab} [.c]*{under}*
+{tab} [.c]_letter_
+
+[.c]_letter_: one of
+{tab} english letters [.c]*a* to [.c]*z*
+{tab} english letters [.c]*A* to [.c]*Z*
+
+[.c]_digit_: one of
+{tab} integers [.c]*0* to [.c]*9*
+
+[.c]_universal-character-name_:
+{tab} [.c]*\u* [.c]_hex-quad_
+{tab} [.c]*\U* [.c]_hex-quad_ [.c]_hex-quad_
+
+[.c]_hex-quad_:
+{tab} [.c]_hexadecimal-digit_ [.c]_hexadecimal-digit_ [.c]_hexadecimal-digit_ [.c]_hexadecimal-digit_
+
+== Constants
+[.c]_constant_:
+{tab} [.c]_integer-constant_
+{tab} [.c]_floating-constant_
+{tab} [.c]_enumeration-constant_
+{tab} [.c]_character-constant_
+
+[.c]_integer-constant_:
+{tab} [.c]_decimal-constant_ [.c]_integer-suffix_~opt~
+{tab} [.c]_arbitrary-base-constant_ [.c]_integer-suffix_~opt~
+
+[.c]_decimal-constant_:
+{tab} [.c]_digit-sequence_
+
+[.c]_digit-sequence_:
+{tab} [.c]_digit_
+{tab} [.c]_digit-sequence_ [.c]_digit_
+
+[.c]_arbitary-base-constant_:
+{tab} [.c]_arbitrary-base-digit-sequence_
+
+[.c]_arbitrary-base-digit-sequence_:
+{tab} [.c]_arbitrary-base-digit_ [.c]_arbitrary-base-suffix_
+{tab} [.c]_arbitrary-base-digit_ [.c]_arbitrary-base-constant_
+
+[.c]_arbitrary-base-digit_: one of
+{tab} [.c]_letter_
+{tab} [.c]_digit_
+
+[.c]_arbitrary-base-suffix_:
+{tab} [.c]*b* [.c]_arbitrary-base_
+{tab} [.c]*B* [.c]_arbitrary-base_
+
+[.c]_arbitrary-base_:
+{tab} a [.c]_decimal-constant_ whose value is between 2 and 36
+
+[.c]_integer-suffix_:
+{tab} [.c]_unsigned-suffix_ [.c]_long-suffix_~opt~
+{tab} [.c]_unsigned-suffix_ [.c]_long-long-suffix_~opt~
+{tab} [.c]_long-suffix_ [.c]_unsigned-suffix_~opt~
+{tab} [.c]_long-long-suffix_ [.c]_unsigned-suffix_~opt~
+
+[.c]_unsigned-suffix_:
+{tab} [.c]*u* [.c]*U*
+
+[.c]_long-suffix_:
+{tab} [.c]*l* [.c]*L*
+
+[.c]_long-long-suffix_:
+{tab} [.c]*ll* [.c]*LL*
+
+[.c]_floating-constant_:
+{tab} [.c]_decimal-floating-constant_
+{tab} [.c]_arbitrary-base-floating-constant_
+
+[.c]_decimal-floating-constant_
+{tab} [.c]_fractional-constant_ [.c]_exponent-part_~opt~ [.c]_floating-suffix_~opt~
+{tab} [.c]_digit-sequence_ [.c]_exponent-part_ [.c]_floating-suffix_~opt~
+
+[.c]_arbitrary-base-floating-constant_:
+{tab} [.c]_arbitrary-base-fractional-constant_ [.c]_arbitrary-base-exponent-part_~opt~ [.c]_floating-suffix_~opt~
+{tab} [.c]_arbitrary-base-digit-sequence_ [.c]_arbitrary-base-exponent-part_ [.c]_floating-suffix_~opt~
+
+[.c]_fractional-constant_:
+{tab} [.c]_digit-sequence_~opt~ [.c]*.* [.c]_digit-sequence_
+{tab} [.c]_digit-sequence_ [.c]*.*
+
+[.c]_exponent-part_:
+{tab} [.c]*e* [.c]_sign_~opt~ [.c]_decimal-constant_
+{tab} [.c]*E* [.c]_sign_~opt~ [.c]_decimal-constant_
+
+[.c]_sign_: one of
+{tab} [.c]*+* [.c]*-*
+
+[.c]_arbitrary-base-fractional-constant_:
+{tab} [.c]_arbitrary-base-digit-sequence_~opt~ [.c]*.* [.c]_arbitrary-base-digit-sequence_
+{tab} [.c]_arbitrary-base-digit-sequence_ [.c]*.*
+
+[.c]_arbitrary-base-exponent-part_:
+{tab} [.c]*e* [.c]_sign_~opt~ [.c]_arbitrary-base-constant_
+{tab} [.c]*E* [.c]_sign_~opt~ [.c]_arbitrary-base-constant_
+
+[.c]_floating-suffix_: one of
+{tab} [.c]*f* [.c]*F* [.c]*l* [.c]*L*
+
+[.c]_enuemration-constant_:
+{tab} [.c]_identifier_
+
+[.c]_character-constant_:
+{tab} [.c]*'* [.c]_c-char-sequence_ [.c]*'*
+{tab} [.c]*L* [.c]*'* [.c]_c-char-sequence_ [.c]*'*
+
+// TODO add escape sequences
+
+== String Literals
+[.c]_string-literal_:
+{tab} [.c]_string-prefix_ [.c]*"* [.c]_s-char-sequence_ [.c]*"*
+
+[.c]_string-prefix_: one of
+{tab} [.c]*b* [.c]*f* [.c]*r*
+{tab} [.c]_size-prefix_
+
+[.c]_size-prefix_:
+{tab} [.c]_decimal-constant_
+{tab} [.c]_arbitrary-base-constant_
+
+[.c]_s-char_
+{tab} [.c]_escape-sequence_
+{tab} any member of the source character set except [.c]*"*, [.c]*\*, or new-line charcter
+
+== Operators
+_All non-keyword operators are punctuators_
+
+[.c]_operator_: one of
+{tab} [.c]*.* [.c]*\->* [.c]*\++* [.c]*--* [.c]*%* [.c]*!*
+{tab} [.c]*^* [.c]*@* [.c]*+* [.c]*-* [.c]*~* [.c]*~<* [.c]*~>*
+{tab} [.c]*{star}{star}* [.c]*{star}* [.c]*/*
+{tab} [.c]*<<* [.c]*>>* [.c]*&* [.c]*|* [.c]*$*
+{tab} [.c]*<* [.c]*>* [.c]*\<=* [.c]*>=* [.c]*==* [.c]*!=*
+{tab} [.c]*=* [.c]*{star}{star}=* [.c]*{star}=* [.c]*/=* [.c]*%=* [.c]*+=* [.c]*-=*
+{tab} [.c]*<\<=* [.c]*>>=* [.c]*&=* [.c]*|=* [.c]*$=*
+
+== Keyword Operators
+_Keyword operators are both keywords and operators_
+
+[.c]_keyword-operator_: one of
+{tab} [.c]*and* [.c]*mod* [.c]*not* [.c]*or*
+
+== Punctuators
+[.c]_punctuator_: one of
+{tab} [.c]*{lbracket}* [.c]*]* [.c]*(* [.c]*)* [.c]*|*
+{tab} [.c]*,*
+{tab} [.c]_indent_ [.c]*\n*
+
+[.c]_indent_:
+{tab} four spaces
+{tab} (through the configurator) at least one space
+
+== Header Names
+[.c]_header-name_:
+{tab} [.c]*<* [.c]_h-char-sequence_ [.c]*>*
+{tab} [.c]*"* [.c]_q-char-sequence_ [.c]*"*
+
+[.c]_h-char-sequence_:
+{tab} [.c]_h-char_
+{tab} [.c]_h-char-sequence_ [.c]_h-char_
+
+[.c]_h-char_:
+{tab} any member of the source character set except the new-line character and [.c]*>*
+
+[.c]_q-char-sequence_:
+{tab} [.c]_q-char_
+{tab} [.c]_q-char-sequence_ [.c]_q-char_
+
+[.c]_q-char_:
+{tab} any member of the source character set except the new-line character and [.c]*"*

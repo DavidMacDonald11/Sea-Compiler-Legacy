@@ -1,0 +1,47 @@
+= Syntax Summary
+:microsoft: https://docs.microsoft.com/en-us/cpp/c-language/c-language-syntax-summary?view=msvc-170
+
+As Sea is based on C and Python, most of Sea's grammar is based directly on C.
+Specifically, I utilized {microsoft}[Microsoft's C Language Syntax Summary] to construct this document.
+
+++++
+<style>
+    .c {
+        background-color: #E6E6E6;
+        border-radius: 3px;
+        padding: .1em .2em;
+        word-wrap: break-word;
+    }
+</style>
+++++
+
+:tab: &nbsp;&nbsp;&nbsp;&nbsp;
+
+[cols="1,4"]
+|===
+|*Attribute*
+|*Description*
+
+|terminal
+|Normal text is for terminals.
+
+|_nonterminal_
+|Italic text is for nonterminals.
+
+|[.c]*literal*
+|Bold is for literal keywords and symbols.
+
+|_optional_~opt~
+|Nonterminals followed by ~opt~ are optional.
+
+|===
+
+A colon following a nonterminal begins its definition.
+Definitions can be recursive.
+Each new line is an alternative definition, unless prefaced by "one of".
+
+== Grammar Docs
+[%hardbreaks]
+link:operator-precedence.adoc[Operator Precedence]
+link:tokens.adoc[Tokens]
+link:expressions.adoc[Expressions]

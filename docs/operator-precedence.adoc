@@ -1,0 +1,159 @@
+= Operator Precedence
+
+:cppref: https://en.cppreference.com/w/c/language/operator_precedence
+
+The following is based on the table from {cppref}[cppreference.com].
+
+[cols="1,2,6,1"]
+|===
+|*Precedence*
+|*Operator*
+|*Description*
+|*Associativity*
+
+|*1*
+|( ) +
+\|\|
+
+|Parentheses +
+Absolute value
+
+|In-to-out
+
+|*2*
+|++ \-- +
+% +
+! +
+( ) +
+[ ] +
+. +
+\-> +
+(_type_){_list_}
+
+|Postfix deviation; increment and decrement +
+Percentage +
+Factorial +
+Function call +
+Array subscripting +
+Structure and union member access +
+Structure and union member access via pointer +
+Compound literal
+
+|Left-to-right
+
+|*3*
+|++ \--
+|Prefix deviation; increment and decrement
+|Right-to-left
+
+|*4*
+|**
+|Exponentiation
+|Left-to-right
+
+|*5*
+|+ - +
+~ ~< ~> +
+! +
+(_type_) +
+@ +
+^ +
+size of +
+align of
+
+|Unary plus and minus +
+Round, round down (floor), round up (ceil) +
+Bitwise not +
+Cast +
+Value-at (dereference) +
+Pointer-to (address-of) +
+Size-of +
+Alignment requirement
+
+|Right-to-left
+
+|*6*
+|* / +
+mod
+
+|Multiplication and division +
+Modulo (remainder)
+|Left-to-right
+
+|*7*
+|+ -
+|Addition and subtraction
+|Left-to-right
+
+|*8*
+|<< >>
+|Bitwise left shfit and right shift
+|Left-to-right
+
+|*9*
+|&
+|Bitwise and
+|Left-to-right
+
+|*10*
+|$
+|Bitwise xor
+|Left-to-right
+
+|*11*
+|\|
+|Bitwise or
+|Left-to-right
+
+|*12*
+|< > +
+\<= >= +
+== !=
+
+|Less than and greater than +
+Less than or equal to and greater than or equal to +
+Equal to, and not equal to
+|Left-to-right
+
+|*13*
+|not
+|Logical not
+|Left-to-right
+
+|*14*
+|and
+|Logical and
+|Left-to-right
+
+|*15*
+|or
+|Logical or
+|Left-to-right
+
+|*16*
+|_ if _ else _
+|Ternary conditional
+|Left-to-right
+
+|*17*
+|= +
+**= +
+*= /= %= +
++= -= +
+<\<= >>= +
+&= $= \|=
+
+|Assignment +
+Assignment by power +
+Assignment by product, quotient, and remainder +
+Assignment by sum and difference +
+Assignment by bitwise left shift and right shfit +
+Assignment by bitwise and, xor, and or
+|Right-to-right
+
+|*18*
+|,
+|Comma
+|Left-to-right
+
+|===
