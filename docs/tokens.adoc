@@ -23,6 +23,7 @@
 `_preprocessing-token_`:
 {tab} `_header-name_`
 {tab} `_identifier_`
+{tab} `_preprocessing-number_`
 {tab} `_character-constant_`
 {tab} `_string-literal_`
 {tab} `_operator_`
@@ -72,7 +73,7 @@
 
 `_integer-constant_`:
 {tab} `_decimal-constant_` `_integer-suffix_`~opt~
-{tab} `_arbitrary-base-constant_` `_integer-suffix_`~opt~
+{tab} `_base-n-constant_` `_integer-suffix_`~opt~
 
 `_decimal-constant_`:
 {tab} `_digit-sequence_`
@@ -81,22 +82,22 @@
 {tab} `_digit_`
 {tab} `_digit-sequence_` `_digit_`
 
-`_arbitary-base-constant_`:
-{tab} `_arbitrary-base-digit-sequence_`
+`_base-n-constant_`:
+{tab} `_base-n-digit-sequence_`
 
-`_arbitrary-base-digit-sequence_`:
-{tab} `_arbitrary-base-digit_` `_arbitrary-base-suffix_`
-{tab} `_arbitrary-base-digit_` `_arbitrary-base-constant_`
+`_base-n-digit-sequence_`:
+{tab} `_base-n-digit_` `_base-n-suffix_`
+{tab} `_base-n-digit_` `_base-n-constant_`
 
-`_arbitrary-base-digit_`: one of
+`_base-n-digit_`: one of
 {tab} `_letter_`
 {tab} `_digit_`
 
-`_arbitrary-base-suffix_`:
-{tab} `*b*` `_arbitrary-base_`
-{tab} `*B*` `_arbitrary-base_`
+`_base-n-suffix_`:
+{tab} `*b*` `_base-n_`
+{tab} `*B*` `_base-n_`
 
-`_arbitrary-base_`:
+`_base-n_`:
 {tab} a `_decimal-constant_` whose value is between 2 and 36
 
 `_integer-suffix_`:
@@ -116,15 +117,15 @@
 
 `_floating-constant_`:
 {tab} `_decimal-floating-constant_`
-{tab} `_arbitrary-base-floating-constant_`
+{tab} `_base-n-floating-constant_`
 
 `_decimal-floating-constant_`
 {tab} `_fractional-constant_` `_exponent-part_`~opt~ `_floating-suffix_`~opt~
 {tab} `_digit-sequence_` `_exponent-part_` `_floating-suffix_`~opt~
 
-`_arbitrary-base-floating-constant_`:
-{tab} `_arbitrary-base-fractional-constant_` `_arbitrary-base-exponent-part_`~opt~ `_floating-suffix_`~opt~
-{tab} `_arbitrary-base-digit-sequence_` `_arbitrary-base-exponent-part_` `_floating-suffix_`~opt~
+`_base-n-floating-constant_`:
+{tab} `_base-n-fractional-constant_` `_base-n-exponent-part_`~opt~ `_floating-suffix_`~opt~
+{tab} `_base-n-digit-sequence_` `_base-n-exponent-part_` `_floating-suffix_`~opt~
 
 `_fractional-constant_`:
 {tab} `_digit-sequence_`~opt~ `*.*` `_digit-sequence_`
@@ -137,13 +138,13 @@
 `_sign_`: one of
 {tab} `*+*` `*-*`
 
-`_arbitrary-base-fractional-constant_`:
-{tab} `_arbitrary-base-digit-sequence_`~opt~ `*.*` `_arbitrary-base-digit-sequence_`
-{tab} `_arbitrary-base-digit-sequence_` `*.*`
+`_base-n-fractional-constant_`:
+{tab} `_base-n-digit-sequence_`~opt~ `*.*` `_base-n-digit-sequence_`
+{tab} `_base-n-digit-sequence_` `*.*`
 
-`_arbitrary-base-exponent-part_`:
-{tab} `*e*` `_sign_`~opt~ `_arbitrary-base-constant_`
-{tab} `*E*` `_sign_`~opt~ `_arbitrary-base-constant_`
+`_base-n-exponent-part_`:
+{tab} `*e*` `_sign_`~opt~ `_base-n-constant_`
+{tab} `*E*` `_sign_`~opt~ `_base-n-constant_`
 
 `_floating-suffix_`: one of
 {tab} `*f*` `*F*` `*l*` `*L*`
@@ -153,9 +154,34 @@
 
 `_character-constant_`:
 {tab} `*'*` `_c-char-sequence_` `*'*`
-{tab} `*L*` `*'*` `_c-char-sequence_` `*'*`
+{tab} `*L'*` `_c-char-sequence_` `*'*`
 
-// TODO add escape sequences
+`_c-char-sequence_`:
+{tab} `_c-char_`
+{tab} `_c-char-sequence_` `_c-char_`
+
+`_c-char_`:
+{tab} `_escape-sequence_`
+{tab} any member of the source character set except `*'*`, `*\*`, or new-line character.
+
+`_escape-sequence_`:
+{tab} `_simple-escape-sequence_`
+{tab} `_octal-escape-sequence_`
+{tab} `_hexadecimal-escape-sequence_`
+{tab} `_universal-character-name_`
+
+`_simple-escape-sequence_`: one of
+{tab} `*\a*` `*\b*` `*\f*` `*\n*` `*\r*` `*\t*` `*\v*`
+{tab} `*\'*` `*\"*` `*\\*` `*\?*`
+
+`_octal-escape-sequence_`:
+{tab} `*\*` `_octal-digit_`
+{tab} `*\*` `_octal-digit_` `_octal-digit_`
+{tab} `*\*` `_octal-digit_` `_octal-digit_` `_octal-digit_`
+
+`_hexadecimal-escape-sequence_`:
+{tab} `*\x*` `_hexadecimal-digit_`
+{tab} `_hexadecimal-escape-sequence_` `_hexadecimal-digit_`
 
 == String Literals
 `_string-literal_`:
@@ -167,7 +193,7 @@
 
 `_size-prefix_`:
 {tab} `_decimal-constant_`
-{tab} `_arbitrary-base-constant_`
+{tab} `_base-n-constant_`
 
 `_s-char_`
 {tab} `_escape-sequence_`
@@ -177,7 +203,7 @@
 _All non-keyword operators are punctuators_
 
 `_operator_`: one of
-{tab} `*.*` `*\->*` `*\++*` `*--*` `*%*` `*!*`
+{tab} `*.*` `*\->*` `*++*` `*--*` `*%*` `*!*`
 {tab} `*^*` `*@*` `*+*` `*-*` `*~*` `*~<*` `*~>*`
 {tab} `*{star}{star}*` `*{star}*` `*/*`
 {tab} `*<<*` `*>>*` `*&*` `*|*` `*$*`
@@ -219,3 +245,15 @@ _Keyword operators are both keywords and operators_
 
 `_q-char_`:
 {tab} any member of the source character set except the new-line character and `*"*`
+
+== Preprocessing Numbers
+`_preprocessing-number_`:
+{tab} `_digit_`
+{tab} `*.*` `_digit_`
+{tab} `_preprocessing-number_` `_digit_`
+{tab} `_preprocessing-number_` `identifier-nondigit`
+{tab} `_preprocessing-number_` `*e*` `_sign_`
+{tab} `_preprocessing-number_` `*E*` `_sign_`
+{tab} `_preprocessing-number_` `*p*` `_sign_`
+{tab} `_preprocessing-number_` `*P*` `_sign_`
+{tab} `_preprocessing-number_` `*.*`
