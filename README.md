@@ -96,6 +96,8 @@ Perhaps for other IDEs as well.
 I've included documentation for the Sea language.
 Check out the [syntax summary](./docs/syntax-summary.adoc).
 
+To see the complete development history, check out the [legacy repository](https://github.com/DavidMacDonald11/Sea-Programming-Language-LEGACY).
+
 # Legal
 I am basing much of this code on [David Callanan's BASIC interpreter written in Python](https://github.com/davidcallanan/py-myopl-code) which is licensed under [MIT](https://github.com/davidcallanan/py-myopl-code/blob/master/LICENSE).
 
