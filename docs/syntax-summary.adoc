@@ -22,7 +22,7 @@ Specifically, I utilized {microsoft}[Microsoft's C Language Syntax Summary] to c
 |_nonterminal_
 |Italic text is for nonterminals.
 
-|[.c]*literal*
+a|`*literal*`
 |Bold is for literal keywords and symbols.
 
 |_optional_~opt~

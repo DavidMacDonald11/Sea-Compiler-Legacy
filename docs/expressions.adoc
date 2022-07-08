@@ -10,126 +10,126 @@
 :lbracket: [
 :star: *
 
-[.c]_primary-expression_:
-{tab} [.c]_identifier_
-{tab} [.c]_constant_
-{tab} [.c]_string-literal_
-{tab} [.c]*(* [.c]_expression_ [.c]*)*
-{tab} [.c]*|* [.c]_expression_ [.c]*|*
-{tab} [.c]_generic-selection_
+`_primary-expression_`:
+{tab} `_identifier_`
+{tab} `_constant_`
+{tab} `_string-literal_`
+{tab} `*(*` `_expression_` `*)*`
+{tab} `*|*` `_expression_` `*|*`
+{tab} `_generic-selection_`
 
-[.c]_generic-selection_:
-{tab} [.c]*generic* [.c]*(* [.c]_assignment-expression_ [.c]*,* [.c]_generic-association-list_ [.c]*)*
+`_generic-selection_`:
+{tab} `*generic*` `*(*` `_assignment-expression_` `*,*` `_generic-association-list_` `*)*`
 
-[.c]_generic-association-list_:
-{tab} [.c]_generic-association_
-{tab} [.c]_generic-association-list_ [.c]*,* [.c]_generic-association_
+`_generic-association-list_`:
+{tab} `_generic-association_`
+{tab} `_generic-association-list_` `*,*` `_generic-association_`
 
-[.c]_generic-association_:
-{tab} [.c]_type-name_ [.c]*:* [.c]_assignment-experssion_
-{tab} [.c]*default* [.c]*:* [.c]_assignment-expression_
+`_generic-association_`:
+{tab} `_type-name_` `*:*` `_assignment-experssion_`
+{tab} `*default*` `*:*` `_assignment-expression_`
 
-[.c]_postfix-expression_:
-{tab} [.c]_primary-expression_
-{tab} [.c]_postfix-expression_ [.c]*{lbracket}* [.c]_expression_ [.c]*]*
-{tab} [.c]_postfix-expression_ [.c]*(* [.c]_argument-expression-list_~opt~ [.c]*)*
-{tab} [.c]_postfix-expression_ [.c]*.* [.c]_identifier_
-{tab} [.c]_postfix-expression_ [.c]*\->* [.c]_identifier_
-{tab} [.c]_postfix-expression_ [.c]_postfix-unary-operator_
-{tab} [.c]*(* [.c]_type-name_ [.c]*{* [.c]_initializer-list_ [.c]*}* [.c]*)*
-{tab} [.c]*(* [.c]_type-name_ [.c]*{* [.c]_initializer-list_ [.c]*}* [.c]*,* [.c]*)*
+`_postfix-expression_`:
+{tab} `_primary-expression_`
+{tab} `_postfix-expression_` `*{lbracket}*` `_expression_` `*]*`
+{tab} `_postfix-expression_` `*(*` `_argument-expression-list_`~opt~ `*)*`
+{tab} `_postfix-expression_` `*.*` `_identifier_`
+{tab} `_postfix-expression_` `*\->*` `_identifier_`
+{tab} `_postfix-expression_` `_postfix-unary-operator_`
+{tab} `*(*` `_type-name_` `*{*` `_initializer-list_` `*}*` `*)*`
+{tab} `*(*` `_type-name_` `*{*` `_initializer-list_` `*}*` `*,*` `*)*`
 
-[.c]_postfix_unary_operator_: one of
-{tab} [.c]*++* [.c]*--* [.c]*%* [.c]*!*
+`_postfix-unary_operator_`: one of
+{tab} `*++*` `*--*` `*%*` `*!*`
 
-[.c]_argument-expression-list_:
-{tab} [.c]_assignment-expression_
-{tab} [.c]_argument-expression-list_ [.c]*,* [.c]_assignment-expression_
+`_argument-expression-list_`:
+{tab} `_assignment-expression_`
+{tab} `_argument-expression-list_` `*,*` `_assignment-expression_`
 
-[.c]_prefix-deviation-expression_:
-{tab} [.c]_postfix-expression_
-{tab} [.c]*++* _prefix-deviation-expression_
-{tab} [.c]*--* _prefix-deviation-expression_
+`_prefix-deviation-expression_`:
+{tab} `_postfix-expression_`
+{tab} `*++*` _prefix-deviation-expression_
+{tab} `*--*` _prefix-deviation-expression_
 
-[.c]_exponential-expression_:
-{tab} [.c]_prefix-deviation-expression_
-{tab} [.c]_exponential-expression_ [.c]*{star}{star}* [.c]_cast_expression_
+`_exponential-expression_`:
+{tab} `_prefix-deviation-expression_`
+{tab} `_exponential-expression_` `*{star}{star}*` `_cast-expression_`
 
-[.c]_unary-expression_:
-{tab} [.c]_exponential-expression_
-{tab} [.c]_unary-operator_ [.c]_cast-expression_
-{tab} [.c]*size* [.c]*of* [.c]_unary-expression_
-{tab} [.c]*size* [.c]*of* [.c]*(* [.c]_type-name_ [.c]*)* [.c]*align* [.c]*of* [.c]*(* [.c]_type-name_ [.c]*)*
+`_unary-expression_`:
+{tab} `_exponential-expression_`
+{tab} `_unary-operator_` `_cast-expression_`
+{tab} `*size*` `*of*` `_unary-expression_`
+{tab} `*size*` `*of*` `*(*` `_type-name_` `*)*` `*align*` `*of*` `*(*` `_type-name_` `*)*`
 
-[.c]_unary-operator_: one of
-{tab} [.c]*^* [.c]*@* [.c]*+* [.c]*-* [.c]*!* [.c]*~* [.c]*~<* [.c]*~>*
+`_unary-operator_`: one of
+{tab} `*^*` `*@*` `*+*` `*-*` `*!*` `*~*` `*~<*` `*~>*`
 
-[.c]_cast-expression_:
-{tab} [.c]_unary-expression_
-{tab} [.c]*(* [.c]_type-name_ [.c]*)* [.c]_cast-expression_
+`_cast-expression_`:
+{tab} `_unary-expression_`
+{tab} `*(*` `_type-name_` `*)*` `_cast-expression_`
 
-[.c]_multiplicative-expression_:
-{tab} [.c]_cast-expression_
-{tab} [.c]_multiplicative-expression_ [.c]*{star}* [.c]_cast-expression_
-{tab} [.c]_multiplicative-expression_ [.c]*/* [.c]_cast-expression_
-{tab} [.c]_multiplicative-expression_ [.c]*mod* [.c]_cast-expression_
+`_multiplicative-expression_`:
+{tab} `_cast-expression_`
+{tab} `_multiplicative-expression_` `*{star}*` `_cast-expression_`
+{tab} `_multiplicative-expression_` `*/*` `_cast-expression_`
+{tab} `_multiplicative-expression_` `*mod*` `_cast-expression_`
 
-[.c]_additive-expression_:
-{tab} [.c]_multiplicative-expression_
-{tab} [.c]_additive-expression_ [.c]*+* [.c]_multiplicative-expression_
-{tab} [.c]_additive-expression_ [.c]*-* [.c]_multiplicative-expression_
+`_additive-expression_`:
+{tab} `_multiplicative-expression_`
+{tab} `_additive-expression_` `*+*` `_multiplicative-expression_`
+{tab} `_additive-expression_` `*-*` `_multiplicative-expression_`
 
-[.c]_shift-expression_:
-{tab} [.c]_additive-expression_
-{tab} [.c]_shift-expression_ [.c]*<<* [.c]_additive-expression_
-{tab} [.c]_shift-expression_ [.c]*>>* [.c]_additive-expression_
+`_shift-expression_`:
+{tab} `_additive-expression_`
+{tab} `_shift-expression_` `*<<*` `_additive-expression_`
+{tab} `_shift-expression_` `*>>*` `_additive-expression_`
 
-[.c]_bitwise-and-expression_:
-{tab} [.c]_shift-expression_
-{tab} [.c]_bitwise-and-expression_ [.c]*&* [.c]_shift-expression_
+`_bitwise-and-expression_`:
+{tab} `_shift-expression_`
+{tab} `_bitwise-and-expression_` `*&*` `_shift-expression_`
 
-[.c]_bitwise-xor-expression_:
-{tab} [.c]_bitwise-and-expression_
-{tab} [.c]_bitwise-xor-expression_ [.c]*$* [.c]_bitwise-and-expression_
+`_bitwise-xor-expression_`:
+{tab} `_bitwise-and-expression_`
+{tab} `_bitwise-xor-expression_` `*$*` `_bitwise-and-expression_`
 
-[.c]_bitwise-or-expression_:
-{tab} [.c]_bitwise-xor-expression_
-{tab} [.c]_bitwise-or-expression_ [.c]*|* [.c]_bitwise-xor-expression_
+`_bitwise-or-expression_`:
+{tab} `_bitwise-xor-expression_`
+{tab} `_bitwise-or-expression_` `*|*` `_bitwise-xor-expression_`
 
-[.c]_comparative-expression_:
-{tab} [.c]_bitwise-or-expression_
-{tab} [.c]_comparative-expression_ [.c]_comparative-operator_ [.c]_bitwise-or-expression_
+`_comparative-expression_`:
+{tab} `_bitwise-or-expression_`
+{tab} `_comparative-expression_` `_comparative-operator_` `_bitwise-or-expression_`
 
-[.c]_comparative-operator_: one of
-{tab} [.c]*<* [.c]*>* [.c]*\<=* [.c]*>=* [.c]*==* [.c]*!=*
+`_comparative-operator_`: one of
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*`
 
-[.c]_logical-not-expression_:
-{tab} [.c]_comparative-expression_
-{tab} [.c]*not* [.c]_logical-not-expression_
+`_logical-not-expression_`:
+{tab} `_comparative-expression_`
+{tab} `*not*` `_logical-not-expression_`
 
-[.c]_logical-and-expression_:
-{tab} [.c]_logical-not-expression_
-{tab} [.c]_logical-and-expression_ [.c]*and* [.c]_logical-not-expression_
+`_logical-and-expression_`:
+{tab} `_logical-not-expression_`
+{tab} `_logical-and-expression_` `*and*` `_logical-not-expression_`
 
-[.c]_logical-or-expression_:
-{tab} [.c]_logical-and-expression_
-{tab} [.c]_logical-or-expression_ [.c]*or* [.c]_logical-and-expression_
+`_logical-or-expression_`:
+{tab} `_logical-and-expression_`
+{tab} `_logical-or-expression_` `*or*` `_logical-and-expression_`
 
-[.c]_conditional-expression_:
-{tab} [.c]_logical-or-expression_
-{tab} [.c]_logical-or-expression_ [.c]*if* [.c]_expression_ [.c]*else* [.c]_conditional-expression_
+`_conditional-expression_`:
+{tab} `_logical-or-expression_`
+{tab} `_logical-or-expression_` `*if*` `_expression_` `*else*` `_conditional-expression_`
 
-[.c]_assignment-expression_:
-{tab} [.c]_conditional-expression_
-{tab} [.c]_conditional-expression_ [.c]_assignment-operator_ [.c]_assignment-expression_
+`_assignment-expression_`:
+{tab} `_conditional-expression_`
+{tab} `_conditional-expression_` `_assignment-operator_` `_assignment-expression_`
 
-[.c]_assignment-operator_: one of
-{tab} [.c]*=* [.c]*{star}{star}=* [.c]*{star}=* [.c]*/=* [.c]*%=* [.c]*+=* [.c]*-=*
-{tab} [.c]*<\<=* [.c]*>>=* [.c]*&=* [.c]*|=* [.c]*$=*
+`_assignment-operator_`: one of
+{tab} `*=*` `*{star}{star}=*` `*{star}=*` `*/=*` `*%=*` `*+=*` `*-=*`
+{tab} `*<\<=*` `*>>=*` `*&=*` `*|=*` `*$=*`
 
-[.c]_expression_:
-{tab} [.c]_assignment-expression_
-{tab} [.c]_expression_ [.c]*,* [.c]_assignment-expression_
+`_expression_`:
+{tab} `_assignment-expression_`
+{tab} `_expression_` `*,*` `_assignment-expression_`
 
-[.c]_constant-expression_:
-{tab} [.c]_conditional-expression_
+`_constant-expression_`:
+{tab} `_conditional-expression_`
