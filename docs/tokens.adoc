@@ -12,7 +12,7 @@
 :under: _
 
 [.c]_token_:
-{tab} [.c]_keyword_
+{tab} [.c]`_keyword_`
 {tab} [.c]_identifier_
 {tab} [.c]_constant_
 {tab} [.c]_string-literal_

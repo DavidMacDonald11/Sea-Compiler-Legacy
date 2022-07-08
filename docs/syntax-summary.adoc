@@ -1,12 +1,13 @@
 = Syntax Summary
-:microsoft: https://docs.microsoft.com/en-us/cpp/c-language/c-language-syntax-summary?view=msvc-170
-
-As Sea is based on C and Python, most of Sea's grammar is based directly on C.
-Specifically, I utilized {microsoft}[Microsoft's C Language Syntax Summary] to construct this document.
 
 ++++
 <link rel="stylesheet" href="style.css" type="text/css">
 ++++
+
+:microsoft: https://docs.microsoft.com/en-us/cpp/c-language/c-language-syntax-summary?view=msvc-170
+
+As Sea is based on C and Python, most of Sea's grammar is based directly on C.
+Specifically, I utilized {microsoft}[Microsoft's C Language Syntax Summary] to construct this document.
 
 :tab: &nbsp;&nbsp;&nbsp;&nbsp;
 
