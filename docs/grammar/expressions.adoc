@@ -1,13 +1,12 @@
 = Expressions
 
 ++++
-<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="stylesheet" href="../style.css" type="text/css">
 ++++
 
 :tab: &nbsp;&nbsp;&nbsp;&nbsp;
 :hardbreaks-option:
 
-:lbracket: [
 :star: *
 
 `_primary-expression_`:
@@ -16,31 +15,28 @@
 {tab} `_string-literal_`
 {tab} `*(*` `_expression_` `*)*`
 {tab} `*|*` `_expression_` `*|*`
-{tab} `_generic-selection_`
-
-`_generic-selection_`:
-{tab} `*generic*` `*(*` `_assignment-expression_` `*,*` `_generic-association-list_` `*)*`
-
-`_generic-association-list_`:
-{tab} `_generic-association_`
-{tab} `_generic-association-list_` `*,*` `_generic-association_`
-
-`_generic-association_`:
-{tab} `_type-name_` `*:*` `_assignment-experssion_`
-{tab} `*default*` `*:*` `_assignment-expression_`
 
 `_postfix-expression_`:
 {tab} `_primary-expression_`
-{tab} `_postfix-expression_` `*{lbracket}*` `_expression_` `*]*`
+{tab} `_postfix-expression_` `*[*` `_assignment-expression_`~opt~ `_slice-operator_`~opt~ `*]*`
 {tab} `_postfix-expression_` `*(*` `_argument-expression-list_`~opt~ `*)*`
 {tab} `_postfix-expression_` `*.*` `_identifier_`
 {tab} `_postfix-expression_` `*\->*` `_identifier_`
 {tab} `_postfix-expression_` `_postfix-unary-operator_`
-{tab} `*(*` `_type-name_` `*{*` `_initializer-list_` `*}*` `*)*`
-{tab} `*(*` `_type-name_` `*{*` `_initializer-list_` `*}*` `*,*` `*)*`
+{tab} `_postfix-compound-literal_`
+
+`_slice-operator_`:
+{tab} `*:*` `_assignment-expression_`~opt~
+{tab} `*:*` `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~
 
 `_postfix-unary_operator_`: one of
 {tab} `*++*` `*--*` `*%*` `*!*`
+
+`_postfix-compound-literal_`:
+{tab} `*(*` `_type-name_` `*)*` `*(*` `_array-initializer-list_` `*,*`~opt~ `*)*`
+{tab} `*(*` `_type-name_` `*)*` `*[*` `_array-initializer-list_` `*,*`~opt~ `*]*`
+{tab} `*(*` `_type-name_` `*)*` `*{*` `_initializer-list_` `*,*`~opt~ `*}*`
+{tab} `*(*` `_type-name_` `*)*` `_initializer-comprehension_`
 
 `_argument-expression-list_`:
 {tab} `_assignment-expression_`
@@ -48,8 +44,8 @@
 
 `_prefix-deviation-expression_`:
 {tab} `_postfix-expression_`
-{tab} `*++*` _prefix-deviation-expression_
-{tab} `*--*` _prefix-deviation-expression_
+{tab} `*++*` `_prefix-deviation-expression_`
+{tab} `*--*` `_prefix-deviation-expression_`
 
 `_exponential-expression_`:
 {tab} `_prefix-deviation-expression_`
@@ -58,11 +54,17 @@
 `_unary-expression_`:
 {tab} `_exponential-expression_`
 {tab} `_unary-operator_` `_cast-expression_`
-{tab} `*size*` `*of*` `_unary-expression_`
-{tab} `*size*` `*of*` `*(*` `_type-name_` `*)*` `*align*` `*of*` `*(*` `_type-name_` `*)*`
+{tab} `_unary-type-expression_`
 
 `_unary-operator_`: one of
-{tab} `*^*` `*@*` `*+*` `*-*` `*!*` `*~*` `*~<*` `*~>*`
+{tab} `*^*` `*@*` `*-*` `*!*` `*~*` `*~<*` `*~>*`
+
+`_unary-type-expression_`:
+{tab} `_unary-type-keyword_` `*of*` `_expression_`
+{tab} `_unary-type-keyword_` `*of*` `*(*`~opt~ `_type-name_` `*)*`~opt~
+
+`_unary-type-keyword_`: one of
+{tab} `*align*` `*size*` `*type*`
 
 `_cast-expression_`:
 {tab} `_unary-expression_`
@@ -101,7 +103,7 @@
 {tab} `_comparative-expression_` `_comparative-operator_` `_bitwise-or-expression_`
 
 `_comparative-operator_`: one of
-{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*`
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*is*` `*is not*` `*in*` `*not in*`
 
 `_logical-not-expression_`:
 {tab} `_comparative-expression_`

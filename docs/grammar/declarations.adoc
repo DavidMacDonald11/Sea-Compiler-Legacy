@@ -1,0 +1,164 @@
+= Declarations
+
+++++
+<link rel="stylesheet" href="../style.css" type="text/css">
+++++
+
+:tab: &nbsp;&nbsp;&nbsp;&nbsp;
+:hardbreaks-option:
+
+:star: *
+
+`_declaration_`:
+{tab} `_variable-declaration_`
+{tab} `_chained-variable-declaration_`
+{tab} `_alias-declaration_`
+
+`_variable-declaration_`:
+{tab} `_element-declaration_`  `_variable-initalizer_`~opt~
+
+`_element-declaration_`:
+{tab} `_type-name_` `_identifier_`
+
+`_variable-initalizer_`:
+{tab} `*=*` `_initializer_`
+
+`_chained-variable-declaration_`:
+{tab} `_variable-declaration_`
+{tab} `_chained-variable-declaration_` `*,*` `_variable-declaration_`
+
+`_type-name_`:
+{tab} `_non-reference-type-name_`
+{tab} `_non-reference-type-name_` `_alignment-specifier_`
+{tab} `_reference-type-name_`
+{tab} `_reference-type-name_` `_alignment-specifier_`
+
+`_non-reference-type-name_`:
+{tab} `_specifiers-and-qualifiers_` `_type-specifier_`
+{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*[*` `*{star}*` `*]*`
+{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*[*` `*>=*`~opt~ `_assignment-expression_` `*]*`
+{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*^*`
+{tab} `_type-name_` `*(*` `_function-variadic-list_`~opt~ `*)*`
+
+`_reference-type-name_`:
+{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*@*`
+
+`_specifiers-and-qualifiers_`:
+{tab} `_storage-class-specifier_`~opt~ `_type-qualifier_`~opt~
+
+`_alignment-specifier_`:
+{tab} `*aligned*` `*to*` `_constant-expression_`
+{tab} `*aligned*` `*to*` `*(*`~opt~ `_type-name_` `*)*`~opt~
+
+`_storage-class-specifier_`:
+{tab} `*external*`
+{tab} `*register*`
+{tab} `*static*`
+{tab} `*static*`~opt~ `*thread*`~opt~ `*local*`
+{tab} `*external*`~opt~ `*thread*`~opt~ `*local*`
+
+`_type-qualifier_`:
+{tab} `*atomic*` `_type-qualifier_`~opt~
+{tab} `*const*` `_type-qualifier_`~opt~
+{tab} `*restrict*` `_type-qualifier_`~opt~
+{tab} `*volatile*` `_type-qualifier_`~opt~
+
+`_type-specifier_`:
+{tab} `*auto*`
+{tab} `*void*`
+{tab} `_alias_`
+{tab} `_numeric-type-specifier_`
+
+`_numeric-type-specifier_`:
+{tab} `_numeric-set-specifier_`~opt~ `*+*`~opt~ `_integer-type-specifier_`
+{tab} `_numeric-set-specifier_`~opt~ `_floating-type-specifier_`
+
+`_numeric-set-specifier_`:
+{tab} `*complex*`
+{tab} `*imaginary*`
+{tab} `*real*`
+
+`_integer-type-specifier_`:
+{tab} `*bool*`
+{tab} `*char*`
+{tab} `*short*` `*int*`~opt~
+{tab} `*int*`
+{tab} `*long*` `*int*`~opt~
+
+`_floating-type-specifier_`:
+{tab} `*float*`
+{tab} `*double*` `*float*`~opt~
+
+`_initializer_`:
+{tab} `_assignment-expression_`
+{tab} `_initializer-comprehension_`
+{tab} `*(*` `_array-initializer-list_` `*,*`~opt~ `*)*`
+{tab} `*[*` `_array-initializer-list_` `*,*`~opt~ `*]*`
+{tab} `*{*` `_initializer-list_` `*,*`~opt~ `*}*`
+
+`_initializer-comprehension_`:
+{tab} `*(*` `_generator_` `*)*`
+{tab} `*[*` `_generator_` `*]*`
+{tab} `*{*` `_generator_` `*}*`
+
+`_generator_`:
+{tab} `_expression_` `_generator-loop_`
+
+`_generator-loop_`:
+{tab} `*for*` `_element-declaration_` `*in*` `_initializer_` `_generator-loop_`~opt~
+
+`_generator-conditional_`:
+{tab} `*if*` `_expression_` `_generator-conditional_`~opt~
+
+`_array-initializer-list_`:
+{tab} `_list-designation_`~opt~ `_initializer_`
+{tab} `_array-initializer-list_` `*,*` `_list-designation_`~opt~ `_initializer_`
+
+`_list-designation_`:
+{tab} `*[*` `_constant-expression_` `*]*` `*:*`
+
+`_initializer-list_`:
+{tab} `_designation_`~opt~ `_initializer_`
+{tab} `_initailizer-list_` `*,*` `_designation_`~opt~ `_initializer_`
+
+`_designation_`:
+{tab} `_list-designation_`
+{tab} `_constant-expresssion_` `*:*`
+
+`_alias-declaration_`:
+{tab} `*alias*` `*(*`~opt~ `_type-name_` `*)*`~opt~ `*as*` `_alias_`
+
+`_alias_`:
+{tab} `_identifier_`
+
+`_function-declaration_`:
+{tab} `_function-specifier_`~opt~ `_identifier_` `_function-values_` `*:*` `_block-statement_`
+
+`_function-specifier_`:
+{tab} `_specifiers-and-qualifiers_` `*inline*` `*deviant*`~opt~
+{tab} `_specifiers-and-qualifiers_` `*deviant*` `*inline*`~opt~
+
+`_function-values_`:
+{tab} `*(*` `_function-variadic-list_`~opt~ `*)*` `_function-return-type_`~opt~
+
+`_function-variadic-list_`:
+{tab} `_function-parameter-list_`
+{tab} `_function-parameter-list_` `*,*` `*\...*`
+
+`_function-parameter-list_`:
+{tab} `_function-parameter_`
+{tab} `_function-parameter_` `*,*` `_function-parameter-list_`
+
+`_function-parameter_`:
+{tab} `_type-name_` `_identifier_`~opt~
+
+`_function-return-type_`:
+{tab} `*\->*` `_type-name_`
+
+`_structure-declaration_`:
+{tab} `_specifiers-and-qualifiers_` `_structure-type_` `_identifier_` `*:*` `_block-statement_`
+
+`_structure-type_`:
+{tab} `*enum*`
+{tab} `*struct*`
+{tab} `*union*`

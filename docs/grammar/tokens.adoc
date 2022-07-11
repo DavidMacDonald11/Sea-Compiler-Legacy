@@ -1,15 +1,16 @@
 == Tokens
 
 ++++
-<link rel="stylesheet" href="style.css" type="text/css">
+<link rel="stylesheet" href="../style.css" type="text/css">
 ++++
 
 :tab: &nbsp;&nbsp;&nbsp;&nbsp;
 :hardbreaks-option:
 
-:lbracket: [
 :star: *
 :under: _
+:tick: `
+:stick: \`
 
 `_token_`:
 {tab} `_keyword_`
@@ -32,8 +33,20 @@
 
 == Keywords
 `_keyword_`: one of
-{tab} `*align*` `*default*` `*else*` `*generic*`
-{tab} `*if*` `*of*` `*size*`
+{tab} `*assert*`
+{tab} `*alias*` `*as*`
+{tab} `*align*` `*size*` `*type*` `*of*`
+{tab} `*aligned*` `*to*`
+{tab} `*external*` `*register*` `*static*` `*thread*` `*local*`
+{tab} `*atomic*` `*const*` `*restrict*` `*volatile*`
+{tab} `*inline*` `*deviant*`
+{tab} `*complex*` `*imaginary*` `*real*`
+{tab} `*auto*` `*void*` `*float*` `*double*`
+{tab} `*bool*` `*char*` `*short*` `*int*` `*long*`
+{tab} `*enum*` `*struct*` `*union*`
+{tab} `*if*` `*else*` `*match*` `*with*`
+{tab} `*for*` `*do*` `*while*`
+{tab} `*break*` `*continue*` `*pass*` `*return*` `*yield*`
 
 == Identifiers
 `_identifier_`:
@@ -72,8 +85,8 @@
 {tab} `_character-constant_`
 
 `_integer-constant_`:
-{tab} `_decimal-constant_` `_integer-suffix_`~opt~
-{tab} `_base-n-constant_` `_integer-suffix_`~opt~
+{tab} `*+*`~opt~  `_decimal-constant_`
+{tab} `*+*`~opt~ `_base-n-constant_`
 
 `_decimal-constant_`:
 {tab} `_digit-sequence_`
@@ -87,11 +100,12 @@
 
 `_base-n-digit-sequence_`:
 {tab} `_base-n-digit_` `_base-n-suffix_`
-{tab} `_base-n-digit_` `_base-n-constant_`
+{tab} `_base-n-digit_` `_base-n-digit-sequence_`
 
 `_base-n-digit_`: one of
 {tab} `_letter_`
 {tab} `_digit_`
+{tab} other implementation-defined characters
 
 `_base-n-suffix_`:
 {tab} `*b*` `_base-n_`
@@ -100,32 +114,17 @@
 `_base-n_`:
 {tab} a `_decimal-constant_` whose value is between 2 and 36
 
-`_integer-suffix_`:
-{tab} `_unsigned-suffix_` `_long-suffix_`~opt~
-{tab} `_unsigned-suffix_` `_long-long-suffix_`~opt~
-{tab} `_long-suffix_` `_unsigned-suffix_`~opt~
-{tab} `_long-long-suffix_` `_unsigned-suffix_`~opt~
-
-`_unsigned-suffix_`:
-{tab} `*u*` `*U*`
-
-`_long-suffix_`:
-{tab} `*l*` `*L*`
-
-`_long-long-suffix_`:
-{tab} `*ll*` `*LL*`
-
 `_floating-constant_`:
 {tab} `_decimal-floating-constant_`
 {tab} `_base-n-floating-constant_`
 
 `_decimal-floating-constant_`
-{tab} `_fractional-constant_` `_exponent-part_`~opt~ `_floating-suffix_`~opt~
-{tab} `_digit-sequence_` `_exponent-part_` `_floating-suffix_`~opt~
+{tab} `_fractional-constant_` `_exponent-part_`~opt~
+{tab} `_digit-sequence_` `_exponent-part_`
 
 `_base-n-floating-constant_`:
-{tab} `_base-n-fractional-constant_` `_base-n-exponent-part_`~opt~ `_floating-suffix_`~opt~
-{tab} `_base-n-digit-sequence_` `_base-n-exponent-part_` `_floating-suffix_`~opt~
+{tab} `_base-n-fractional-constant_` `_base-n-exponent-part_`~opt~
+{tab} `_base-n-digit-sequence_` `_base-n-exponent-part_`
 
 `_fractional-constant_`:
 {tab} `_digit-sequence_`~opt~ `*.*` `_digit-sequence_`
@@ -146,15 +145,12 @@
 {tab} `*e*` `_sign_`~opt~ `_base-n-constant_`
 {tab} `*E*` `_sign_`~opt~ `_base-n-constant_`
 
-`_floating-suffix_`: one of
-{tab} `*f*` `*F*` `*l*` `*L*`
-
 `_enuemration-constant_`:
 {tab} `_identifier_`
 
 `_character-constant_`:
 {tab} `*'*` `_c-char-sequence_` `*'*`
-{tab} `*L'*` `_c-char-sequence_` `*'*`
+{tab} `*{tick}*` `_w-char-sequence_` `*{tick}*`
 
 `_c-char-sequence_`:
 {tab} `_c-char_`
@@ -164,6 +160,14 @@
 {tab} `_escape-sequence_`
 {tab} any member of the source character set except `*'*`, `*\*`, or new-line character.
 
+`_w-char-sequence_`:
+{tab} `_w-char_`
+{tab} `_w-char-sequence_` `_w-char_`
+
+`_w-char_`:
+{tab} `_escape-sequence_`
+{tab} any member of the source chararcter set except `*{tick}*`, `*\*`, or new-line character.
+
 `_escape-sequence_`:
 {tab} `_simple-escape-sequence_`
 {tab} `_octal-escape-sequence_`
@@ -172,7 +176,7 @@
 
 `_simple-escape-sequence_`: one of
 {tab} `*\a*` `*\b*` `*\f*` `*\n*` `*\r*` `*\t*` `*\v*`
-{tab} `*\'*` `*\"*` `*\\*` `*\?*`
+{tab} `*\'*` `*{stick}*` `*\"*` `*\\*` `*\?*`
 
 `_octal-escape-sequence_`:
 {tab} `*\*` `_octal-digit_`
@@ -188,14 +192,13 @@
 {tab} `_string-prefix_` `*"*` `_s-char-sequence_` `*"*`
 
 `_string-prefix_`: one of
-{tab} `*b*` `*f*` `*r*`
-{tab} `_size-prefix_`
+{tab} `*b*` `*B*` `*f*` `*F*` `*r*` `*R*`
 
-`_size-prefix_`:
-{tab} `_decimal-constant_`
-{tab} `_base-n-constant_`
+`_s-char-sequence_`:
+{tab} `_s-char_`
+{tab} `_s-char-sequence_` `_s-char_`
 
-`_s-char_`
+`_s-char_`:
 {tab} `_escape-sequence_`
 {tab} any member of the source character set except `*"*`, `*\*`, or new-line charcter
 
@@ -204,8 +207,8 @@ _All non-keyword operators are punctuators_
 
 `_operator_`: one of
 {tab} `*.*` `*\->*` `*++*` `*--*` `*%*` `*!*`
-{tab} `*^*` `*@*` `*+*` `*-*` `*~*` `*~<*` `*~>*`
-{tab} `*{star}{star}*` `*{star}*` `*/*`
+{tab} `*^*` `*@*` `*-*` `*~*` `*~<*` `*~>*`
+{tab} `*{star}{star}*` `*{star}*` `*/*` `*+*`
 {tab} `*<<*` `*>>*` `*&*` `*|*` `*$*`
 {tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*`
 {tab} `*=*` `*{star}{star}=*` `*{star}=*` `*/=*` `*%=*` `*+=*` `*-=*`
@@ -215,17 +218,26 @@ _All non-keyword operators are punctuators_
 _Keyword operators are both keywords and operators_
 
 `_keyword-operator_`: one of
-{tab} `*and*` `*mod*` `*not*` `*or*`
+{tab} `*mod*`
+{tab} `*and*` `*not*` `*or*`
+{tab} `*in*` `*is*`
 
 == Punctuators
 `_punctuator_`: one of
-{tab} `*{lbracket}*` `*]*` `*(*` `*)*` `*|*`
-{tab} `*,*`
-{tab} `_indent_` `*\n*`
+{tab} `*[*` `*]*` `*(*` `*)*` `*{*` `*}*`
+{tab} `*,*` `*{tick}*` `*:*` `*\...*` `*#*`
+{tab} `_indent_` `*\n*` `_EOF_` `_line-end_`
 
 `_indent_`:
 {tab} four spaces
 {tab} (through the configurator) at least one space
+
+`_EOF_`:
+{tab} end of file character
+
+`_line-end_`:
+{tab} `*\n*`
+{tab} `_EOF_`
 
 == Header Names
 `_header-name_`:

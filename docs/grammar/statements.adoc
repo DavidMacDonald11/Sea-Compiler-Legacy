@@ -1,0 +1,104 @@
+= Statements
+
+++++
+<link rel="stylesheet" href="../style.css" type="text/css">
+++++
+
+:tab: &nbsp;&nbsp;&nbsp;&nbsp;
+:hardbreaks-option:
+
+:star: *
+
+`_statement_`:
+{tab} `_line-statement_`
+{tab} `_function-declaration_`
+{tab} `_structure-declaration_`
+{tab} `_if-statement_`
+{tab} `_match-with-statement_`
+{tab} `_iteration-statement_`
+{tab} `_static-assert-statement_`
+
+`_line-statement_`:
+{tab} `_line-statement-component_` `_line-end_`
+
+`_line-statement-component_`:
+{tab} `_expression_`
+{tab} `_declaration_`
+
+`_if-statement_`:
+{tab} `*if*` `_expression_` `*:*` `_block-statement_` `_else-if-statement_`~opt~ `_else-statement_`~opt~
+
+`_else-if-statement_`:
+{tab} `*else*` `*if*` `_expression_` `*:*` `_block-statement_`
+{tab} `_else-if-statement_` `*else*` `*if*` `_expression_` `*:*` `_block-statement_`
+
+`_else-statement_`:
+{tab} `*else*` `*:*` `_block-statement_`
+
+`_block-statement_`:
+{tab} `_line-statement_`
+{tab} `_blockable-statement_`
+{tab} `*\n*` `_block-indent_` `_blockable-statement_`
+{tab} `*\n*` `_block-indent_` `_statement_`
+
+`_blockable-statement_`:
+{tab} `_blockable-statement-component_` `_line-end_`
+
+`_blockable-statement-component_`:
+{tab} `*pass*`
+{tab} `*continue*` `_identifier_`~opt~
+{tab} `*break*` `_identifier_`~opt~
+{tab} `*return*` `_expression_`~opt~
+{tab} `*yield*` `_expression_`~opt~
+
+`_block-indent_`:
+{tab} One `_indent_` per line of the following statement per number of nested blocks
+
+`_match-with-statement_`:
+{tab} `*match*` `_expression_` `*:*` `_with-statement_` `_else-statement_`~opt~
+
+`_with-statement_`:
+{tab} `*with*` `_constant-expression_` `*:*` `_block-statement_`
+{tab} `_with-statement_` `*with*` `_constant-expression_` `*:*` `_block-statement_`
+
+`_iteration-statement_`:
+{tab} `_while-statement_`
+{tab} `_do-while-statement_`
+{tab} `_for-statement_`
+
+`_while-statement_`:
+{tab} `_label_`~opt~ `*while*` `_expression_` `*:*` `_block-statement_` `_else-statement_`~opt~
+
+`_label_`:
+{tab} `_identifier_`
+
+`_do-while-statement_`:
+{tab} `_label_`~opt~ `*do*` `*:*` `_do-while-block-statement_` `_else-statement_`~opt~
+{tab} `*do*` `_label_`~opt~ `*:*` `_do-while-block-statement_` `_else-statement_`~opt~
+
+`_do-while-block-statement_`:
+{tab} `_statement-component_` `*while*` `_expression_` `_line-end_`
+{tab} `_block-statement_` `*while*` `_expression_` `_line-end_`
+
+`_statement-component_`:
+{tab} `_line-statement-component_`
+{tab} `_blockable-statement-component_`
+
+`_for-statement_`:
+{tab} `*for*` `_element-declaration_` `*in*` `_initializer_` `*:*` `_block-statement_` `_else-statement_`~opt~
+
+`_static-assert-statement_`:
+{tab} `*static*`~opt~ `*assert*` `_constant-expression_` `*else*` `_string-literal_` `_line-end_`
+
+// TODO:
+// # decorators
+// struct functions
+// __dunder__ methods
+// __dunder__ + operator overloading
+// nested functions
+// context managers
+// scope block
+// c block
+// asm block
+// preprocessor
+// configurator

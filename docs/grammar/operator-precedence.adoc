@@ -25,16 +25,18 @@ Absolute value
 % +
 ! +
 ( ) +
-[ ] +
+[ :: ] +
 . +
 \-> +
+(_type_)(_list_) +
+(_type_)[_list_] +
 (_type_){_list_}
 
 |Postfix deviation; increment and decrement +
 Percentage +
 Factorial +
 Function call +
-Array subscripting +
+Array subscripting and slicing +
 Structure and union member access +
 Structure and union member access via pointer +
 Compound literal
@@ -59,7 +61,8 @@ Compound literal
 @ +
 ^ +
 size of +
-align of
+align of +
+type of
 
 |Unary plus and minus +
 Round, round down (floor), round up (ceil) +
@@ -68,7 +71,8 @@ Cast +
 Value-at (dereference) +
 Pointer-to (address-of) +
 Size-of +
-Alignment requirement
+Align-of +
+Type-of
 
 |Right-to-left
 
@@ -87,7 +91,7 @@ Modulo (remainder)
 
 |*8*
 |<< >>
-|Bitwise left shfit and right shift
+|Bitwise left shift and right shift
 |Left-to-right
 
 |*9*
@@ -108,11 +112,19 @@ Modulo (remainder)
 |*12*
 |< > +
 \<= >= +
-== !=
+== != +
+is +
+is not +
+in +
+not in
 
 |Less than and greater than +
 Less than or equal to and greater than or equal to +
-Equal to, and not equal to
+Equal to, and not equal to +
+Is the same as +
+Is not the same as +
+Is in +
+Is not in
 |Left-to-right
 
 |*13*

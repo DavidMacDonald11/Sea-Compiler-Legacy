@@ -1,9 +1,5 @@
 = Syntax Summary
 
-++++
-<link rel="stylesheet" href="style.css" type="text/css">
-++++
-
 :microsoft: https://docs.microsoft.com/en-us/cpp/c-language/c-language-syntax-summary?view=msvc-170
 
 As Sea is based on C and Python, most of Sea's grammar is based directly on C.
@@ -22,7 +18,7 @@ Specifically, I utilized {microsoft}[Microsoft's C Language Syntax Summary] to c
 |_nonterminal_
 |Italic text is for nonterminals.
 
-a|`*literal*`
+|*literal*
 |Bold is for literal keywords and symbols.
 
 |_optional_~opt~
@@ -36,6 +32,8 @@ Each new line is an alternative definition, unless prefaced by "one of".
 
 == Grammar Docs
 [%hardbreaks]
-link:operator-precedence.adoc[Operator Precedence]
-link:tokens.adoc[Tokens]
-link:expressions.adoc[Expressions]
+link:grammar/operator-precedence.adoc[Operator Precedence]
+link:grammar/tokens.adoc[Tokens]
+link:grammar/expressions.adoc[Expressions]
+link:grammar/declarations.adoc[Declarations]
+link:grammar/statements.adoc[Statements]
