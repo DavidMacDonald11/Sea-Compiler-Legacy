@@ -35,9 +35,9 @@ Each new line is an alternative definition, unless prefaced by "one of".
 
 == Grammar Docs
 [%hardbreaks]
-link:grammar/operator-precedence.adoc[Operator Precedence]
-link:grammar/tokens.adoc[Tokens]
-link:grammar/expressions.adoc[Expressions]
-link:grammar/declarations.adoc[Declarations]
-link:grammar/statements.adoc[Statements]
-link:grammar/preprocessor.adoc[Preprocessor]
+link:operator-precedence.adoc[Operator Precedence]
+link:tokens.adoc[Tokens]
+link:expressions.adoc[Expressions]
+link:declarations.adoc[Declarations]
+link:statements.adoc[Statements]
+link:preprocessor.adoc[Preprocessor]

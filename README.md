@@ -88,8 +88,7 @@ Perhaps for other IDEs as well.
 * create optional libraries to make Sea more like Python.
 
 # Documentation and Syntax
-I've included documentation for the Sea language.
-Check out the [syntax summary](./docs/syntax-summary.adoc).
+I've included [documentation](./docs/docs.adoc) for the Sea language and compiler.
 
 To see the complete development history, check out the [legacy repository](https://github.com/DavidMacDonald11/Sea-Programming-Language-LEGACY).
 

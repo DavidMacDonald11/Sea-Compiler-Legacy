@@ -1,0 +1,35 @@
+= Compiliation Process
+
+++++
+<link rel="stylesheet" href="../style.css" type="text/css">
+++++
+
+The compiler is composed of three components: the lexer, the parser, and the transpiler. The `sea.bash` program is an interface to the compiler.
+
+. Before compilation, the user enters arguments into the `sea.bash` command.
+The arguments and options are parsed and passed to the `main.py` program.
+
+. `main.py` goes through the arguments provided.
+If the user passes in a directory to compile, the program must find all Sea files within the directory and all child directories.
+Once all files are found, the program creates a map of all input and their respective output files.
+The output files are written into a `manifest.seatmp` file in the output directory.
+The file contains file paths relative to the working directory separated by newlines.
+The program will then loop per file pair in the file map, generating the output file.
+
+. The lexer will read the file character by character.
+Its job is to construct a list of tokens.
+Each type of token will have its own class.
+Each token class can use the lexer to construct itself.
+Each token is constructed with the position in the file and original text to allow for verbose warnings and errors.
+
+. The parser will go through the list of tokens one by one.
+Its job is to construct an abstract syntax tree (AST).
+Each node of the AST will have its own class.
+Each node class can use the parser to construct itself.
+Each node is constructed with the tokes saved for accessing.
+
+. The transpiler will provide useful methods for the node classes.
+The node classes will be able to use the transpiler to generate C code.
+
+. Once these files are generated, `main.py` will exit and `sea.bash` will continue.
+It will either call `gcc` to complete compilation, or run a user-chosen script.

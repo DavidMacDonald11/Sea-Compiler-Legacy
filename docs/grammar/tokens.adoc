@@ -239,22 +239,3 @@ _Keyword operators are both keywords and operators_
 `_line-end_`:
 {tab} `*\n*`
 {tab} `_EOF_`
-
-== Header Names
-`_header-name_`:
-{tab} `*<*` `_h-char-sequence_` `*>*`
-{tab} `*"*` `_q-char-sequence_` `*"*`
-
-`_h-char-sequence_`:
-{tab} `_h-char_`
-{tab} `_h-char-sequence_` `_h-char_`
-
-`_h-char_`:
-{tab} any member of the source character set except the new-line character and `*>*`
-
-`_q-char-sequence_`:
-{tab} `_q-char_`
-{tab} `_q-char-sequence_` `_q-char_`
-
-`_q-char_`:
-{tab} any member of the source character set except the new-line character and `*"*`
