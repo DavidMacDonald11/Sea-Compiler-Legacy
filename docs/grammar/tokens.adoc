@@ -230,7 +230,7 @@ _Keyword operators are both keywords and operators_
 
 `_indent_`:
 {tab} four spaces
-{tab} (through the configurator) at least one space
+{tab} (through configuration) at least one space
 
 `_EOF_`:
 {tab} end of file character

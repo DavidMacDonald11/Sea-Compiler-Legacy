@@ -8,7 +8,6 @@ With this language comes a few file extension requirements:
 * `.sea`; equivalent to `.c`
 * `.hea`; equivalent to `.h`
 * `.seatmp`; used for temporary compiler data
-* `.sea.conf` or `.hea.conf`; generated for configured, but not compiled, files
 
 Let's set the record straight now and avoid creating a "gif" situation.
 The `.sea` file extension is pronounced like the English word "sea."
@@ -20,7 +19,7 @@ For headers, `.hea` was the obvious choice as it is `.sea` with an "h" and conta
 
 # Compiler Functionality
 This program includes a versatile Sea compiler, as well as language documentation.
-The compiler can run the Sea configurator (similar to C's preprocessor) or configure and transpile Sea to C.
+The compiler can transpile Sea to C.
 From there, the program can automatically use `gcc` to compile, assemble, and or link.
 You may also provide your own script to compile the generated C files if you wish.
 
@@ -41,7 +40,7 @@ Usage: sea [OPTIONS]... [DIR|FILE]...
 ### OPTIONS
 Run `sea --help` to see the usage information.
 
-To see the configuration, generated tokens and AST, add the `--debug` option.
+To see the generated tokens and AST, add the `--debug` option.
 
 To update the compiler using git, run `sea --update`.
 
@@ -55,10 +54,6 @@ Without this argument, the program will call `gcc` and try to complete the proce
 Note that the compiler will create a `manifest.seatmp` file in the output directory containing a list of the output filepaths. This may be useful for your script.
 
 To stop compilation at a specific stage, use the `--mode=MODE` option, where `MODE` is one of the following (note that only the first letter is checked):
-* g, short for configure, runs the Sea configurator.
-Generates `.sea.conf` and `.hea.conf` files only.
-The `.conf` extension exists to prevent overwriting source files.
-You can remove the `.conf` extension and use as a normal Sea file.
 * t, short for transpile, does above and compiles (transpiles) Sea to C.
 Generates `.c` and `.h` files only.
 * p, short for preprocess, does above and preprocesses the C files.

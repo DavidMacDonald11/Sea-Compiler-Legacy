@@ -31,7 +31,6 @@ usage() {
     print_usage "" "the C files as you wish; FUNC should be a"
     print_usage "" "callable script."
     print_usage "-m, --mode=MODE" "specifies what the program should do;"
-    print_usage "" "  MODE=g    configures Sea"
     print_usage "" "  MODE=t    does above and compiles Sea to C,"
     print_usage "" "  MODE=p    does above and preprocesses C"
     print_usage "" "  MODE=c    does above and compiles C to asm,"
@@ -81,7 +80,7 @@ get_single_arg() {
     exit 3
 }
 
-mode_args="gtpcal"
+mode_args="tpcal"
 
 while getopts ":-:hduvm:o:c:" arg
 do
