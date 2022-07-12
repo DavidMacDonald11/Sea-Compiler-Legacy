@@ -1,4 +1,4 @@
-== Tokens
+= Tokens
 
 ++++
 <link rel="stylesheet" href="../style.css" type="text/css">
@@ -21,38 +21,39 @@
 {tab} `_keyword-operator_`
 {tab} `_punctuator_`
 
-`_preprocessing-token_`:
-{tab} `_header-name_`
-{tab} `_identifier_`
-{tab} `_preprocessing-number_`
-{tab} `_character-constant_`
-{tab} `_string-literal_`
-{tab} `_operator_`
-{tab} `_punctuator_`
-{tab} each non-whitespace character that can't be one of the above
-
 == Keywords
 `_keyword_`: one of
+{tab} `*include*` `*define*` `*redefine*` `*undefine*` `*defined*`
 {tab} `*assert*`
 {tab} `*alias*` `*as*`
-{tab} `*align*` `*size*` `*type*` `*of*`
-{tab} `*aligned*` `*to*`
+{tab} `*align*` `*size*` `*type*` `*of*` `*aligned*` `*to*`
+{tab} `*alloc*` `*realloc*` `*dealloc*` `*bytes*`
 {tab} `*external*` `*register*` `*static*` `*thread*` `*local*`
 {tab} `*atomic*` `*const*` `*restrict*` `*volatile*`
-{tab} `*inline*` `*deviant*`
+{tab} `*template*` `*decorate*` `*inline*` `*deviant*`
 {tab} `*complex*` `*imaginary*` `*real*`
-{tab} `*auto*` `*void*` `*float*` `*double*`
+{tab} `*auto*` `*void*` `*str*` `*float*` `*double*`
 {tab} `*bool*` `*char*` `*short*` `*int*` `*long*`
 {tab} `*enum*` `*struct*` `*union*`
 {tab} `*if*` `*else*` `*match*` `*with*`
 {tab} `*for*` `*do*` `*while*`
+{tab} `*manage*` `*c*` `*asm*` `*block*`
 {tab} `*break*` `*continue*` `*pass*` `*return*` `*yield*`
+{tab} `*True*` `*False*` `*Null*` `*Infinity*` `*NaN*` `*Pi*`
 
 == Identifiers
 `_identifier_`:
 {tab} `_identifier-nondigit_`
 {tab} `_identifier_` `_identifier-nondigit_`
 {tab} `_identifier_` `_digit_`
+{tab} `_operator-function-identifier_`
+
+`_operator-function-identifier_`:
+{tab} `*{under}{under}operator*` `_operator-string_` `*{under}{under}*`
+{tab} `*{under}{under}*` `_operator-string_` `*operator{under}{under}*`
+
+`_operator-string_`:
+{tab} a string of symbols, without spaces, composing a single `_operator_`
 
 `_identifier-nondigit_`:
 {tab} `_nondigit_`
@@ -79,14 +80,14 @@
 
 == Constants
 `_constant_`:
-{tab} `_integer-constant_`
+{tab} `_integer-constant_` `*bytes*`~opt~
 {tab} `_floating-constant_`
 {tab} `_enumeration-constant_`
 {tab} `_character-constant_`
 
 `_integer-constant_`:
-{tab} `*+*`~opt~  `_decimal-constant_`
-{tab} `*+*`~opt~ `_base-n-constant_`
+{tab} `_sign_`~opt~  `_decimal-constant_`
+{tab} `_sign_`~opt~ `_base-n-constant_`
 
 `_decimal-constant_`:
 {tab} `_digit-sequence_`
@@ -207,10 +208,10 @@ _All non-keyword operators are punctuators_
 
 `_operator_`: one of
 {tab} `*.*` `*\->*` `*++*` `*--*` `*%*` `*!*`
-{tab} `*^*` `*@*` `*-*` `*~*` `*~<*` `*~>*`
-{tab} `*{star}{star}*` `*{star}*` `*/*` `*+*`
+{tab} `*^*` `*@*` `*-*` `*~*` `*~<*` `*~>*` `*{star}*`
+{tab} `*{star}{star}*` `*/*` `*+*`
 {tab} `*<<*` `*>>*` `*&*` `*|*` `*$*`
-{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*`
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*`
 {tab} `*=*` `*{star}{star}=*` `*{star}=*` `*/=*` `*%=*` `*+=*` `*-=*`
 {tab} `*<\<=*` `*>>=*` `*&=*` `*|=*` `*$=*`
 
@@ -225,7 +226,7 @@ _Keyword operators are both keywords and operators_
 == Punctuators
 `_punctuator_`: one of
 {tab} `*[*` `*]*` `*(*` `*)*` `*{*` `*}*`
-{tab} `*,*` `*{tick}*` `*:*` `*\...*` `*#*`
+{tab} `*,*` `*{tick}*` `*:*`
 {tab} `_indent_` `*\n*` `_EOF_` `_line-end_`
 
 `_indent_`:
@@ -257,15 +258,3 @@ _Keyword operators are both keywords and operators_
 
 `_q-char_`:
 {tab} any member of the source character set except the new-line character and `*"*`
-
-== Preprocessing Numbers
-`_preprocessing-number_`:
-{tab} `_digit_`
-{tab} `*.*` `_digit_`
-{tab} `_preprocessing-number_` `_digit_`
-{tab} `_preprocessing-number_` `identifier-nondigit`
-{tab} `_preprocessing-number_` `*e*` `_sign_`
-{tab} `_preprocessing-number_` `*E*` `_sign_`
-{tab} `_preprocessing-number_` `*p*` `_sign_`
-{tab} `_preprocessing-number_` `*P*` `_sign_`
-{tab} `_preprocessing-number_` `*.*`

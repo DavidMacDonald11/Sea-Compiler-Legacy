@@ -11,12 +11,15 @@
 
 `_statement_`:
 {tab} `_line-statement_`
-{tab} `_function-declaration_`
-{tab} `_structure-declaration_`
+{tab} `_declaration-header-list_`~opt~ `_function-declaration_`
+{tab} `_declaration-header-list_`~opt~ `_structure-declaration_`
 {tab} `_if-statement_`
 {tab} `_match-with-statement_`
 {tab} `_iteration-statement_`
+{tab} `_manage-statement_`
 {tab} `_static-assert-statement_`
+{tab} `_unique-block-statement_`
+{tab} `_preprocessor-statement_`
 
 `_line-statement_`:
 {tab} `_line-statement-component_` `_line-end_`
@@ -38,21 +41,27 @@
 `_block-statement_`:
 {tab} `_line-statement_`
 {tab} `_blockable-statement_`
-{tab} `*\n*` `_block-indent_` `_blockable-statement_`
-{tab} `*\n*` `_block-indent_` `_statement_`
+{tab} `_newline-block-statement_`
+
+`_newline-block-statement_`:
+{tab} `*\n*` `_block-indent_` `_blockable-statement_` `_newline-block-statement_`~opt~
+{tab} `*\n*` `_block-indent_` `_statement_` `_newline-block-statement_`~opt~
 
 `_blockable-statement_`:
 {tab} `_blockable-statement-component_` `_line-end_`
 
 `_blockable-statement-component_`:
 {tab} `*pass*`
-{tab} `*continue*` `_identifier_`~opt~
-{tab} `*break*` `_identifier_`~opt~
+{tab} `*continue*` `_label_`~opt~
+{tab} `*break*` `_label_`~opt~
 {tab} `*return*` `_expression_`~opt~
 {tab} `*yield*` `_expression_`~opt~
 
+`_label_`:
+{tab} `_identifier_`
+
 `_block-indent_`:
-{tab} One `_indent_` per line of the following statement per number of nested blocks
+{tab} one `_indent_` per line of the following statement per number of nested blocks
 
 `_match-with-statement_`:
 {tab} `*match*` `_expression_` `*:*` `_with-statement_` `_else-statement_`~opt~
@@ -69,9 +78,6 @@
 `_while-statement_`:
 {tab} `_label_`~opt~ `*while*` `_expression_` `*:*` `_block-statement_` `_else-statement_`~opt~
 
-`_label_`:
-{tab} `_identifier_`
-
 `_do-while-statement_`:
 {tab} `_label_`~opt~ `*do*` `*:*` `_do-while-block-statement_` `_else-statement_`~opt~
 {tab} `*do*` `_label_`~opt~ `*:*` `_do-while-block-statement_` `_else-statement_`~opt~
@@ -85,19 +91,37 @@
 {tab} `_blockable-statement-component_`
 
 `_for-statement_`:
-{tab} `*for*` `_element-declaration_` `*in*` `_initializer_` `*:*` `_block-statement_` `_else-statement_`~opt~
+{tab} `_label_`~opt~ `*for*` `_element-declaration_` `*in*` `_initializer_` `*:*` `_block-statement_` `_else-statement_`~opt~
+
+`_manage-statement_`:
+{tab} `*manage*` `_chained-variable-declaration_` `*:*` `_block-statement_`
 
 `_static-assert-statement_`:
 {tab} `*static*`~opt~ `*assert*` `_constant-expression_` `*else*` `_string-literal_` `_line-end_`
 
-// TODO:
-// # decorators
-// struct functions
-// __dunder__ methods
-// __dunder__ + operator overloading
-// nested functions
-// context managers
-// scope block
-// c block
-// asm block
-// preprocessor
+`_unique-block-statement_`:
+{tab} `*block*` `*:*` `_block-statement_`
+{tab} `*c*` `*block*` `*:*` `_raw-c_`
+{tab} `*asm*` `*block*` `*:*` `_raw-asm_`
+
+`_raw-c_`:
+{tab} `*pass*` `_line-end_`
+{tab} `_raw-c-symbols_` `_line-end_`
+{tab} `_newline-raw-c_`
+
+`_raw-c-symbols_`:
+{tab} any symbols for C code
+
+`_newline-raw-c_`:
+{tab} `*\n*` `_block-indent_` `_raw-c-symbols_` `_line-end_` `_newline-raw-c_`~opt~
+
+`_raw-asm_`:
+{tab} `*pass*` `_line-end_`
+{tab} `_raw-asm-symbols_` `_line-end_`
+{tab} `_newline-raw-asm_`
+
+`_raw-asm-symbols_`:
+{tab} any symbols for assembly code
+
+`_newline-raw-asm_`:
+{tab} `*\n*` `_block-indent_` `_raw-asm-symbols_` `_line-end_` `_newline-raw-asm_`~opt~

@@ -15,6 +15,10 @@
 {tab} `_string-literal_`
 {tab} `*(*` `_expression_` `*)*`
 {tab} `*|*` `_expression_` `*|*`
+{tab} `_primary-keyword_`
+
+`_primary-keyword_`: one of
+{tab} `*True*` `*False*` `*Null*` `*Infinity*` `*NaN*` `*Pi*`
 
 `_postfix-expression_`:
 {tab} `_primary-expression_`
@@ -29,7 +33,7 @@
 {tab} `*:*` `_assignment-expression_`~opt~
 {tab} `*:*` `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~
 
-`_postfix-unary_operator_`: one of
+`_postfix-unary-operator_`: one of
 {tab} `*++*` `*--*` `*%*` `*!*`
 
 `_postfix-compound-literal_`:
@@ -55,9 +59,10 @@
 {tab} `_exponential-expression_`
 {tab} `_unary-operator_` `_cast-expression_`
 {tab} `_unary-type-expression_`
+{tab} `_unary-alloc-expression_`
 
 `_unary-operator_`: one of
-{tab} `*^*` `*@*` `*-*` `*!*` `*~*` `*~<*` `*~>*`
+{tab} `*^*` `*@*` `*-*` `*!*` `*~*` `*~<*` `*~>*` `*{star}*`
 
 `_unary-type-expression_`:
 {tab} `_unary-type-keyword_` `*of*` `_expression_`
@@ -65,6 +70,17 @@
 
 `_unary-type-keyword_`: one of
 {tab} `*align*` `*size*` `*type*`
+
+`_unary-alloc-expression_`:
+{tab} `*alloc*` `_alloc-arguments_`
+{tab} `*realloc*` `_expression_` `*to*` `_alloc-arguments_`
+{tab} `*dealloc*` `_expression_`
+
+`_alloc-arguments_`:
+{tab} `_expression_`
+{tab} `_expression_` `*as*` `_expression_`
+{tab} `*(*`~opt~ `_type-name_` `*)*`~opt~
+{tab} `*(*`~opt~ `_type-name_` `*)*`~opt~ `*as*` `_expression_`
 
 `_cast-expression_`:
 {tab} `_unary-expression_`
@@ -103,7 +119,7 @@
 {tab} `_comparative-expression_` `_comparative-operator_` `_bitwise-or-expression_`
 
 `_comparative-operator_`: one of
-{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*is*` `*is not*` `*in*` `*not in*`
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*` `*is*` `*is not*` `*in*` `*not in*`
 
 `_logical-not-expression_`:
 {tab} `_comparative-expression_`

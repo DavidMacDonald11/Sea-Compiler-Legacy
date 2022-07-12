@@ -7,7 +7,7 @@ Specifically, I utilized {microsoft}[Microsoft's C Language Syntax Summary] to c
 
 :tab: &nbsp;&nbsp;&nbsp;&nbsp;
 
-[cols="1,4"]
+[cols="3,8"]
 |===
 |*Attribute*
 |*Description*
@@ -23,6 +23,9 @@ Specifically, I utilized {microsoft}[Microsoft's C Language Syntax Summary] to c
 
 |_optional_~opt~
 |Nonterminals followed by ~opt~ are optional.
+
+|*(*~opt~ _mutually optional_ *)*~opt~
+|With surrounding optional brackets, the brackets must both be included, or must both not be included.
 
 |===
 

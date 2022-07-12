@@ -8,6 +8,7 @@
 :hardbreaks-option:
 
 :star: *
+:under: _
 
 `_declaration_`:
 {tab} `_variable-declaration_`
@@ -19,6 +20,7 @@
 
 `_element-declaration_`:
 {tab} `_type-name_` `_identifier_`
+{tab} `_element-declaration_` `*,*` `_type-name_`~opt~ `_identifier_`
 
 `_variable-initalizer_`:
 {tab} `*=*` `_initializer_`
@@ -66,6 +68,7 @@
 `_type-specifier_`:
 {tab} `*auto*`
 {tab} `*void*`
+{tab} `*str*`
 {tab} `_alias_`
 {tab} `_numeric-type-specifier_`
 
@@ -90,11 +93,28 @@
 {tab} `*double*` `*float*`~opt~
 
 `_initializer_`:
-{tab} `_assignment-expression_`
+{tab} `_expression_`
+{tab} `_initializer-alloc_`
 {tab} `_initializer-comprehension_`
 {tab} `*(*` `_array-initializer-list_` `*,*`~opt~ `*)*`
 {tab} `*[*` `_array-initializer-list_` `*,*`~opt~ `*]*`
 {tab} `*{*` `_initializer-list_` `*,*`~opt~ `*}*`
+
+`_initializer-alloc_`:
+{tab} `*alloc*` `_initializer-alloc-arguments_`~opt~
+{tab} `*realloc*` `_expression_` `_initializer-realloc-arguments_`~opt~
+
+`_initializer-alloc-arguments_`:
+{tab} `*(*` `*)*`
+{tab} `*bytes*`
+{tab} `*as*` `_initializer_`
+{tab} `*(*` `*)*` `*as*` `_initializer_`
+{tab} `*bytes*` `*as*` `_initializer_`
+
+`_initialzier-realloc-arguments_`:
+{tab} `*as*` `_initializer_`
+{tab} `*to*` `_initializer_`
+{tab} `*to*` `_initializer_` `*as*` `_initializer_`
 
 `_initializer-comprehension_`:
 {tab} `*(*` `_generator_` `*)*`
@@ -102,13 +122,18 @@
 {tab} `*{*` `_generator_` `*}*`
 
 `_generator_`:
-{tab} `_expression_` `_generator-loop_`
+{tab} `_initializer_` `_generator-loop_` `_generator-conditional_`~opt~
+{tab} `_generator-constant_` `*to*` `_generator-constant_`
 
 `_generator-loop_`:
 {tab} `*for*` `_element-declaration_` `*in*` `_initializer_` `_generator-loop_`~opt~
 
 `_generator-conditional_`:
 {tab} `*if*` `_expression_` `_generator-conditional_`~opt~
+
+`_generator-constant_`:
+{tab} `_integer-constant_`
+{tab} `_character-constant_`
 
 `_array-initializer-list_`:
 {tab} `_list-designation_`~opt~ `_initializer_`
@@ -127,6 +152,7 @@
 
 `_alias-declaration_`:
 {tab} `*alias*` `*(*`~opt~ `_type-name_` `*)*`~opt~ `*as*` `_alias_`
+{tab} `*alias*` `*(*`~opt~ `*type*` `*of*` `_expression_` `*)*`~opt~ `*as*` `_alias_`
 
 `_alias_`:
 {tab} `_identifier_`
@@ -143,11 +169,11 @@
 
 `_function-variadic-list_`:
 {tab} `_function-parameter-list_`
-{tab} `_function-parameter-list_` `*,*` `*\...*`
+{tab} `_function-parameter-list_` `*,*` `_type-name_` `*{star}*` `_identifier_`~opt~
 
 `_function-parameter-list_`:
 {tab} `_function-parameter_`
-{tab} `_function-parameter_` `*,*` `_function-parameter-list_`
+{tab} `_function-parameter-list_` `*,*` `_function-parameter_`
 
 `_function-parameter_`:
 {tab} `_type-name_` `_identifier_`~opt~
@@ -162,3 +188,32 @@
 {tab} `*enum*`
 {tab} `*struct*`
 {tab} `*union*`
+
+`_declaration-header-list_`:
+{tab} `_declaration-header_`
+{tab} `_declaration-header-list_` `_declaration-header_`
+
+`_declaration-header_`:
+{tab} `_template-declaration_`
+{tab} `_decorator-declaration_`
+
+`_template-declaration_`:
+{tab} `*template*` `*with*` `_template-parameter-list_` `*,*`~opt~ `_line-end_`
+
+`_template-parameter-list_`:
+{tab} `_template-parameter_`
+{tab} `_template-parameter-list_` `*,*` `_template-parameter_`
+
+`_template-parameter_`:
+{tab} `*type*` `_identifier_`
+
+`_decorator-declaration_`:
+{tab} `*decorate*` `*with*` `_decorator-parameter-list_` `*,*`~opt~ `_line-end_`
+
+`_decorator-parameter-list_`:
+{tab} `_decorator-parameter_`
+{tab} `_decorator-parameter-list_` `*,*` `_decorator-parameter_`
+
+`_decorator-parameter_`:
+{tab} `_identifier_`
+{tab} `_identifier_` `*(*` `_argument-epression-list_`~opt~ `*)*`
