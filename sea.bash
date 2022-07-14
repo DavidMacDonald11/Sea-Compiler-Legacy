@@ -4,6 +4,7 @@ sea_path="$(dirname "$0" | sed s/' '/'\\ '/g)"
 working="$(pwd | sed s/' '/'\\ '/g)"
 
 update() {
+    eval cd "$sea_path"
     git pull origin main || sudo git pull origin main
 }
 
