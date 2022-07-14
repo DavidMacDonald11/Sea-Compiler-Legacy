@@ -36,7 +36,7 @@ def output_debug(options, name, lexer):
     if "d" not in options:
         return
 
-    print(f"Tokens from {name}:\n\t{None if lexer is None else lexer.tokens}")
+    print(f"Tokens from {name}:\n  {None if lexer is None else lexer.tokens}")
     print()
 
 if __name__ == "__main__":

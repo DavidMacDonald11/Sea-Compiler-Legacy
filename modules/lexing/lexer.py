@@ -1,4 +1,5 @@
 from string import ascii_letters, ascii_uppercase
+from util.misc import MatchIn
 from util.warnings import CompilerError
 from .tokens.character_constant import CharacterConstant
 from .tokens.identifier import Identifier
@@ -12,10 +13,7 @@ from .tokens.token_string import TokenString
 class Lexer:
     @property
     def symbol(self):
-        if len(self.symbols) == 0:
-            raise CompilerError("Expecting symbol", self.take_string(take = False))
-
-        return self.symbols[0]
+        return "" if len(self.symbols) == 0 else self.symbols[0]
 
     @property
     def last(self):
@@ -92,57 +90,51 @@ class Lexer:
             self.make_token()
 
     def make_token(self):
-        self.make_spaces()
+        self.check_spaces()
 
-        if self.symbols == "":
-            self += Punctuator(self.take_string(take = False))
-            return
+        match MatchIn(self.symbol):
+            case [""]|Punctuator.SYMBOLS:
+                self += Punctuator(self.take_string(1))
+            case "0123456789.":
+                self.make_numeric_constant()
+            case Identifier.START:
+                self.make_identifier()
+            case "`'":
+                self.make_character_constant()
+            case "\"":
+                self.make_string_literal()
+            case Operator.SYMBOLS:
+                self.make_operator()
+            case _:
+                raise CompilerError("Unrecognized symbol", self.take_string(1))
 
-        if self.symbol in Punctuator.SYMBOLS:
-            self += Punctuator(self.take_string(1))
-            return
-
-        if self.symbol in "0123456789.":
-            return self.make_numeric_constant()
-
-        if self.symbol in f"{ascii_letters}_\\":
-            return self.make_identifier()
-
-        if self.symbol in "`'":
-            return self.make_character_constant()
-
-        if self.symbol in "\"":
-            return self.make_string_literal()
-
-        if self.symbol in Operator.SYMBOLS:
-            return self.make_operator()
-
-        raise CompilerError("Unrecognized symbol", self.take_string(1))
-
-    def make_spaces(self):
+    def check_spaces(self):
         if not self.symbols.isspace():
             self.at_line_start = False
-            return
+        else:
+            self.make_spaces()
 
+    def make_spaces(self):
         if not self.at_line_start:
             self.take_string(until = "\n")
 
-            if self.symbol != "\n":
-                return
+            if self.symbol == "\n":
+                self.at_line_start = True
+                self.check_spaces()
 
-            self.at_line_start = True
-            return self.make_spaces()
+            return
 
         if self.symbol in "\t\n":
             self += Punctuator(self.take_string(1))
-            return self.make_spaces()
+            self.check_spaces()
+            return
 
         if self.symbols[:4] != " " * 4:
             string = self.take_string(until = "\t\n")
             raise CompilerError("Indents must be 4 spaces or 1 tab", string)
 
         self += Punctuator(self.take_string(4))
-        return self.make_spaces()
+        self.check_spaces()
 
     def make_numeric_constant(self):
         self.take(1)
@@ -176,8 +168,8 @@ class Lexer:
             if quote != self.symbol:
                 string = self.take_string(1)
                 raise CompilerError("Unterminated character constant", string)
-            else:
-                self += CharacterConstant(self.take_string(1))
+
+            self += CharacterConstant(self.take_string(1))
 
         quote = self.take(1)
 
@@ -215,7 +207,8 @@ class Lexer:
             raise CompilerError("Unterminated string literal", string)
 
         if self.string.symbols.replace(r"\\", "")[-1] == "\\":
-            return self.make_string_literal()
+            self.make_string_literal()
+            return
 
         self += StringLiteral(self.take_string(1))
 
