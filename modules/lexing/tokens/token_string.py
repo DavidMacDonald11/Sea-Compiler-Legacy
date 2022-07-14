@@ -1,4 +1,4 @@
-class FileSymbols:
+class TokenString:
     def __init__(self, filename, symbols, begin, end = None):
         self.filename = filename
         self.symbols = symbols
@@ -6,23 +6,25 @@ class FileSymbols:
         self.end = end if end is not None else begin.copy()
 
     def __iadd__(self, symbol):
-        if symbol != "\n":
-            self.symbols[-1] += symbol
-            self.end[0] += 1
-            return
+        self.symbols += symbol
 
-        self.symbols += [""]
+        if symbol != "\n":
+            self.end[0] += 1
+            return self
+
         self.end[0] = 1
         self.end[1] += 1
+
+        return self
 
     def __add__(self, obj):
         result = self.copy()
 
-        for line in symbols:
-            for symbol in line:
-                result += symbol
+        for _ in range(obj.start[0] - self.end[0]):
+            result += " "
 
-            result += "\n"
+        for symbol in self.symbols:
+            result += symbol
 
         return result
 
@@ -34,16 +36,15 @@ class FileSymbols:
         location = f"{file}: {begin} to {end}"
         lines = ""
 
-        for i, line in enumerate(self.lines):
+        for i, line in enumerate(self.symbols.split("\n")):
             num = i + self.begin[1]
-            lines += f"{num:4d} |{line}\n"
-
+            lines += f"{num:4d} | {line}\n"
 
         return f"{file}: {begin} to {end}\n{lines}"
 
     def copy(self):
         position = (self.begin.copy(), self.end.copy())
-        return FileSymbols(self.filename, self.symbols.copy(), *position)
+        return TokenString(self.filename, self.symbols, *position)
 
     def next(self):
-        return FileSymbols(self.filename, [""], self.end.copy())
+        return TokenString(self.filename, "", self.end.copy())

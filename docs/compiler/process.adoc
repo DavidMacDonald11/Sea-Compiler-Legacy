@@ -19,7 +19,6 @@ The program will then loop per file pair in the file map, generating the output 
 . The lexer will read the file character by character.
 Its job is to construct a list of tokens.
 Each type of token will have its own class.
-Each token class can use the lexer to construct itself.
 Each token is constructed with the position in the file and original text to allow for verbose warnings and errors.
 
 . The parser will go through the list of tokens one by one.

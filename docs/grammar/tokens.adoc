@@ -100,17 +100,16 @@
 {tab} `_base-n-digit-sequence_`
 
 `_base-n-digit-sequence_`:
-{tab} `_base-n-digit_` `_base-n-suffix_`
-{tab} `_base-n-digit_` `_base-n-digit-sequence_`
+{tab} `_base-n-prefix_` `_base-n-digit_`
+{tab} `_base-n-digit-sequence_` `_base-n-digit_`
 
 `_base-n-digit_`: one of
-{tab} `_letter_`
 {tab} `_digit_`
+{tab} english letters `*A*` to `*Z*`
 {tab} other implementation-defined characters
 
-`_base-n-suffix_`:
-{tab} `*b*` `_base-n_`
-{tab} `*B*` `_base-n_`
+`_base-n-prefix_`:
+{tab} `_base-n_` `*b*`
 
 `_base-n_`:
 {tab} a `_decimal-constant_` whose value is between 2 and 36
@@ -124,8 +123,8 @@
 {tab} `_digit-sequence_` `_exponent-part_`
 
 `_base-n-floating-constant_`:
-{tab} `_base-n-fractional-constant_` `_base-n-exponent-part_`~opt~
-{tab} `_base-n-digit-sequence_` `_base-n-exponent-part_`
+{tab} `_base-n-fractional-constant_` `_exponent-part_`~opt~
+{tab} `_base-n-digit-sequence_` `_exponent-part_`~opt~
 
 `_fractional-constant_`:
 {tab} `_digit-sequence_`~opt~ `*.*` `_digit-sequence_`
@@ -133,7 +132,7 @@
 
 `_exponent-part_`:
 {tab} `*e*` `_sign_`~opt~ `_decimal-constant_`
-{tab} `*E*` `_sign_`~opt~ `_decimal-constant_`
+{tab} `*e*` `_sign_`~opt~ `_base-n-constant_`
 
 `_sign_`: one of
 {tab} `*+*` `*-*`
@@ -141,10 +140,6 @@
 `_base-n-fractional-constant_`:
 {tab} `_base-n-digit-sequence_`~opt~ `*.*` `_base-n-digit-sequence_`
 {tab} `_base-n-digit-sequence_` `*.*`
-
-`_base-n-exponent-part_`:
-{tab} `*e*` `_sign_`~opt~ `_base-n-constant_`
-{tab} `*E*` `_sign_`~opt~ `_base-n-constant_`
 
 `_enuemration-constant_`:
 {tab} `_identifier_`
@@ -226,8 +221,8 @@ _Keyword operators are both keywords and operators_
 == Punctuators
 `_punctuator_`: one of
 {tab} `*[*` `*]*` `*(*` `*)*` `*{*` `*}*`
-{tab} `*,*` `*{tick}*` `*:*`
-{tab} `_indent_` `*\n*` `_EOF_` `_line-end_`
+{tab} `*,*` `*:*`
+{tab} `_indent_` `_line-end_`
 
 `_indent_`:
 {tab} four spaces
