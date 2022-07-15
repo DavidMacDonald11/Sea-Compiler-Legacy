@@ -1,7 +1,7 @@
 from functools import cached_property
 from string import ascii_letters, ascii_uppercase
 from util.misc import MatchIn
-from util.warnings import CompilerError
+from util.warnings import CompilerError, CompilerWarning
 from .tokens.annotation import Annotation
 from .tokens.character_constant import CharacterConstant
 from .tokens.identifier import Identifier
@@ -32,6 +32,10 @@ class Lexer:
         self.at_line_start = True
         self.symbols = ""
         self.tokens = []
+        self.warnings = []
+
+        with open(filepath, "r", encoding = "UTF-8") as file:
+            self.lines = file.readlines() + [""]
 
         self.next()
 
@@ -41,6 +45,9 @@ class Lexer:
 
     def __del__(self):
         self.file.close()
+
+    def warn(self, *args, **kwargs):
+        self.warnings += [CompilerWarning(*args, **kwargs)]
 
     def next(self):
         if self.symbols != "":
@@ -89,7 +96,7 @@ class Lexer:
             self.take(num, inside, until)
 
         string = self.string
-        self.string = string.next()
+        self.string = string.next(self.lines)
         return string
 
     def make_tokens(self):
@@ -138,11 +145,12 @@ class Lexer:
             self.check_spaces()
             return
 
-        if self.symbols[:4] != " " * 4:
-            string = self.take_string(until = "\t\n")
-            raise CompilerError("Indents must be 4 spaces or 1 tab", string)
+        string = self.take_string(4, inside = " ")
 
-        self += Punctuator(self.take_string(4))
+        if string.symbols != " " * 4:
+            self.warn("Indents must be 4 spaces or 1 tab", string)
+
+        self += Punctuator(string)
         self.check_spaces()
 
     def make_comment(self):

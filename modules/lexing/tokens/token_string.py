@@ -1,5 +1,8 @@
+from functools import cached_property
+
 class TokenString:
     def __init__(self, filename, symbols, begin, end = None):
+        self.line = ""
         self.filename = filename
         self.symbols = symbols
         self.begin = begin
@@ -29,22 +32,24 @@ class TokenString:
         return result
 
     def __repr__(self):
+        col1, ln1 = self.begin
+        col2, ln2 = self.end
+
         file = f"{self.filename}"
-        begin = f"Ln{self.begin[1]}, Col {self.begin[0]}"
-        end = f"Ln {self.end[1]}, Col {self.end[0]}"
+        location = f"Ln{ln1}, Col {col1} to Col {col2}"
+        line1 = f"{ln1:4d}|{self.line}"
+        line2 = "    |" + " " * (col1 - 1) + "^" * (col2 - col1)
 
-        location = f"{file}: {begin} to {end}"
-        lines = ""
-
-        for i, line in enumerate(self.symbols.split("\n")):
-            num = i + self.begin[1]
-            lines += f"{num:4d} | {line}\n"
-
-        return f"{file}: {begin} to {end}\n{lines}"
+        return f"{file}: {location}\n{line1}{line2}\n"
 
     def copy(self):
         position = (self.begin.copy(), self.end.copy())
-        return TokenString(self.filename, self.symbols, *position)
+        string = TokenString(self.filename, self.symbols, *position)
+        string.line = self.line
 
-    def next(self):
-        return TokenString(self.filename, "", self.end.copy())
+        return string
+
+    def next(self, lines):
+        string = TokenString(self.filename, "", self.end.copy())
+        string.line = lines[self.end[1] - 1]
+        return string

@@ -9,3 +9,6 @@ class CompilerWarning:
 class CompilerError(CompilerWarning, Exception):
     def printable(self, prefix = "error: "):
         return super().printable(prefix)
+
+class Stop(Exception):
+    pass
