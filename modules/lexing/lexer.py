@@ -1,245 +1,193 @@
-from functools import cached_property
-from string import ascii_letters, ascii_uppercase
+from lexing import token
 from util.misc import MatchIn
 from util.warnings import CompilerError, CompilerWarning
-from .tokens.annotation import Annotation
-from .tokens.character_constant import CharacterConstant
-from .tokens.identifier import Identifier
-from .tokens.keyword import Keyword
-from .tokens.numeric_constant import NumericConstant
-from .tokens.operator import Operator
-from .tokens.punctuator import Punctuator
-from .tokens.string_literal import StringLiteral
-from .tokens.token_string import TokenString
+from .smart_file import SmartFile
+
+Token = token.Token
 
 class Lexer:
     @property
-    def symbol(self):
-        return "" if len(self.symbols) == 0 else self.symbols[0]
-
-    @property
-    def last(self):
-        return self.string.symbols[-1]
-
-    @cached_property
-    def keep_comments(self):
-        return "t" in self.options
+    def string(self):
+        return self.file.line.string
 
     def __init__(self, options, filepath):
-        self.options = options
-        self.file = open(filepath, "r", encoding = "UTF-8")
-        self.string = TokenString(filepath, "", [1, 1])
+        self.file = SmartFile(filepath)
         self.at_line_start = True
-        self.symbols = ""
+        self.keep_comments = "t" in options
         self.tokens = []
         self.warnings = []
 
-        with open(filepath, "r", encoding = "UTF-8") as file:
-            self.lines = file.readlines() + [""]
+    def new_token(self, kind, line = None):
+        if line is None:
+            line = self.file.line
 
-        self.next()
+        new_token = Token(kind, line)
+        self.tokens += [new_token]
+        warning = None
 
-    def __iadd__(self, token):
-        self.tokens += [token]
-        return self
+        match kind:
+            case "CharacterConstant":
+                warning = new_token.validate_character_constant()
+            case "NumericConstant":
+                warning = new_token.validate_numeric_constant()
+            case "Identifier":
+                warning = new_token.validate_identifier()
 
-    def __del__(self):
-        self.file.close()
+        if warning is not None:
+            self.warnings += [warning]
 
-    def warn(self, *args, **kwargs):
-        self.warnings += [CompilerWarning(*args, **kwargs)]
-
-    def next(self):
-        if self.symbols != "":
-            return self.symbols
-
-        symbol = self.file.read(1)
-
-        while symbol != "":
-            is_different = (self.symbols.isspace() != symbol.isspace())
-
-            if self.symbols != "" and is_different:
-                self.file.seek(self.file.tell() - 1)
-                break
-
-            self.symbols += symbol
-            symbol = self.file.read(1)
-
-        return self.symbols
-
-    def take(self, num = 0, inside = "", until = "", refresh = False):
-        taken = ""
-
-        if inside == "":
-            condition = lambda x: x not in until
-        else:
-            condition = lambda x: x not in until and x in inside
-
-        while len(self.symbols) > 0 and condition(self.symbol):
-            self.string += self.symbol
-            taken += self.symbol
-            self.symbols = self.symbols[1:]
-
-            if refresh:
-                self.next()
-
-            if num != 0 and len(taken) == num:
-                break
-
-        if len(self.symbols) == 0:
-            self.next()
-
-        return taken
-
-    def take_string(self, num = 0, inside = "", until = "", take = True):
-        if take:
-            self.take(num, inside, until)
-
-        string = self.string
-        self.string = string.next(self.lines)
-        return string
+    def warn(self, message):
+        self.warnings += [CompilerWarning(message, self.tokens[-1])]
 
     def make_tokens(self):
-        while self.symbols != "":
+        while self.string != "":
             self.make_token()
 
     def make_token(self):
         self.check_spaces()
 
-        match MatchIn(self.symbol):
-            case [""]|Punctuator.SYMBOLS:
-                self += Punctuator(self.take_string(1))
+        match MatchIn(self.file.next):
+            case [""]|token.PUNCTUATOR_SYMBOLS:
+                self.file.take(1)
+                self.new_token("Punctuator")
             case "#":
                 self.make_comment()
-            case "0123456789.":
+            case token.NUMERIC_START_SYMBOLS:
                 self.make_numeric_constant()
-            case Identifier.START:
+            case token.IDENTIFIER_START_SYMBOLS:
                 self.make_identifier()
-            case "`'":
-                self.make_character_constant()
             case "\"":
                 self.make_string_literal()
-            case Operator.SYMBOLS:
+            case "`'":
+                self.make_character_constant()
+            case token.OPERATOR_SYMBOLS:
                 self.make_operator()
             case _:
-                raise CompilerError("Unrecognized symbol", self.take_string(1))
+                self.file.take(1)
+                self.new_token("ERROR")
+                raise CompilerError("Unrecognized symbol", self.tokens[-1])
 
     def check_spaces(self):
-        if not self.symbols.isspace():
+        if not self.file.next.isspace():
             self.at_line_start = False
         else:
             self.make_spaces()
 
     def make_spaces(self):
-        if not self.at_line_start:
-            self.take_string(until = "\n")
-
-            if self.symbol == "\n":
-                self.at_line_start = True
-                self.check_spaces()
-
-            return
-
-        if self.symbol in "\t\n":
-            self += Punctuator(self.take_string(1))
+        if self.at_line_start:
+            self.make_indents()
             self.check_spaces()
             return
 
-        string = self.take_string(4, inside = " ")
+        self.file.take(these = " \t")
+        self.file.line.ignore()
 
-        if string.symbols != " " * 4:
-            self.warn("Indents must be 4 spaces or 1 tab", string)
+        if self.file.next == "\n":
+            self.at_line_start = True
 
-        self += Punctuator(string)
         self.check_spaces()
 
+    def make_indents(self):
+        if self.file.next in "\t\n":
+            line = self.file.line
+            self.file.take(1)
+            self.new_token("Punctuator", line)
+            return
+
+        string = self.file.take(4, these = " ")
+        self.new_token("Punctuator")
+
+        if string != " " * 4:
+            self.warn("Indents must be 4 spaces or 1 tab")
+
     def make_comment(self):
-        self.take(until = "\n", refresh = True)
-        string = self.take_string(take = False)
+        self.file.take(until = "\n")
 
         if self.keep_comments:
-            self += Annotation(string)
+            self.new_token("Annotation")
+        else:
+            self.file.line.ignore()
 
     def make_numeric_constant(self):
-        self.take(1)
-
-        if self.last == "." and self.symbol not in "0123456789":
-            self += Operator(self.take_string(take = False))
+        if self.file.take(1) == "." and self.file.next not in "0123456789":
+            self.new_token("Operator")
             return
 
-        self.take(inside = f"{ascii_uppercase}0123456789.be")
+        string = self.file.take(these = token.NUMERIC_SYMBOLS)
 
-        if self.last == "e" and self.symbol in "+-":
-            self.take(1)
-            self.take(inside = f"{ascii_uppercase}0123456789b")
+        if string != "" and string[-1] == "e" and self.file.next in "+-":
+            self.file.take(1)
+            self.file.take(these = token.NUMERIC_SYMBOLS)
 
-        self += NumericConstant(self.take_string(take = False))
+        self.new_token("NumericConstant")
 
     def make_identifier(self):
-        symbols = self.take(inside = f"{ascii_letters}_\\0123456789")
+        string = self.file.take(these = token.IDENTIFIER_SYMBOLS)
+        is_prefix = len(string) == 1 and string[0] in token.STRING_PREFIXES
 
-        string_prefix = len(symbols) == 1 and symbols in StringLiteral.PREFIXES
-
-        if string_prefix and self.symbol == "\"":
+        if is_prefix and self.file.next == "\"":
             self.make_string_literal()
             return
 
-        string = self.take_string(take = False)
-        self += (Keyword if symbols in Keyword.LIST else Identifier)(string)
-
-    def make_character_constant(self):
-        def finish_character(self, quote):
-            if quote != self.symbol:
-                string = self.take_string(1)
-                raise CompilerError("Unterminated character constant", string)
-
-            self += CharacterConstant(self.take_string(1))
-
-        quote = self.take(1)
-
-        if self.symbol == quote:
-            string = self.take_string(1)
-            raise CompilerError("Empty character constant", string)
-
-        if self.symbol != "\\":
-            self.take(1)
-            return finish_character(self, quote)
-
-        self.take(1)
-        escape = self.take(1)
-
-        if escape in "01234567":
-            self.take(inside = "01234567")
-            return finish_character(self, quote)
-
-        if escape in "abfnrtv'`\"\\?":
-            return finish_character(self, quote)
-
-        if escape in "xuU":
-            self.take(inside = "0123456789ABCDEF")
-            return finish_character(self, quote)
-
-        string = self.take_string(take = False)
-        raise CompilerError("Incorrect character constant", string)
+        kind = "Keyword" if string in token.KEYWORD_LIST else "Identifier"
+        self.new_token(kind)
 
     def make_string_literal(self):
-        self.take(1)
-        self.take(until = "\"\n", refresh = True)
+        self.file.take(1)
+        self.file.take(until = "\"\n")
 
-        if self.symbol == "\n":
-            string = self.take_string(take = False)
-            raise CompilerError("Unterminated string literal", string)
+        if self.file.next == "\n":
+            self.new_token("StringLiteral")
+            self.warn("Unterminated string literal")
+            return
 
-        if self.string.symbols.replace(r"\\", "")[-1] == "\\":
+        if self.file.line.captured.replace(r"\\", "")[-1] == "\\":
             self.make_string_literal()
             return
 
-        self += StringLiteral(self.take_string(1))
+        self.file.take(1)
+        self.new_token("StringLiteral")
+
+    def make_character_constant(self):
+        quote = self.file.take(1)
+
+        if self.file.next != "\\":
+            char = self.file.take(1)
+            self.file.take(1)
+            self.new_token("CharacterConstant")
+
+            if char == quote:
+                self.warn("Empty character constant")
+
+            return
+
+        self.file.take(1)
+        escape = self.file.take(1)
+        unknown = False
+
+        match MatchIn(escape):
+            case "01234567":
+                self.file.take(these = "01234567")
+            case "abfnrtv'`\"\\?":
+                pass
+            case "xuU":
+                self.file.take(these = "0123456789ABCDEF")
+            case _:
+                unknown = True
+
+        end_quote = self.file.take(1)
+        self.new_token("CharacterConstant")
+
+        if end_quote != quote:
+            self.warn("Unterminated character constant")
+
+        if unknown:
+            self.warn("Unkown escape sequence")
 
     def make_operator(self):
-        symbols = ""
+        string = ""
 
-        while symbols + self.symbol in Operator.LIST:
-            symbols += self.take(1)
+        while string + self.file.next in token.OPERATOR_LIST:
+            string += self.file.take(1)
 
-        self += Operator(self.take_string(take = False))
+        self.new_token("Operator")

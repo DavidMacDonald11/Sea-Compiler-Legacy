@@ -4,7 +4,7 @@ class CompilerWarning:
         self.component = component
 
     def printable(self, prefix = "warning: "):
-        return f"{prefix}{self.message}\n{repr(self.component)}"
+        return f"{prefix}{self.message}\n{self.component.raw()}"
 
 class CompilerError(CompilerWarning, Exception):
     def printable(self, prefix = "error: "):
