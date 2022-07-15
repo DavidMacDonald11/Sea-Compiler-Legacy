@@ -1,6 +1,8 @@
+from functools import cached_property
 from string import ascii_letters, ascii_uppercase
 from util.misc import MatchIn
 from util.warnings import CompilerError
+from .tokens.annotation import Annotation
 from .tokens.character_constant import CharacterConstant
 from .tokens.identifier import Identifier
 from .tokens.keyword import Keyword
@@ -19,7 +21,12 @@ class Lexer:
     def last(self):
         return self.string.symbols[-1]
 
-    def __init__(self, filepath):
+    @cached_property
+    def keep_comments(self):
+        return "t" in self.options
+
+    def __init__(self, options, filepath):
+        self.options = options
         self.file = open(filepath, "r", encoding = "UTF-8")
         self.string = TokenString(filepath, "", [1, 1])
         self.at_line_start = True
@@ -95,6 +102,8 @@ class Lexer:
         match MatchIn(self.symbol):
             case [""]|Punctuator.SYMBOLS:
                 self += Punctuator(self.take_string(1))
+            case "#":
+                self.make_comment()
             case "0123456789.":
                 self.make_numeric_constant()
             case Identifier.START:
@@ -135,6 +144,13 @@ class Lexer:
 
         self += Punctuator(self.take_string(4))
         self.check_spaces()
+
+    def make_comment(self):
+        self.take(until = "\n", refresh = True)
+        string = self.take_string(take = False)
+
+        if self.keep_comments:
+            self += Annotation(string)
 
     def make_numeric_constant(self):
         self.take(1)

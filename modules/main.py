@@ -10,6 +10,9 @@ def main():
 
     check_verbose(options)
 
+    if mode == "t":
+        options += "t"
+
     printv("Finding files and dirs...")
     file_map = generate_map(mode, out_dir, filenames)
 
@@ -19,7 +22,7 @@ def main():
 
 def compile_file(options, file_pair):
     try:
-        lexer = Lexer(file_pair[0])
+        lexer = Lexer(options, file_pair[0])
         lexer.make_tokens()
 
         write_output(file_pair[1])
