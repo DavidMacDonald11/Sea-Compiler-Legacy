@@ -13,6 +13,8 @@ Let's set the record straight now and avoid creating a "gif" situation.
 The `.sea` file extension is pronounced like the English word "sea."
 The `.hea` file extension is pronounced like the English word "he."
 
+If you are talking about Sea in the same context as C, I will accept the pronunciation "**ess**ay **sea**." (pronounce the **bold** only)
+
 Sea is a play-on-words of C.
 The name matches the concept of writing C in a different way.
 For headers, `.hea` was the obvious choice as it is `.sea` with an "h" and contains the first three letters of "header." I chose the pronunciation so that it would rhyme.
@@ -54,7 +56,7 @@ Without this argument, the program will call `gcc` and try to complete the proce
 Note that the compiler will create a `manifest.seatmp` file in the output directory containing a list of the output filepaths. This may be useful for your script.
 
 To stop compilation at a specific stage, use the `--mode=MODE` option, where `MODE` is one of the following (note that only the first letter is checked):
-* t, short for transpile, does above and compiles (transpiles) Sea to C.
+* t, short for transpile, compiles (transpiles) Sea to C.
 Generates `.c` and `.h` files only.
 * p, short for preprocess, does above and preprocesses the C files.
 Generates `.c` files only.
