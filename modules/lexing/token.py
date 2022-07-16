@@ -77,24 +77,25 @@ class Token:
 
 KEYWORD_LIST = (
         "alias", "align", "aligned", "alloc", "and", "as", "asm",
-        "assert","atomic", "auto", "block", "bool", "break", "bytes",
+        "assert", "atomic", "auto", "block", "bool", "break", "bytes",
         "c", "char", "complex", "const", "continue", "dealloc",
         "decorate", "define", "defined", "deviant", "do", "double",
         "else", "enum", "external", "False", "float", "for", "if",
         "in", "is", "imaginary", "include", "Infinity", "inline",
-        "int", "local", "long", "manage", "match", "mod","NaN", "not",
+        "int", "local", "long", "manage", "match", "mod", "NaN", "not",
         "Null", "of", "or", "pass", "Pi", "real", "realloc", "redefine",
-        "register", "restrict", "return","short", "size", "static",
+        "register", "restrict", "return", "short", "size", "static",
         "str", "struct", "template", "thread", "to", "True", "type",
         "undefine", "union", "void", "volatile", "while", "with", "yield"
     )
 
-OPERATOR_LIST = (".", "->", "++", "--", "%", "!",
-            "^", "@", "-", "~", "~<", "~>", "*",
-            "**", "/", "+", "<<", ">>", "&", "|", "$",
-            "<", ">", "<=", ">=", "==", "!=", "<=>",
-            "=", "**=", "*=", "/=", "%=", "+=", "-=",
-            "<<=", ">>=", "&=", "|=", "$="
+OPERATOR_LIST = (
+        ".", "->", "++", "--", "%", "!",
+        "^", "@", "-", "~", "~<", "~>", "*",
+        "**", "/", "+", "<<", ">>", "&", "|", "$",
+        "<", ">", "<=", ">=", "==", "!=", "<=>",
+        "=", "**=", "*=", "/=", "%=", "+=", "-=",
+        "<<=", ">>=", "&=", "|=", "$="
     )
 
 OPERATOR_SYMBOLS = {c for op in OPERATOR_LIST for c in op }
