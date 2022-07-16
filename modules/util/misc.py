@@ -14,3 +14,8 @@ class MatchIn:
 
     def __eq__(self, other):
         return self.obj in other
+
+def last_enumerate(iterable, **kwargs):
+    for i, thing in enumerate(iterable, **kwargs):
+        at_last = i == len(iterable) - 1
+        yield at_last, thing

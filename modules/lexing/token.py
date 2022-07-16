@@ -19,6 +19,12 @@ class Token:
         string = self.string.replace("\n", r"\n").replace("    ", r"\t")
         return f"{self.kind[0]}'{string}'"
 
+    def of(self, *kinds):
+        return any(kind in self.kind for kind in kinds)
+
+    def has(self, *strings):
+        return self.string in strings
+
     def raw(self):
         line = self.line.number
         col1, col2 = self.locale
