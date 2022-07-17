@@ -56,6 +56,16 @@ class NodeChildren:
 
         return taken
 
+    def take_and_warn(self, message):
+        taken = self.take()
+        taken.line.mark(taken)
+        self.warn(message)
+
+        return taken
+
+    def ignore(self):
+        self.parser.i += 1
+
     def expecting_error(self, *things):
         token = self.parser.token
         token.line.mark(token)
@@ -85,3 +95,6 @@ class NodeChildren:
         string += "".join(line.raw() for line in self.lines)
 
         return string
+
+    def next(self):
+        return NodeChildren(self.parser)

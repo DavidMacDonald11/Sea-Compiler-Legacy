@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 
 class Node(ABC):
-    def __init__(self, children):
+    def __init__(self, children, specifier = None):
         self.children = children
+        self.specifier = specifier
 
     def __repr__(self):
         return self.tree_repr()

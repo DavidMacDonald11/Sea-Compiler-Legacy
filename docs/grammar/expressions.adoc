@@ -22,7 +22,7 @@
 
 `_postfix-expression_`:
 {tab} `_primary-expression_`
-{tab} `_postfix-expression_` `*[*` `_assignment-expression_`~opt~ `_slice-operator_`~opt~ `*]*`
+{tab} `_postfix-expression_` `*[*` `_slice-operator_` `*]*`
 {tab} `_postfix-expression_` `*(*` `_argument-expression-list_`~opt~ `*)*`
 {tab} `_postfix-expression_` `*.*` `_identifier_`
 {tab} `_postfix-expression_` `*\->*` `_identifier_`
@@ -30,8 +30,9 @@
 {tab} `_postfix-compound-literal_`
 
 `_slice-operator_`:
-{tab} `*:*` `_assignment-expression_`~opt~
-{tab} `*:*` `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~
+{tab} `_assignment-expression_`
+{tab} `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~
+{tab} `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~
 
 `_postfix-unary-operator_`: one of
 {tab} `*++*` `*--*` `*%*` `*!*`
