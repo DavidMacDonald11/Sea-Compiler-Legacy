@@ -40,8 +40,16 @@ class Lexer:
         self.warnings += [CompilerWarning(message, self.tokens[-1])]
 
     def make_tokens(self):
+        self.make_token()
+
         while self.string != "":
             self.make_token()
+
+        for found in self.tokens:
+            if not found.has("\n", ""):
+                break
+        else:
+            self.warnings += [CompilerWarning("Empty file", None)]
 
     def make_token(self):
         self.check_spaces()

@@ -61,9 +61,9 @@ def output_debug(options, name, lexer, parser):
     if "d" not in options:
         return
 
-    print(f"{name}:\n")
-    print(f"Tokens:\n  {None if lexer is None else lexer.tokens}")
-    print(f"AST:\n  {None if parser is None else parser.tree}")
+    print(f"{name}:")
+    print(f"  Tokens:\n    {None if lexer is None else lexer.tokens}")
+    print(f"  AST:\n    {None if parser is None else parser.tree}")
 
 if __name__ == "__main__":
     main()

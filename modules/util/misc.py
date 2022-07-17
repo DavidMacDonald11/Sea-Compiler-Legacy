@@ -19,3 +19,9 @@ def last_enumerate(iterable, **kwargs):
     for i, thing in enumerate(iterable, **kwargs):
         at_last = i == len(iterable) - 1
         yield at_last, thing
+
+def repr_expand(iterable):
+    if len(iterable) < 2:
+        return repr(iterable[0])
+
+    return ",".join(iterable[:-1]) + f" or {iterable[-1]}"

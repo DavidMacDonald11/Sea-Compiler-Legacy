@@ -4,7 +4,10 @@ class CompilerWarning:
         self.component = component
 
     def printable(self, prefix = "warning: "):
-        return f"{prefix}{self.message}\n{self.component.raw()}"
+        string = f"{prefix}{self.message}\n"
+        string += "" if self.component is None else self.component.raw()
+
+        return string
 
 class CompilerError(CompilerWarning, Exception):
     def printable(self, prefix = "error: "):

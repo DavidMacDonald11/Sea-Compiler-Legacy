@@ -5,11 +5,15 @@ class Node(ABC):
         self.children = children
 
     def __repr__(self):
-        return f"{type(self).__name__}\n{repr(self.children)}"
+        return self.tree_repr()
+
+    def tree_repr(self, prefix = "     "):
+        name = type(self).__name__
+        return f"{name}\n{self.children.tree_repr(prefix)}"
 
     @classmethod
     @abstractmethod
-    def construct(cls, parser):
+    def construct(cls, children):
         pass
 
     # TODO uncomment
