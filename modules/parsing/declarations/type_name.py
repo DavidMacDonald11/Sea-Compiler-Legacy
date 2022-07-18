@@ -11,13 +11,11 @@ class TypeName(Node):
         children.take()
         children.expecting_has("to")
 
-        if not children.next_token.has("("):
+        nextt = children.next_token
+        if nextt.of("Keyword") and not nextt.has("not") or nextt.has("+"):
             children.make("TypeName")
-            return cls(children)
-
-        children.take()
-        children.make("ConstantExpression")
-        children.expecting_has(")")
+        else:
+            children.make("ConstantExpression")
 
         return cls(children)
 

@@ -47,7 +47,7 @@
 {tab} `_storage-class-specifier_`~opt~ `_type-qualifier_`~opt~
 
 `_alignment-specifier_`:
-{tab} `*aligned*` `*to*` `*(*` `_constant-expression_` `*)*`
+{tab} `*aligned*` `*to*` `_constant-expression_`
 {tab} `*aligned*` `*to*` `_type-name_`
 
 `_storage-class-specifier_`:
