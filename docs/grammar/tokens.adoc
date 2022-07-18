@@ -32,12 +32,12 @@
 {tab} `*atomic*` `*const*` `*restrict*` `*volatile*`
 {tab} `*template*` `*decorate*` `*inline*` `*deviant*`
 {tab} `*complex*` `*imaginary*` `*real*`
-{tab} `*auto*` `*void*` `*str*` `*float*` `*double*`
+{tab} `*auto*` `*void*` `*str*` `*func*` `*float*` `*double*`
 {tab} `*bool*` `*char*` `*short*` `*int*` `*long*`
 {tab} `*enum*` `*struct*` `*union*`
 {tab} `*if*` `*else*` `*match*` `*with*`
 {tab} `*for*` `*do*` `*while*`
-{tab} `*manage*` `*c*` `*asm*` `*block*`
+{tab} `*manage*` `*clang*` `*asm*` `*block*`
 {tab} `*break*` `*continue*` `*pass*` `*return*` `*yield*`
 {tab} `*True*` `*False*` `*Null*` `*Infinity*` `*NaN*` `*Pi*`
 
@@ -80,8 +80,9 @@
 
 == Constants
 `_constant_`:
+{tab} `_integer-constant_` `*i*`~opt~
 {tab} `_integer-constant_` `*bytes*`~opt~
-{tab} `_floating-constant_`
+{tab} `_floating-constant_` `*i*`~opt~
 {tab} `_enumeration-constant_`
 {tab} `_character-constant_`
 
@@ -202,6 +203,7 @@
 _All non-keyword operators are punctuators_
 
 `_operator_`: one of
+{tab} `*||*`
 {tab} `*.*` `*\->*` `*++*` `*--*` `*%*` `*!*`
 {tab} `*^*` `*@*` `*-*` `*~*` `*~<*` `*~>*` `*{star}*`
 {tab} `*{star}{star}*` `*/*` `*+*`

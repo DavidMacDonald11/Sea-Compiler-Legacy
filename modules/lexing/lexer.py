@@ -46,7 +46,7 @@ class Lexer:
             self.make_token()
 
         for found in self.tokens:
-            if not found.has("\n", ""):
+            if not (found.has("\n", "") or found.of("Annotation")):
                 break
         else:
             self.warnings += [CompilerWarning("Empty file", None)]

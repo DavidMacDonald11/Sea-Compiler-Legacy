@@ -14,6 +14,9 @@ class NodeChildren:
         self.nodes = []
 
     def __iadd__(self, other):
+        if other is None:
+            return self
+
         if isinstance(other, Token):
             self.nodes += [other]
             self.add_line(other.line)
@@ -27,7 +30,7 @@ class NodeChildren:
 
             return self
 
-        raise NotImplementedError(f"Cannot add {type(other)} to TokenList.")
+        raise NotImplementedError(f"Cannot add {type(other)} to NodeChildren.")
 
     def __repr__(self):
         return self.tree_repr()
@@ -58,7 +61,7 @@ class NodeChildren:
 
     def take_and_warn(self, message):
         taken = self.take()
-        taken.line.mark(taken)
+        taken.mark()
         self.warn(message)
 
         return taken
@@ -66,9 +69,16 @@ class NodeChildren:
     def ignore(self):
         self.parser.i += 1
 
+    def unignore(self):
+        self.parser.i -= 1
+
+    def take_previous(self):
+        self.unignore()
+        self.take()
+
     def expecting_error(self, *things):
         token = self.parser.token
-        token.line.mark(token)
+        token.mark()
 
         things = repr_expand(things)
         raise CompilerError(f"Expecting {things}", self)
@@ -85,9 +95,12 @@ class NodeChildren:
 
         self.expecting_error(*strings)
 
-    def make(self, kind):
-        node = self.parser.make(kind)
-        self += node
+    def make(self, kind, children = None):
+        node = self.parser.make(kind, children)
+
+        if children is not self:
+            self += node
+
         return node
 
     def raw(self):

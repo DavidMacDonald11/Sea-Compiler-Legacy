@@ -14,7 +14,7 @@
 {tab} `_constant_`
 {tab} `_string-literal_`
 {tab} `*(*` `_expression_` `*)*`
-{tab} `*|*` `_expression_` `*|*`
+{tab} `*||*` `_expression_` `*||*`
 {tab} `_primary-keyword_`
 
 `_primary-keyword_`: one of
@@ -67,7 +67,7 @@
 
 `_unary-type-expression_`:
 {tab} `_unary-type-keyword_` `*of*` `_expression_`
-{tab} `_unary-type-keyword_` `*of*` `*(*`~opt~ `_type-name_` `*)*`~opt~
+{tab} `_unary-type-keyword_` `*of*` `_type-name_`
 
 `_unary-type-keyword_`: one of
 {tab} `*align*` `*size*` `*type*`
@@ -80,8 +80,8 @@
 `_alloc-arguments_`:
 {tab} `_expression_`
 {tab} `_expression_` `*as*` `_expression_`
-{tab} `*(*`~opt~ `_type-name_` `*)*`~opt~
-{tab} `*(*`~opt~ `_type-name_` `*)*`~opt~ `*as*` `_expression_`
+{tab} `_type-name_`
+{tab}  `_type-name_` `*as*` `_expression_`
 
 `_cast-expression_`:
 {tab} `_unary-expression_`

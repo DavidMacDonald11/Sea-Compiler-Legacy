@@ -31,5 +31,8 @@ class Parser:
 
         children.take()
 
-    def make(self, kind):
-        return CONSTRUCT_MAP[kind](NodeChildren(self))
+    def make(self, kind, children = None):
+        if children is None:
+            children = NodeChildren(self)
+
+        return CONSTRUCT_MAP[kind](children)

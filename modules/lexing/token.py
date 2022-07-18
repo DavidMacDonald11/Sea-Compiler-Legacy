@@ -12,12 +12,16 @@ class Token:
         self.kind = kind
         self.line = line
         self.locale = [0, 0]
+        self.specifier = None
 
         self.line += self
 
     def __repr__(self):
         string = self.string.replace("\n", r"\n").replace("    ", r"\t")
         return f"{self.kind[0]}'{string}'"
+
+    def __eq__(self, other):
+        return (self.kind, self.string) == other
 
     def tree_repr(self, _):
         return f"{self}\n"
@@ -27,6 +31,9 @@ class Token:
 
     def has(self, *strings):
         return self.string in strings
+
+    def mark(self):
+        self.line.mark(self)
 
     def raw(self):
         line = self.line.number
@@ -63,6 +70,7 @@ class Token:
         n_float = re.compile(r"^\d+b[A-Z0-9]*.?[A-Z0-9]*(e[+-]?\d+b[A-Z0-9]+)?$")
 
         if d_int.match(self.string) or n_int.match(self.string):
+            self.specifier = "int"
             return None
 
         if "." not in self.string and "e" not in self.string:
@@ -72,6 +80,7 @@ class Token:
         is_float = is_float or nd_float.match(self.string)
 
         if is_float or n_float.match(self.string):
+            self.specifier = "float"
             return None
 
         return CompilerWarning("Incorrect float constant", self)
@@ -84,14 +93,14 @@ class Token:
 
         return CompilerWarning("Incorrect universal character name", self)
 
-PRIMARY_KEYWORD_LIST = ( "False","Infinity", "NaN", "Null", "Pi", "True" )
+PRIMARY_KEYWORD_LIST = ("False","Infinity", "NaN", "Null", "Pi", "True")
 
 KEYWORD_LIST = PRIMARY_KEYWORD_LIST + (
         "alias", "align", "aligned", "alloc", "and", "as", "asm",
         "assert", "atomic", "auto", "block", "bool", "break", "bytes",
-        "c", "char", "complex", "const", "continue", "dealloc",
+        "clang", "char", "complex", "const", "continue", "dealloc",
         "decorate", "define", "defined", "deviant", "do", "double",
-        "else", "enum", "external", "float", "for", "if",
+        "else", "enum", "external", "float", "for", "func", "if",
         "in", "is", "imaginary", "include", "inline",
         "int", "local", "long", "manage", "match", "mod", "not",
         "Null", "of", "or", "pass", "real", "realloc", "redefine",
@@ -100,13 +109,19 @@ KEYWORD_LIST = PRIMARY_KEYWORD_LIST + (
         "undefine", "union", "void", "volatile", "while", "with", "yield"
     )
 
-OPERATOR_LIST = (
+UNARY_OPERATOR_LIST = ("^", "@", "-", "~", "~<", "~>", "*")
+
+COMPARATIVE_OPERATOR_LIST = ("<", ">", "<=", ">=", "==", "!=", "<=>")
+
+ASSIGNMENT_OPERATOR_LIST = (
+    "=", "**=", "*=", "/=", "%=", "+=", "-=",
+    "<<=", ">>=", "&=", "|=", "$="
+    )
+
+OPERATOR_LIST = UNARY_OPERATOR_LIST + COMPARATIVE_OPERATOR_LIST + ASSIGNMENT_OPERATOR_LIST + (
         ".", "->", "++", "--", "%", "!",
-        "^", "@", "-", "~", "~<", "~>", "*",
         "**", "/", "+", "<<", ">>", "&", "|", "$",
-        "<", ">", "<=", ">=", "==", "!=", "<=>",
-        "=", "**=", "*=", "/=", "%=", "+=", "-=",
-        "<<=", ">>=", "&=", "|=", "$="
+        "||"
     )
 
 OPERATOR_SYMBOLS = {c for op in OPERATOR_LIST for c in op }

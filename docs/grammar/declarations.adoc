@@ -30,27 +30,25 @@
 {tab} `_chained-variable-declaration_` `*,*` `_variable-declaration_`
 
 `_type-name_`:
-{tab} `_non-reference-type-name_`
-{tab} `_non-reference-type-name_` `_alignment-specifier_`
 {tab} `_reference-type-name_`
 {tab} `_reference-type-name_` `_alignment-specifier_`
+
+`_reference-type-name_`:
+{tab} `_non-reference-type-name_`
+{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*@*`
 
 `_non-reference-type-name_`:
 {tab} `_specifiers-and-qualifiers_` `_type-specifier_`
 {tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*[*` `*{star}*` `*]*`
 {tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*[*` `*>=*`~opt~ `_assignment-expression_` `*]*`
 {tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*^*`
-{tab} `_type-name_` `*(*` `_function-variadic-list_`~opt~ `*)*`
-
-`_reference-type-name_`:
-{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*@*`
 
 `_specifiers-and-qualifiers_`:
 {tab} `_storage-class-specifier_`~opt~ `_type-qualifier_`~opt~
 
 `_alignment-specifier_`:
-{tab} `*aligned*` `*to*` `_constant-expression_`
-{tab} `*aligned*` `*to*` `*(*`~opt~ `_type-name_` `*)*`~opt~
+{tab} `*aligned*` `*to*` `*(*` `_constant-expression_` `*)*`
+{tab} `*aligned*` `*to*` `_type-name_`
 
 `_storage-class-specifier_`:
 {tab} `*external*`
@@ -71,6 +69,8 @@
 {tab} `*str*`
 {tab} `_alias_`
 {tab} `_numeric-type-specifier_`
+{tab} `*func*` `*(*` `*(*` `_function-variadic-list_`~opt~ `*)*` `*)*`
+{tab} `*func*` `*(*` `*(*` `_function-variadic-list_`~opt~ `*)*` `*\->*`  `_type-name_` `*)*`
 
 `_numeric-type-specifier_`:
 {tab} `_numeric-set-specifier_`~opt~ `*+*`~opt~ `_integer-type-specifier_`
@@ -151,8 +151,8 @@
 {tab} `_constant-expresssion_` `*:*`
 
 `_alias-declaration_`:
-{tab} `*alias*` `*(*`~opt~ `_type-name_` `*)*`~opt~ `*as*` `_alias_`
-{tab} `*alias*` `*(*`~opt~ `*type*` `*of*` `_expression_` `*)*`~opt~ `*as*` `_alias_`
+{tab} `*alias*`  `_type-name_` `*as*` `_alias_`
+{tab} `*alias*` `*type*` `*of*` `_expression_` `*as*` `_alias_`
 
 `_alias_`:
 {tab} `_identifier_`
@@ -161,8 +161,8 @@
 {tab} `_function-specifier_`~opt~ `_identifier_` `_function-values_` `*:*` `_block-statement_`
 
 `_function-specifier_`:
-{tab} `_specifiers-and-qualifiers_` `*inline*` `*deviant*`~opt~
-{tab} `_specifiers-and-qualifiers_` `*deviant*` `*inline*`~opt~
+{tab} `_specifiers-and-qualifiers_` `*inline*` `*deviant*`~opt~ `*func*`~opt~
+{tab} `_specifiers-and-qualifiers_` `*deviant*` `*inline*`~opt~ `*func*`~opt~
 
 `_function-values_`:
 {tab} `*(*` `_function-variadic-list_`~opt~ `*)*` `_function-return-type_`~opt~
