@@ -6,8 +6,7 @@ class CastExpression(Node):
         if children.next_token.has("("):
             children.ignore()
 
-            nextt = children.next_token
-            if nextt.of("Keyword") and not nextt.has("not") or nextt.has("+"):
+            if children.next_token_may_be_type:
                 children.take_previous()
                 children.make("TypeName")
                 children.expecting_has(")")

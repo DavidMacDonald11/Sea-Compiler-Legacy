@@ -13,8 +13,7 @@ class UnaryExpression(Node):
             children.take()
             children.expecting_has("of")
 
-            nextt = children.next_token
-            if nextt.of("Keyword") and not nextt.has("not") or nextt.has("+"):
+            if children.next_token_may_be_type:
                 children.make("TypeName")
             else:
                 children.make("Expression")
@@ -33,8 +32,7 @@ class UnaryExpression(Node):
             if keyword.has("realloc"):
                 children.expecting_has("to")
 
-            nextt = children.next_token
-            if nextt.of("Keyword") and not nextt.has("not") or nextt.has("+"):
+            if children.next_token_may_be_type:
                 children.make("TypeName")
             else:
                 children.make("Expression")

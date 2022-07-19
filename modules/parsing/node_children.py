@@ -8,6 +8,11 @@ class NodeChildren:
     def next_token(self):
         return self.parser.token
 
+    @property
+    def next_token_may_be_type(self):
+        token = self.next_token
+        return token.of("Keyword") and not token.has("not") or token.has("+")
+
     def __init__(self, parser):
         self.parser = parser
         self.lines = []
