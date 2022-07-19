@@ -5,29 +5,30 @@ from ..node import Node
 class PrimaryExpression(Node):
     @classmethod
     def construct(cls, children):
-        if children.next_token.of("Identifier", "Constant", "StringLiteral"):
+        if children.next_token.of("Identifier", "CharacterConstant", "StringLiteral"):
+            children.take()
+            return cls(children)
+
+        if children.next_token.of("NumericConstant"):
             taken = children.take()
             taken_bytes = None
 
             if children.next_token.has("bytes"):
                 taken_bytes = children.take()
 
-                if not (taken.of("NumericConstant") and taken.specifier == "int"):
+                if taken.specifier != "int":
                     taken.mark()
                     taken_bytes.mark()
-                    children.warn("Cannot use bytes keyword on non-integer")
+                    children.warn("Cannot have floating number of bytes")
 
             if children.next_token.has("i"):
                 taken_i = children.take()
 
-                if not taken.of("NumericConstant"):
-                    taken.mark()
-                    taken_i.mark()
-                    children.warn("Can only use the imaginary with NumericConstants")
-
                 if taken_bytes is not None or children.next_token.has("bytes"):
                     taken_bytes = taken_bytes or children.take()
+                    taken.mark()
                     taken_bytes.mark()
+                    taken_i.mark()
                     children.warn("Cannot have an imaginary number of bytes")
 
             return cls(children)

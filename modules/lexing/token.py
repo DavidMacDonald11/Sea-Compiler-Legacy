@@ -104,7 +104,7 @@ PRIMARY_KEYWORD_LIST = ("False","Infinity", "NaN", "Null", "Pi", "True")
 
 KEYWORD_LIST = PRIMARY_KEYWORD_LIST + (
         "alias", "align", "aligned", "alloc", "and", "as", "asm",
-        "assert", "atomic", "auto", "block", "bool", "break", "bytes",
+        "assert", "atomic", "auto", "block", "bool", "break",
         "clang", "char", "complex", "const", "continue", "dealloc",
         "decorate", "define", "defined", "deviant", "do", "double",
         "else", "enum", "external", "float", "for", "func", "if",

@@ -27,7 +27,7 @@
 {tab} `*assert*`
 {tab} `*alias*` `*as*`
 {tab} `*align*` `*size*` `*type*` `*of*` `*aligned*` `*to*`
-{tab} `*alloc*` `*realloc*` `*dealloc*` `*bytes*`
+{tab} `*alloc*` `*realloc*` `*dealloc*`
 {tab} `*external*` `*register*` `*static*` `*thread*` `*local*`
 {tab} `*atomic*` `*const*` `*restrict*` `*volatile*`
 {tab} `*template*` `*decorate*` `*inline*` `*deviant*`
