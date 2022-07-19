@@ -86,10 +86,17 @@ class Token:
         return CompilerWarning("Incorrect float constant", self)
 
     def validate_identifier(self):
+        op_pattern = re.compile(r"^_+\W*operator\W*_*$")
         pattern = re.compile(r"^(\w*\\((u[0-9A-F]{4})|(U[0-9A-F]{8})))*\w*$")
 
         if pattern.match(self.string):
             return None
+
+        if op_pattern.match(self.string):
+            if self.string in OPERATOR_IDENTIFIERS:
+                return None
+
+            return CompilerWarning("Incorrect operator identifier", self)
 
         return CompilerWarning("Incorrect universal character name", self)
 
@@ -109,7 +116,7 @@ KEYWORD_LIST = PRIMARY_KEYWORD_LIST + (
         "undefine", "union", "void", "volatile", "while", "with", "yield"
     )
 
-UNARY_OPERATOR_LIST = ("^", "@", "-", "~", "~<", "~>", "*")
+UNARY_OPERATOR_LIST = ("^", "@", "-", "!", "~", "~<", "~>", "*")
 
 COMPARATIVE_OPERATOR_LIST = ("<", ">", "<=", ">=", "==", "!=", "<=>")
 
@@ -118,11 +125,13 @@ ASSIGNMENT_OPERATOR_LIST = (
     "<<=", ">>=", "&=", "|=", "$="
     )
 
-OPERATOR_LIST = UNARY_OPERATOR_LIST + COMPARATIVE_OPERATOR_LIST + ASSIGNMENT_OPERATOR_LIST + (
-        ".", "->", "++", "--", "%", "!",
-        "**", "/", "+", "<<", ">>", "&", "|", "$",
-        "||"
+REMAINING_OPERATOR_LIST = COMPARATIVE_OPERATOR_LIST + ASSIGNMENT_OPERATOR_LIST + (
+    ".", "->", "++", "--", "%",
+    "**", "/", "+", "<<", ">>", "&", "|", "$",
+    "||"
     )
+
+OPERATOR_LIST = UNARY_OPERATOR_LIST + REMAINING_OPERATOR_LIST
 
 OPERATOR_SYMBOLS = {c for op in OPERATOR_LIST for c in op }
 STRING_PREFIXES = "bBfFrR"
@@ -131,3 +140,12 @@ NUMERIC_START_SYMBOLS = "0123456789."
 NUMERIC_SYMBOLS = f"{NUMERIC_START_SYMBOLS}{ascii_uppercase}.be"
 IDENTIFIER_START_SYMBOLS = f"{ascii_letters}_\\"
 IDENTIFIER_SYMBOLS = f"{IDENTIFIER_START_SYMBOLS}0123456789"
+
+OPERATOR_IDENTIFIERS = {f"__{x}operator__" for x in UNARY_OPERATOR_LIST} | {
+    "__||operator||__",
+    "__opeartor!__",
+    "__operator-__",
+    "__operator*__",
+    "__++operator__",
+    "__--operator__",
+} | {f"__operator{x}" for x in REMAINING_OPERATOR_LIST}

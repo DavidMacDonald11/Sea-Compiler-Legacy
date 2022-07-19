@@ -137,6 +137,18 @@ class Lexer:
             self.make_string_literal()
             return
 
+        if string == "__operator":
+            self.file.take(these = token.OPERATOR_SYMBOLS)
+            self.file.take(these = "_")
+        elif len(string) > 1 and string[:2] == "__":
+            operator = self.file.take(these = token.OPERATOR_SYMBOLS)
+            self.file.take(these = token.IDENTIFIER_SYMBOLS)
+
+            if operator == "||":
+                self.file.take(2, these = "|")
+
+            self.file.take(these = "_")
+
         kind = "Keyword" if string in token.KEYWORD_LIST else "Identifier"
         self.new_token(kind)
 

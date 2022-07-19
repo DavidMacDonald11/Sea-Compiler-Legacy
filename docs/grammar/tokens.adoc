@@ -51,6 +51,7 @@
 `_operator-function-identifier_`:
 {tab} `*{under}{under}operator*` `_operator-string_` `*{under}{under}*`
 {tab} `*{under}{under}*` `_operator-string_` `*operator{under}{under}*`
+{tab} `*{under}{under}||operator||{under}{under}*`
 
 `_operator-string_`:
 {tab} a string of symbols, without spaces, composing a single `_operator_`
