@@ -1,4 +1,5 @@
 from ..node import Node
+from .postfix_expression import PostfixExpression
 
 class CastExpression(Node):
     @classmethod
@@ -10,8 +11,12 @@ class CastExpression(Node):
                 children.take_previous()
                 children.make("TypeName")
                 children.expecting_has(")")
-                children.make("CastExpression")
 
+                if children.next_token.has("[", "{"):
+                    children.make("InitializerCompoundLiteral")
+                    return PostfixExpression(children)
+
+                children.make("CastExpression")
                 return cls(children)
 
             children.unignore()

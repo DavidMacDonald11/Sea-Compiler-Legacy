@@ -5,24 +5,51 @@ class Statement(Node):
     def construct(cls, children):
         skip_newlines(children)
 
-        children.make("Expression")
+        if children.next_token.has("alias"):
+            return cls.construct_alias(children)
+
+        if children.next_token_may_be_type:
+            children.make("Declaration")
+        else:
+            children.make("Expression")
+
+            if not children.next_token.has("\n"):
+                children.unignore()
+                children.nodes = children.nodes[:-1]
+                children.make("Declaration")
+
         take_comments(children)
         children.expecting_has("\n")
-
         skip_newlines(children)
 
         return cls(children)
 
-def skip_newlines(children):
-    nextt = children.next_token
+    @classmethod
+    def construct_alias(cls, children):
+        children.take()
 
-    while nextt.has("\n") or nextt.of("Annotation"):
-        if nextt.has("\n"):
+        if children.next_token.has("type"):
+            children.take()
+            children.expecting_has("of")
+            children.make("Expression")
+        else:
+            children.make("TypeName")
+
+        children.expecting_has("as")
+        children.expecting_of("Identifier")
+
+        take_comments(children)
+        children.expecting_has("\n")
+        skip_newlines(children)
+
+        return cls(children, "alias")
+
+def skip_newlines(children):
+    while children.next_token.has("\n") or children.next_token.of("Annotation"):
+        if children.next_token.has("\n"):
             children.ignore()
         else:
             children.take()
-
-        nextt = children.next_token
 
 def take_comments(children):
     while children.next_token.of("Annotation"):

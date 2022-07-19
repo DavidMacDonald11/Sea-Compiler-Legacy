@@ -10,25 +10,6 @@
 :star: *
 :under: _
 
-`_declaration_`:
-{tab} `_variable-declaration_`
-{tab} `_chained-variable-declaration_`
-{tab} `_alias-declaration_`
-
-`_variable-declaration_`:
-{tab} `_element-declaration_`  `_variable-initalizer_`~opt~
-
-`_element-declaration_`:
-{tab} `_type-name_` `_identifier_`
-{tab} `_element-declaration_` `*,*` `_type-name_`~opt~ `_identifier_`
-
-`_variable-initalizer_`:
-{tab} `*=*` `_initializer_`
-
-`_chained-variable-declaration_`:
-{tab} `_variable-declaration_`
-{tab} `_chained-variable-declaration_` `*,*` `_variable-declaration_`
-
 `_type-name_`:
 {tab} `_reference-type-name_`
 {tab} `_reference-type-name_` `_alignment-specifier_`
@@ -92,70 +73,70 @@
 {tab} `*float*`
 {tab} `*double*` `*float*`~opt~
 
+`_declaration_`:
+{tab} `_variable-declaration_`
+{tab} `_declaration_` `*,*` `_variable-declaration_`
+
+`_variable-declaration_`:
+{tab} `_element-declaration_`  `_variable-initalizer_`~opt~
+
+`_element-declaration_`:
+{tab} `_type-name_` `_identifier_`
+{tab} `_element-declaration_` `*,*` `_type-name_`~opt~ `_identifier_`
+
+`_variable-initalizer_`:
+{tab} `*=*` `_initializer_`
+
 `_initializer_`:
-{tab} `_expression_`
+{tab} `_assignment-expression_`
 {tab} `_initializer-alloc_`
-{tab} `_initializer-comprehension_`
-{tab} `*(*` `_array-initializer-list_` `*,*`~opt~ `*)*`
-{tab} `*[*` `_array-initializer-list_` `*,*`~opt~ `*]*`
-{tab} `*{*` `_initializer-list_` `*,*`~opt~ `*}*`
+{tab} `_initializer-compound-literal_`
 
 `_initializer-alloc_`:
 {tab} `*alloc*` `_initializer-alloc-arguments_`~opt~
 {tab} `*realloc*` `_expression_` `_initializer-realloc-arguments_`~opt~
 
 `_initializer-alloc-arguments_`:
-{tab} `*(*` `*)*`
-{tab} `*bytes*`
 {tab} `*as*` `_initializer_`
-{tab} `*(*` `*)*` `*as*` `_initializer_`
-{tab} `*bytes*` `*as*` `_initializer_`
 
 `_initialzier-realloc-arguments_`:
 {tab} `*as*` `_initializer_`
 {tab} `*to*` `_initializer_`
 {tab} `*to*` `_initializer_` `*as*` `_initializer_`
 
-`_initializer-comprehension_`:
-{tab} `*(*` `_generator_` `*)*`
+`_initializer-compound-literal_`:
 {tab} `*[*` `_generator_` `*]*`
 {tab} `*{*` `_generator_` `*}*`
+{tab} `*[*` `_initializer-list_` `*,*`~opt~ `*]*`
+{tab} `*{*` `_initializer-list_` `*,*`~opt~ `*}*`
 
 `_generator_`:
-{tab} `_initializer_` `_generator-loop_` `_generator-conditional_`~opt~
+{tab} `*yield*` `_initializer_` `_generator-loop_` `_generator-conditional_`~opt~
 {tab} `_generator-constant_` `*to*` `_generator-constant_`
 
 `_generator-loop_`:
-{tab} `*for*` `_element-declaration_` `*in*` `_initializer_` `_generator-loop_`~opt~
+{tab} `*for*` `_element-declaration_` `*in*` `_safe-initializer_` `_generator-loop_`~opt~
+
+`_safe-initializer_`:
+{tab} `_logical-or-expression_`
+{tab} `_initializer-alloc_`
+{tab} `_initializer-compound-literal_`
 
 `_generator-conditional_`:
-{tab} `*if*` `_expression_` `_generator-conditional_`~opt~
+{tab} `*if*` `_expression_`
 
 `_generator-constant_`:
 {tab} `_integer-constant_`
 {tab} `_character-constant_`
-
-`_array-initializer-list_`:
-{tab} `_list-designation_`~opt~ `_initializer_`
-{tab} `_array-initializer-list_` `*,*` `_list-designation_`~opt~ `_initializer_`
-
-`_list-designation_`:
-{tab} `*[*` `_constant-expression_` `*]*` `*:*`
 
 `_initializer-list_`:
 {tab} `_designation_`~opt~ `_initializer_`
 {tab} `_initailizer-list_` `*,*` `_designation_`~opt~ `_initializer_`
 
 `_designation_`:
-{tab} `_list-designation_`
-{tab} `_constant-expresssion_` `*:*`
-
-`_alias-declaration_`:
-{tab} `*alias*`  `_type-name_` `*as*` `_alias_`
-{tab} `*alias*` `*type*` `*of*` `_expression_` `*as*` `_alias_`
-
-`_alias_`:
-{tab} `_identifier_`
+{tab} `*[*` `_constant-expression_` `*]*` `*:*`
+{tab} `*[*` `_generator-constant_` `*to*` `_generator-constant_` `*]*` `*:*`
+{tab} `_constant-expression_` `*:*`
 
 `_function-declaration_`:
 {tab} `_function-specifier_`~opt~ `_identifier_` `_function-values_` `*:*` `_block-statement_`

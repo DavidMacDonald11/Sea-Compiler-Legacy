@@ -22,6 +22,15 @@ from .declarations.non_reference_type_name import NonReferenceTypeName
 from .declarations.specifiers_and_qualifiers import SpecifiersAndQualifiers
 from .declarations.type_qualifier import TypeQualifier
 from .declarations.type_specifier import TypeSpecifier
+from .declarations.ranged_generator import RangedGenerator
+from .declarations.iterative_generator import IterativeGenerator
+from .declarations.designated_initializer import DesignatedInitializer
+from .declarations.initializer_compound_literal import InitializerCompoundLiteral
+from .declarations.initializer import Initializer
+from .declarations.safe_initializer import SafeInitializer
+from .declarations.element_declaration import ElementDeclaration
+from .declarations.variable_declaration import VariableDeclaration
+from .declarations.declaration import Declaration
 from .statements.statement import Statement
 from .statements.file_statement import FileStatement
 
@@ -50,6 +59,15 @@ CLASSES = (
     SpecifiersAndQualifiers,
     TypeQualifier,
     TypeSpecifier,
+    InitializerCompoundLiteral,
+    Initializer,
+    SafeInitializer,
+    ElementDeclaration,
+    RangedGenerator,
+    IterativeGenerator,
+    DesignatedInitializer,
+    VariableDeclaration,
+    Declaration,
     Statement,
     FileStatement
 )
@@ -59,7 +77,7 @@ CONSTRUCT_MAP["ConstantExpression"] = CONSTRUCT_MAP["ConditionalExpression"]
 
 # from ..node import Node
 
-# class Expression(Node):
+# class Statement(Node):
 #     @classmethod
 #     def construct(cls, children):
 #         pass

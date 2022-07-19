@@ -17,6 +17,7 @@
 {tab} `_match-with-statement_`
 {tab} `_iteration-statement_`
 {tab} `_manage-statement_`
+{tab} `_alias-statement_`
 {tab} `_static-assert-statement_`
 {tab} `_unique-block-statement_`
 {tab} `_preprocessor-statement_`
@@ -95,6 +96,13 @@
 
 `_manage-statement_`:
 {tab} `*manage*` `_chained-variable-declaration_` `*:*` `_block-statement_`
+
+`_alias-statement_`:
+{tab} `*alias*`  `_type-name_` `*as*` `_alias_` `_line-end_`
+{tab} `*alias*` `*type*` `*of*` `_expression_` `*as*` `_alias_` `_line-end_`
+
+`_alias_`:
+{tab} `_identifier_`
 
 `_static-assert-statement_`:
 {tab} `*static*`~opt~ `*assert*` `_constant-expression_` `*else*` `_string-literal_` `_line-end_`

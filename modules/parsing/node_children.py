@@ -71,6 +71,10 @@ class NodeChildren:
 
         return taken
 
+    def ignore_format_tokens(self):
+        while self.next_token.has("\n", "\t", "    "):
+            self.ignore()
+
     def ignore(self):
         self.parser.i += 1
 
@@ -79,7 +83,7 @@ class NodeChildren:
 
     def take_previous(self):
         self.unignore()
-        self.take()
+        return self.take()
 
     def expecting_error(self, *things):
         token = self.parser.token

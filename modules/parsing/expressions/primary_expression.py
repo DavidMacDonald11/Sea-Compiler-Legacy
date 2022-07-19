@@ -1,5 +1,6 @@
 from lexing import token
 from util.warnings import CompilerError
+from .postfix_expression import PostfixExpression
 from ..node import Node
 
 class PrimaryExpression(Node):
@@ -37,6 +38,13 @@ class PrimaryExpression(Node):
             lbracket = children.take()
             children.make("Expression")
             children.expecting_has(")" if lbracket.string == "(" else "||")
+
+            if lbracket.has("||"):
+                return cls(children)
+
+            if children.next_token.has("{", "["):
+                children.make("InitializerCompoundLiteral")
+                return PostfixExpression(children)
 
             return cls(children)
 

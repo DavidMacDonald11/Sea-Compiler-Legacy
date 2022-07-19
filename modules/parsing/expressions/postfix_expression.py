@@ -11,7 +11,6 @@ class PostfixExpression(Node):
             node = node or cls.construct_call(children)
             node = node or cls.construct_access(children)
             node = node or cls.construct_unary(children)
-            # TODO compound literals
 
             if node is None:
                 return head

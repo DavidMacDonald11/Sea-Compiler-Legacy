@@ -18,10 +18,10 @@ The following is based on the table from {cppref}[cppreference.com].
 
 |*1*
 |( ) +
-\|\|
+\|\| \|\|
 
 |Parentheses +
-Absolute value
+Norm (Absolute value)
 
 |In-to-out
 
@@ -33,7 +33,6 @@ Absolute value
 [ :: ] +
 . +
 \-> +
-( _type_ )( _list_ ) +
 ( _type_ ){lb} _list_ {rb} +
 ( _type_ ){lc} _list_ {rc}
 
@@ -44,9 +43,8 @@ Function call +
 Array subscripting and slicing +
 Structure and union member access +
 Structure and union member access via pointer +
-Compound literal (tuple) +
-Compound literal (list) +
-Compound literal (set/dict) +
+Compound literal (array) +
+Compound literal (struct) +
 
 |Left-to-right
 
