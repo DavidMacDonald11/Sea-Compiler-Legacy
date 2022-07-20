@@ -13,8 +13,9 @@ class NodeChildren:
         token = self.next_token
         return token.of("Keyword") and not token.has("not") or token.has("+")
 
-    def __init__(self, parser):
+    def __init__(self, parser, depth = 0):
         self.parser = parser
+        self.depth = depth
         self.lines = []
         self.nodes = []
 
@@ -64,6 +65,10 @@ class NodeChildren:
 
         return taken
 
+    def untake(self):
+        self.unignore()
+        self.nodes = self.nodes[:-1]
+
     def take_and_warn(self, message):
         taken = self.take()
         taken.mark()
@@ -93,23 +98,78 @@ class NodeChildren:
             self.take()
 
     def expecting_error(self, *things):
-        token = self.parser.token
-        token.mark()
-
+        self.next_token.mark()
         things = repr_expand(things)
+
         raise CompilerError(f"Expecting {things}", self)
 
     def expecting_of(self, *kinds):
-        if self.parser.token.of(*kinds):
+        if self.next_token.of(*kinds):
             return self.take()
 
         self.expecting_error(*kinds)
 
     def expecting_has(self, *strings):
-        if self.parser.token.has(*strings):
+        if self.next_token.has(*strings):
             return self.take()
 
         self.expecting_error(*strings)
+
+    def expecting_indent(self):
+        for _ in range(self.depth):
+            if self.next_token.has("\t", "    "):
+                self.take()
+            else:
+                self.next_token.mark()
+                self.warn(f"Insufficient indentation; expected {self.depth}")
+
+        if not self.next_token.has("\t", "    "):
+            return
+
+        while self.next_token.has("\t", "    "):
+            self.take().mark()
+
+        self.warn(f"Unexpected indentation; expected {self.depth}")
+
+    def expecting_line_end(self):
+        self.take_comments()
+        return self.expecting_has("\n", "")
+
+    def check_empty_line(self):
+        i = self.parser.i
+        children = self.next()
+
+        while children.next_token.has("\t", "    "):
+            children.take()
+
+        if children.next_token.of("Annotation"):
+            children.take()
+
+        if children.next_token.has("\n", ""):
+            children.take()
+            return children
+
+        self.parser.i = i
+        return None
+
+    def take_empty_lines(self):
+        empty = self.check_empty_line()
+
+        while empty is not None and not self.next_token.has(""):
+            for node in empty.nodes:
+                self += node
+
+            empty = self.check_empty_line()
+
+    def indent_count(self):
+        i = self.parser.i
+        children = self.next()
+
+        while children.next_token.has("\t", "    "):
+            children.take()
+
+        self.parser.i = i
+        return len(children.nodes)
 
     def make(self, kind, children = None):
         node = self.parser.make(kind, children)
@@ -125,5 +185,5 @@ class NodeChildren:
 
         return string
 
-    def next(self):
-        return NodeChildren(self.parser)
+    def next(self, depth = 0):
+        return NodeChildren(self.parser, self.depth + depth)

@@ -1,3 +1,4 @@
+from util.warnings import CompilerError
 from ..node import Node
 
 class TypeSpecifier(Node):
@@ -61,5 +62,10 @@ class TypeSpecifier(Node):
                     prefix.mark()
                     postfix.mark()
                     children.warn("Cannot declare double int")
+
+        if len(children.nodes) == 0:
+            token = children.take()
+            token.mark()
+            raise CompilerError(f"Unexpected token {token}", children)
 
         return cls(children)

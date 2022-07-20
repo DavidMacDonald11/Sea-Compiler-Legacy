@@ -7,9 +7,6 @@ class StaticAssertStatement(Node):
         children.make("ConstantExpression")
         children.expecting_has("else")
         children.expecting_of("StringLiteral")
-
-        children.take_comments()
-        children.expecting_has("\n", "")
-        children.ignore_format_tokens()
+        children.expecting_line_end()
 
         return cls(children)

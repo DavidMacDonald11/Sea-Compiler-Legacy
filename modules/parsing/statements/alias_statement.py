@@ -14,9 +14,6 @@ class AliasStatement(Node):
 
         children.expecting_has("as")
         children.expecting_of("Identifier")
-
-        children.take_comments()
-        children.expecting_has("\n", "")
-        children.ignore_format_tokens()
+        children.expecting_line_end()
 
         return cls(children)

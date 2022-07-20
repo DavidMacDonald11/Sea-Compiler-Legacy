@@ -17,12 +17,12 @@
 {tab} `_match-with-statement_`
 {tab} `_iteration-statement_`
 {tab} `_manage-statement_`
-{tab} `_alias-statement_`
-{tab} `_static-assert-statement_`
 {tab} `_unique-block-statement_`
 {tab} `_preprocessor-statement_`
 
 `_line-statement_`:
+{tab} `_alias-statement_`
+{tab} `_static-assert-statement_`
 {tab} `_line-statement-component_` `_line-end_`
 
 `_line-statement-component_`:
@@ -65,11 +65,14 @@
 {tab} one `_indent_` per line of the following statement per number of nested blocks
 
 `_match-with-statement_`:
-{tab} `*match*` `_expression_` `*:*` `_with-statement_` `_else-statement_`~opt~
+{tab} `*match*` `_expression_` `*:*` `*pass*` `*\n*`
+{tab} `*match*` `_expression_` `*:*` `*\n*` `_block-indent_` `*pass*` `*\n*`
+{tab} `*match*` `_expression_` `*:*` `_with-statement_`
 
 `_with-statement_`:
-{tab} `*with*` `_constant-expression_` `*:*` `_block-statement_`
-{tab} `_with-statement_` `*with*` `_constant-expression_` `*:*` `_block-statement_`
+{tab} `*\n*` `_block-indent_` `*with*` `_constant-expression_` `*:*` `_block-statement_`
+{tab} `_with-statement_` `*\n*` `_block-indent_` `*with*` `_constant-expression_` `*:*` `_block-statement_`
+{tab} `_with-statement_` `*\n*` `_block-indent_` `_else-statement_`
 
 `_iteration-statement_`:
 {tab} `_while-statement_`
@@ -95,7 +98,7 @@
 {tab} `_label_`~opt~ `*for*` `_element-declaration_` `*in*` `_initializer_` `*:*` `_block-statement_` `_else-statement_`~opt~
 
 `_manage-statement_`:
-{tab} `*manage*` `_chained-variable-declaration_` `*:*` `_block-statement_`
+{tab} `*manage*` `_declaration_` `*:*` `_block-statement_`
 
 `_alias-statement_`:
 {tab} `*alias*`  `_type-name_` `*as*` `_alias_` `_line-end_`

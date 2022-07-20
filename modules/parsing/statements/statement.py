@@ -1,40 +1,25 @@
 from ..node import Node
-from ..node_children import NodeChildren
 
 class Statement(Node):
     @classmethod
     def construct(cls, children):
-        children.ignore_format_tokens()
+        empty_line = children.check_empty_line()
 
-        if children.next_token.has("alias"):
-            return children.make("AliasStatement")
+        if empty_line is not None:
+            return cls(empty_line)
 
-        if children.next_token.has("assert"):
-            return children.make("StaticAssertStatement")
+        node = children.make("IfStatement", children.next())
+        node = node or children.make("MatchWithStatement", children.next(1))
+        node = node or children.make("ManageStatement", children.next())
 
-        if children.next_token.has("static"):
-            static = children.take()
+        if node is not None:
+            return cls(children)
 
-            if not children.next_token.has("assert"):
-                children.unignore()
-                children.nodes = children.nodes[:-1]
-            else:
-                children = NodeChildren(children.parser)
-                children += static
-                return children.make("StaticAssertStatement", children)
+        blockable = children.make("BlockableStatement")
 
-        if children.next_token_may_be_type:
-            children.make("Declaration")
-        else:
-            children.make("Expression")
+        if blockable is not None:
+            blockable.mark()
+            children.warn(f"Unexpected {blockable.children.nodes[0].string} statement")
+            return cls(children)
 
-            if not children.next_token.has("\n", ""):
-                children.unignore()
-                children.nodes = children.nodes[:-1]
-                children.make("Declaration")
-
-        children.take_comments()
-        children.expecting_has("\n", "")
-        children.ignore_format_tokens()
-
-        return cls(children)
+        return children.make("LineStatement", children)

@@ -33,7 +33,13 @@ from .declarations.variable_declaration import VariableDeclaration
 from .declarations.declaration import Declaration
 from .statements.alias_statement import AliasStatement
 from .statements.static_assert_statement import StaticAssertStatement
+from .statements.blockable_statement import BlockableStatement
+from .statements.line_statement import LineStatement
+from .statements.if_statement import IfStatement
+from .statements.match_with_statement import MatchWithStatement
+from .statements.manage_statement import ManageStatement
 from .statements.statement import Statement
+from .statements.block_statement import BlockStatement
 from .statements.file_statement import FileStatement
 
 CLASSES = (
@@ -72,7 +78,13 @@ CLASSES = (
     Declaration,
     AliasStatement,
     StaticAssertStatement,
+    BlockableStatement,
+    LineStatement,
+    IfStatement,
+    MatchWithStatement,
+    ManageStatement,
     Statement,
+    BlockStatement,
     FileStatement
 )
 
