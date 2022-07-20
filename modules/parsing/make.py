@@ -19,6 +19,7 @@ from .expressions.assignment_expression import AssignmentExpression
 from .expressions.expression import Expression
 from .declarations.type_name import TypeName
 from .declarations.non_reference_type_name import NonReferenceTypeName
+from .declarations.storage_class_specifier import StorageClassSpecifier
 from .declarations.specifiers_and_qualifiers import SpecifiersAndQualifiers
 from .declarations.type_qualifier import TypeQualifier
 from .declarations.type_specifier import TypeSpecifier
@@ -31,6 +32,12 @@ from .declarations.safe_initializer import SafeInitializer
 from .declarations.element_declaration import ElementDeclaration
 from .declarations.variable_declaration import VariableDeclaration
 from .declarations.declaration import Declaration
+from .declarations.function_specifier import FunctionSpecifier
+from .declarations.function_variadic_list import FunctionVariadicList
+from .declarations.function_declaration import FunctionDeclaration
+from .declarations.structure_declaration import StructureDeclaration
+from .declarations.template_declaration import TemplateDeclaration
+from .declarations.decorator_declaration import DecoratorDeclaration
 from .statements.alias_statement import AliasStatement
 from .statements.static_assert_statement import StaticAssertStatement
 from .statements.blockable_statement import BlockableStatement
@@ -64,6 +71,7 @@ CLASSES = (
     Expression,
     TypeName,
     NonReferenceTypeName,
+    StorageClassSpecifier,
     SpecifiersAndQualifiers,
     TypeQualifier,
     TypeSpecifier,
@@ -76,6 +84,12 @@ CLASSES = (
     DesignatedInitializer,
     VariableDeclaration,
     Declaration,
+    FunctionSpecifier,
+    FunctionVariadicList,
+    FunctionDeclaration,
+    StructureDeclaration,
+    TemplateDeclaration,
+    DecoratorDeclaration,
     AliasStatement,
     StaticAssertStatement,
     BlockableStatement,

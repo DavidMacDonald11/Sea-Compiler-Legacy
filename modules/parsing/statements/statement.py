@@ -11,6 +11,8 @@ class Statement(Node):
         node = children.make("IfStatement", children.next())
         node = node or children.make("MatchWithStatement", children.next(1))
         node = node or children.make("ManageStatement", children.next())
+        node = node or children.make("TemplateDeclaration", children.next())
+        node = node or children.make("DecoratorDeclaration", children.next())
 
         if node is not None:
             return cls(children)
@@ -22,4 +24,4 @@ class Statement(Node):
             children.warn(f"Unexpected {blockable.children.nodes[0].string} statement")
             return cls(children)
 
-        return children.make("LineStatement", children)
+        return children.make("StructureDeclaration", children)

@@ -142,8 +142,8 @@
 {tab} `_function-specifier_`~opt~ `_identifier_` `_function-values_` `*:*` `_block-statement_`
 
 `_function-specifier_`:
-{tab} `_specifiers-and-qualifiers_` `*inline*` `*deviant*`~opt~ `*func*`~opt~
-{tab} `_specifiers-and-qualifiers_` `*deviant*` `*inline*`~opt~ `*func*`~opt~
+{tab} `_storage-class-specifier_`~opt~ `*inline*` `*deviant*`~opt~ `*func*`~opt~
+{tab} `_storage-class-specifier_`~opt~ `*deviant*` `*inline*`~opt~ `*func*`~opt~
 
 `_function-values_`:
 {tab} `*(*` `_function-variadic-list_`~opt~ `*)*` `_function-return-type_`~opt~
@@ -163,7 +163,7 @@
 {tab} `*\->*` `_type-name_`
 
 `_structure-declaration_`:
-{tab} `_specifiers-and-qualifiers_` `_structure-type_` `_identifier_` `*:*` `_block-statement_`
+{tab} `_storage-class-specifier_`~opt~ `_structure-type_` `_identifier_` `*:*` `_block-statement_`
 
 `_structure-type_`:
 {tab} `*enum*`
@@ -175,8 +175,8 @@
 {tab} `_declaration-header-list_` `_declaration-header_`
 
 `_declaration-header_`:
-{tab} `_template-declaration_`
-{tab} `_decorator-declaration_`
+{tab} `_block-indent_` `_template-declaration_`
+{tab} `_block-indent_` `_decorator-declaration_`
 
 `_template-declaration_`:
 {tab} `*template*` `*with*` `_template-parameter-list_` `*,*`~opt~ `_line-end_`
@@ -197,4 +197,4 @@
 
 `_decorator-parameter_`:
 {tab} `_identifier_`
-{tab} `_identifier_` `*(*` `_argument-epression-list_`~opt~ `*)*`
+{tab} `_identifier_` `*(*` `_argument-expression-list_`~opt~ `*)*`

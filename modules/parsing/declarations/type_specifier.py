@@ -14,7 +14,10 @@ class TypeSpecifier(Node):
             children.take()
             children.expecting_has("(")
             children.expecting_has("(")
-            # TODO function variadic list opt
+
+            if not children.next_token.has(")"):
+                children.make("FunctionVariadicList")
+
             children.expecting_has(")")
 
             if children.next_token.has("->"):
