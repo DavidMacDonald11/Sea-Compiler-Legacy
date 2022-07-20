@@ -109,7 +109,7 @@
 
 `_unique-block-statement_`:
 {tab} `*block*` `*:*` `_block-statement_`
-{tab} `*c*` `*block*` `*:*` `_raw-c_`
+{tab} `*clang*` `*block*` `*:*` `_raw-c_`
 {tab} `*asm*` `*block*` `*:*` `_raw-asm_`
 
 `_raw-c_`:

@@ -88,6 +88,10 @@ class NodeChildren:
         self.unignore()
         return self.take()
 
+    def take_comments(self):
+        while self.next_token.of("Annotation"):
+            self.take()
+
     def expecting_error(self, *things):
         token = self.parser.token
         token.mark()

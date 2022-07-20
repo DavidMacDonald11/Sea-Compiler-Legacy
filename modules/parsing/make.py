@@ -31,6 +31,8 @@ from .declarations.safe_initializer import SafeInitializer
 from .declarations.element_declaration import ElementDeclaration
 from .declarations.variable_declaration import VariableDeclaration
 from .declarations.declaration import Declaration
+from .statements.alias_statement import AliasStatement
+from .statements.static_assert_statement import StaticAssertStatement
 from .statements.statement import Statement
 from .statements.file_statement import FileStatement
 
@@ -68,6 +70,8 @@ CLASSES = (
     DesignatedInitializer,
     VariableDeclaration,
     Declaration,
+    AliasStatement,
+    StaticAssertStatement,
     Statement,
     FileStatement
 )

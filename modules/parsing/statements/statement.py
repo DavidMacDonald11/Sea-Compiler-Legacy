@@ -1,56 +1,40 @@
 from ..node import Node
+from ..node_children import NodeChildren
 
 class Statement(Node):
     @classmethod
     def construct(cls, children):
-        skip_newlines(children)
+        children.ignore_format_tokens()
 
         if children.next_token.has("alias"):
-            return cls.construct_alias(children)
+            return children.make("AliasStatement")
+
+        if children.next_token.has("assert"):
+            return children.make("StaticAssertStatement")
+
+        if children.next_token.has("static"):
+            static = children.take()
+
+            if not children.next_token.has("assert"):
+                children.unignore()
+                children.nodes = children.nodes[:-1]
+            else:
+                children = NodeChildren(children.parser)
+                children += static
+                return children.make("StaticAssertStatement", children)
 
         if children.next_token_may_be_type:
             children.make("Declaration")
         else:
             children.make("Expression")
 
-            if not children.next_token.has("\n"):
+            if not children.next_token.has("\n", ""):
                 children.unignore()
                 children.nodes = children.nodes[:-1]
                 children.make("Declaration")
 
-        take_comments(children)
-        children.expecting_has("\n")
-        skip_newlines(children)
+        children.take_comments()
+        children.expecting_has("\n", "")
+        children.ignore_format_tokens()
 
         return cls(children)
-
-    @classmethod
-    def construct_alias(cls, children):
-        children.take()
-
-        if children.next_token.has("type"):
-            children.take()
-            children.expecting_has("of")
-            children.make("Expression")
-        else:
-            children.make("TypeName")
-
-        children.expecting_has("as")
-        children.expecting_of("Identifier")
-
-        take_comments(children)
-        children.expecting_has("\n")
-        skip_newlines(children)
-
-        return cls(children, "alias")
-
-def skip_newlines(children):
-    while children.next_token.has("\n") or children.next_token.of("Annotation"):
-        if children.next_token.has("\n"):
-            children.ignore()
-        else:
-            children.take()
-
-def take_comments(children):
-    while children.next_token.of("Annotation"):
-        children.take()
