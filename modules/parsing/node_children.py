@@ -72,8 +72,11 @@ class NodeChildren:
         return taken
 
     def ignore_format_tokens(self):
-        while self.next_token.has("\n", "\t", "    "):
-            self.ignore()
+        while self.next_token.has("\n", "\t", "    ") or self.next_token.of("Annotation"):
+            if self.next_token.of("Annotation"):
+                self.take()
+            else:
+                self.ignore()
 
     def ignore(self):
         self.parser.i += 1

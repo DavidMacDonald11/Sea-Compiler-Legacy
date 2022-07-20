@@ -5,7 +5,7 @@ class InitializerCompoundLiteral(Node):
     def construct(cls, children):
         bracket = children.expecting_has("{", "[")
         cls.construct_initializer_list(children, bracket)
-        children.expecting_has("]" if bracket.string == "[" else "}")
+        children.expecting_has("]" if bracket.has("[") else "}")
 
         return cls(children)
 
@@ -17,12 +17,16 @@ class InitializerCompoundLiteral(Node):
         if node is not None:
             return node
 
+        children.ignore_format_tokens()
         children.make("DesignatedInitializer")
 
         while children.next_token.has(","):
             children.take()
+            children.ignore_format_tokens()
 
-            if children.next_token.has(bracket):
+            if children.next_token.has("]" if bracket.has("[") else "}"):
                 return
 
             children.make("DesignatedInitializer")
+
+        children.ignore_format_tokens()
