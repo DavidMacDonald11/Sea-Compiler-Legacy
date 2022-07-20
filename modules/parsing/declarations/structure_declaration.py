@@ -11,7 +11,7 @@ class StructureDeclaration(Node):
             return children.make("FunctionDeclaration")
 
         children.take()
-        children.expecting_has("Identifier")
+        children.expecting_of("Identifier")
         children.expecting_has(":")
         children.make("BlockStatement", children.next(1))
 

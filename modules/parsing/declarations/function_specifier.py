@@ -11,18 +11,12 @@ class FunctionSpecifier(Node):
             if children.next_token.has("deviant"):
                 children.take()
 
-            if children.next_token.has("func"):
-                children.take()
-
             return cls(children)
 
         if children.next_token.has("deviant"):
             children.take()
 
         if children.next_token.has("inline"):
-            children.take()
-
-        if children.next_token.has("func"):
             children.take()
 
         return None if len(children.nodes) == 0 else cls(children)

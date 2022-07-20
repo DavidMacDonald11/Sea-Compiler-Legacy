@@ -3,6 +3,8 @@ from ..node import Node
 class BlockStatement(Node):
     @classmethod
     def construct(cls, children):
+        children.take_comments()
+
         if not children.next_token.has("\n"):
             blockable = children.make("BlockableStatement")
 

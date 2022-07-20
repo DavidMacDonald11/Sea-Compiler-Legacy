@@ -19,18 +19,7 @@ class LineStatement(Node):
                 children += static
                 return children.make("StaticAssertStatement", children)
 
-        if children.next_token_may_be_type:
-            children.make("Declaration")
-            children.expecting_line_end()
-
-            return cls(children)
-
-        children.make("Expression")
-
-        if not children.next_token.has("\n", ""):
-            children.untake()
-            children.make("Declaration")
-
+        children.make("LineStatementComponent")
         children.expecting_line_end()
 
         return cls(children)

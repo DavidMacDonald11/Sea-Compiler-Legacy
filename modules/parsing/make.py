@@ -40,11 +40,17 @@ from .declarations.template_declaration import TemplateDeclaration
 from .declarations.decorator_declaration import DecoratorDeclaration
 from .statements.alias_statement import AliasStatement
 from .statements.static_assert_statement import StaticAssertStatement
+from .statements.blockable_statement_component import BlockableStatementComponent
+from .statements.line_statement_component import LineStatementComponent
 from .statements.blockable_statement import BlockableStatement
 from .statements.line_statement import LineStatement
 from .statements.if_statement import IfStatement
 from .statements.match_with_statement import MatchWithStatement
 from .statements.manage_statement import ManageStatement
+from .statements.while_statement import WhileStatement
+from .statements.do_while_statement import DoWhileStatement
+from .statements.for_statement import ForStatement
+from .statements.block import Block
 from .statements.statement import Statement
 from .statements.block_statement import BlockStatement
 from .statements.file_statement import FileStatement
@@ -92,11 +98,17 @@ CLASSES = (
     DecoratorDeclaration,
     AliasStatement,
     StaticAssertStatement,
+    BlockableStatementComponent,
+    LineStatementComponent,
     BlockableStatement,
     LineStatement,
     IfStatement,
     MatchWithStatement,
     ManageStatement,
+    WhileStatement,
+    DoWhileStatement,
+    ForStatement,
+    Block,
     Statement,
     BlockStatement,
     FileStatement

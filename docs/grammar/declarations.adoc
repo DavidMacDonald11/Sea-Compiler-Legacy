@@ -139,11 +139,11 @@
 {tab} `_constant-expression_` `*:*`
 
 `_function-declaration_`:
-{tab} `_function-specifier_`~opt~ `_identifier_` `_function-values_` `*:*` `_block-statement_`
+{tab} `_function-specifier_`~opt~ `*func*` `_identifier_` `_function-values_` `*:*` `_block-statement_`
 
 `_function-specifier_`:
-{tab} `_storage-class-specifier_`~opt~ `*inline*` `*deviant*`~opt~ `*func*`~opt~
-{tab} `_storage-class-specifier_`~opt~ `*deviant*` `*inline*`~opt~ `*func*`~opt~
+{tab} `_storage-class-specifier_`~opt~ `*inline*` `*deviant*`~opt~
+{tab} `_storage-class-specifier_`~opt~ `*deviant*` `*inline*`~opt~
 
 `_function-values_`:
 {tab} `*(*` `_function-variadic-list_`~opt~ `*)*` `_function-return-type_`~opt~

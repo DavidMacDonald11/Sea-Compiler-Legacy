@@ -11,6 +11,10 @@ class Statement(Node):
         node = children.make("IfStatement", children.next())
         node = node or children.make("MatchWithStatement", children.next(1))
         node = node or children.make("ManageStatement", children.next())
+        node = node or children.make("WhileStatement", children.next())
+        node = node or children.make("DoWhileStatement", children.next())
+        node = node or children.make("ForStatement", children.next())
+        node = node or children.make("Block", children.next())
         node = node or children.make("TemplateDeclaration", children.next())
         node = node or children.make("DecoratorDeclaration", children.next())
 

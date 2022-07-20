@@ -6,17 +6,17 @@ class FunctionDeclaration(Node):
         i = children.parser.i
         children.make("FunctionSpecifier")
 
+        if not children.next_token.has("func"):
+            return children.make("LineStatement")
+
+        children.take()
+
         if not children.next_token.of("Identifier"):
             children.parser.i = i
             return children.make("LineStatement")
 
         children.take()
-
-        if not children.next_token.has("("):
-            children.parser.i = i
-            return children.make("LineStatement")
-
-        children.take()
+        children.expecting_has("(")
 
         if not children.next_token.has(")"):
             children.make("FunctionVariadicList")
