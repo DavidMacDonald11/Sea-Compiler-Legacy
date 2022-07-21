@@ -115,7 +115,7 @@ class NodeChildren:
 
         self.expecting_error(*strings)
 
-    def expecting_indent(self):
+    def expecting_indent(self, atleast = False):
         for _ in range(self.depth):
             if self.next_token.has("\t", "    "):
                 self.take()
@@ -127,9 +127,13 @@ class NodeChildren:
             return
 
         while self.next_token.has("\t", "    "):
-            self.take().mark()
+            token = self.take()
 
-        self.warn(f"Unexpected indentation; expected {self.depth}")
+            if not atleast:
+                token.mark()
+
+        if not atleast:
+            self.warn(f"Unexpected indentation; expected {self.depth}")
 
     def expecting_line_end(self):
         self.take_comments()

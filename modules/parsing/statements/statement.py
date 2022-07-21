@@ -15,6 +15,7 @@ class Statement(Node):
         node = node or children.make("DoWhileStatement", children.next())
         node = node or children.make("ForStatement", children.next())
         node = node or children.make("Block", children.next())
+        node = node or children.make("RawBlockStatement", children.next(1))
         node = node or children.make("TemplateDeclaration", children.next())
         node = node or children.make("DecoratorDeclaration", children.next())
 

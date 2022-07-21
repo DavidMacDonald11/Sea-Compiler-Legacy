@@ -16,6 +16,7 @@ class Lexer:
         self.keep_comments = "t" in options
         self.tokens = []
         self.warnings = []
+        self.depth = 0
 
     def new_token(self, kind, line = None):
         if line is None:
@@ -44,6 +45,10 @@ class Lexer:
 
         while self.string != "":
             self.make_token()
+
+        if len(self.tokens) == 0 or self.tokens[-1].string != "":
+            self.file.take(1)
+            self.new_token("Punctuator")
 
         for found in self.tokens:
             if not (found.has("\n", "") or found.of("Annotation")):
@@ -91,6 +96,7 @@ class Lexer:
         self.file.line.ignore()
 
         if self.file.next == "\n":
+            self.depth = 0
             self.at_line_start = True
 
         self.check_spaces()
@@ -98,11 +104,13 @@ class Lexer:
     def make_indents(self):
         if self.file.next in "\t\n":
             line = self.file.line
-            self.file.take(1)
+            taken = self.file.take(1)
+            self.depth += 1 if taken == "\t" else -self.depth
             self.new_token("Punctuator", line)
             return
 
         string = self.file.take(4, these = " ")
+        self.depth += 1
         self.new_token("Punctuator")
 
         if string != " " * 4:
@@ -151,6 +159,9 @@ class Lexer:
 
         kind = "Keyword" if string in token.KEYWORD_LIST else "Identifier"
         self.new_token(kind)
+
+        if string in ("clang", "asm"):
+            self.make_raw_block()
 
     def make_string_literal(self):
         self.file.take(1)
@@ -211,3 +222,47 @@ class Lexer:
             string += self.file.take(1)
 
         self.new_token("Operator")
+
+    def make_raw_block(self):
+        self.check_spaces()
+        string = self.file.take(these = token.IDENTIFIER_SYMBOLS)
+        self.new_token("Keyword")
+
+        if string != "block":
+            raise CompilerError("Raw code block must be followed by block keyword", self.tokens[-1])
+
+        self.check_spaces()
+        self.expecting_punctuator(":", "Raw code block must be indicted with : symbol")
+
+        if self.file.next == "#":
+            self.make_comment()
+
+        self.expecting_punctuator("\n", "Raw code block cannot be an inline block")
+
+        depth = self.depth
+        self.at_line_start = True
+        self.depth = 0
+
+        self.check_spaces()
+        first = True
+
+        while self.depth > depth:
+            string = self.file.take(until = "\n")
+
+            if first and string == "pass":
+                self.new_token("Keyword")
+                self.check_spaces()
+                break
+
+            first = False
+            self.new_token("Raw")
+            self.check_spaces()
+
+    def expecting_punctuator(self, symbol, message):
+        line = self.file.line
+        string = self.file.take(1)
+
+        if string != symbol:
+            raise CompilerError(message, self.tokens[-1])
+
+        self.new_token("Punctuator", line)

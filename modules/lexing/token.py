@@ -27,7 +27,7 @@ class Token:
         return f"{self}\n"
 
     def of(self, *kinds):
-        return any(kind in self.kind for kind in kinds)
+        return self.kind in kinds
 
     def has(self, *strings):
         return self.string in strings

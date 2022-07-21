@@ -51,6 +51,7 @@ from .statements.while_statement import WhileStatement
 from .statements.do_while_statement import DoWhileStatement
 from .statements.for_statement import ForStatement
 from .statements.block import Block
+from .statements.raw_block_statement import RawBlockStatement
 from .statements.statement import Statement
 from .statements.block_statement import BlockStatement
 from .statements.file_statement import FileStatement
@@ -111,16 +112,9 @@ CLASSES = (
     Block,
     Statement,
     BlockStatement,
+    RawBlockStatement,
     FileStatement
 )
 
 CONSTRUCT_MAP = {cls.__name__: cls.construct for cls in CLASSES}
 CONSTRUCT_MAP["ConstantExpression"] = CONSTRUCT_MAP["ConditionalExpression"]
-
-# from ..node import Node
-
-# class Statement(Node):
-#     @classmethod
-#     def construct(cls, children):
-#         pass
-#
