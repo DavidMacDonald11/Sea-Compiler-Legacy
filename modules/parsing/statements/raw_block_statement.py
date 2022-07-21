@@ -9,7 +9,7 @@ class RawBlockStatement(Node):
         parser.expecting_has("block")
         parser.expecting_has(":")
         parser.expecting_line_end()
-        parser.take_empty_lines()
+        parser.take_any_empty_lines()
         empty = True
 
         while parser.indent_count() >= parser.depth:
@@ -19,12 +19,12 @@ class RawBlockStatement(Node):
             if parser.next == ("Keyword", "pass"):
                 parser.take()
                 parser.expecting_line_end()
-                parser.take_empty_lines()
+                parser.take_any_empty_lines()
                 break
 
             parser.expecting_of("Raw")
             parser.expecting_line_end()
-            parser.take_empty_lines()
+            parser.take_any_empty_lines()
 
         if empty:
             self.mark()

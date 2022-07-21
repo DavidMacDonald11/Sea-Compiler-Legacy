@@ -54,6 +54,8 @@ from .statements.do_while_statement import DoWhileStatement
 from .statements.for_statement import ForStatement
 from .statements.block import Block
 from .statements.raw_block_statement import RawBlockStatement
+from .statements.include_statement import IncludeStatement
+from .statements.define_statement import DefineStatement
 from .statements.statement import Statement
 from .statements.block_statement import BlockStatement
 from .statements.file_statement import FileStatement
@@ -114,6 +116,8 @@ CLASSES = (
     DoWhileStatement,
     ForStatement,
     Block,
+    IncludeStatement,
+    DefineStatement,
     Statement,
     BlockStatement,
     RawBlockStatement,

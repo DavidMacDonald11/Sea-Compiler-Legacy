@@ -15,6 +15,8 @@ class Statement(Node):
         node = node or parser.make("RawBlockStatement", depth = 1)
         node = node or parser.make("TemplateDeclaration")
         node = node or parser.make("DecoratorDeclaration")
+        node = node or parser.make("IncludeStatement")
+        node = node or parser.make("DefineStatement")
 
         if node is not None:
             return node

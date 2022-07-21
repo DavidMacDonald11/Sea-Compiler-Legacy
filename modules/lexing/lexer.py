@@ -37,8 +37,11 @@ class Lexer:
         if warning is not None:
             self.warnings += [warning]
 
+        return new_token
+
     def warn(self, message):
-        self.warnings += [CompilerWarning(message, self.tokens[-1])]
+        self.tokens[-1].mark()
+        self.warnings += [CompilerWarning(message, self.tokens[-1].line)]
 
     def make_tokens(self):
         self.make_token()
@@ -78,7 +81,7 @@ class Lexer:
             case _:
                 self.file.take(1)
                 self.new_token("ERROR")
-                raise CompilerError("Unrecognized symbol", self.tokens[-1])
+                raise CompilerError("Unrecognized symbol", self.tokens[-1].line)
 
     def check_spaces(self):
         if not self.file.next.isspace():
@@ -160,6 +163,9 @@ class Lexer:
         kind = "Keyword" if string in token.KEYWORD_LIST else "Identifier"
         self.new_token(kind)
 
+        if string in ("include",):
+            self.make_include()
+
         if string in ("clang", "asm"):
             self.make_raw_block()
 
@@ -223,6 +229,32 @@ class Lexer:
 
         self.new_token("Operator")
 
+    def make_include(self):
+        self.check_spaces()
+
+        if self.file.next not in "\"<":
+            self.make_file_path(False)
+            return
+
+        self.file.take(1)
+        lbracket = self.new_token("Punctuator")
+
+        self.make_file_path()
+
+        bracket = "\"" if self.file.take(1) == "\"" else "<"
+        self.new_token("Punctuator")
+
+        if lbracket.string != bracket:
+            lbracket.mark()
+            self.warn("Cannot mix \" \" and < > brackets in include statement")
+
+    def make_file_path(self, terminatable = True):
+        self.file.take(until = ">\"#\n")
+        self.new_token("FilePath")
+
+        if terminatable and self.file.next in "\n#":
+            self.warn("Unterminated include statement")
+
     def make_raw_block(self):
         self.check_spaces()
         string = self.file.take(these = token.IDENTIFIER_SYMBOLS)
@@ -263,6 +295,7 @@ class Lexer:
         string = self.file.take(1)
 
         if string != symbol:
-            raise CompilerError(message, self.tokens[-1])
+            self.tokens[-1].mark()
+            raise CompilerError(message, self.tokens[-1].line)
 
         self.new_token("Punctuator", line)

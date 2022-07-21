@@ -1,6 +1,7 @@
 import re
 from functools import cached_property
 from string import ascii_letters, ascii_uppercase
+from util.misc import escape_whitespace
 from util.warnings import CompilerWarning
 
 class Token:
@@ -17,8 +18,7 @@ class Token:
         self.line += self
 
     def __repr__(self):
-        string = self.string.replace("\n", r"\n").replace("    ", r"\t")
-        return f"{self.kind[0]}'{string}'"
+        return f"{self.kind[0]}'{escape_whitespace(self.string)}'"
 
     def __eq__(self, other):
         return (self.kind, self.string) == other

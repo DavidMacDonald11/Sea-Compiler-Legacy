@@ -12,7 +12,7 @@ class NonReferenceTypeName(Node):
             node = node or self.construct_pointer(parser)
 
             if node is not None:
-                return recursive_construct(parser, node)
+                return recursive_construct(parser, type(self)(parser))
 
             if qualifier is None:
                 return head

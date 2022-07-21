@@ -12,9 +12,6 @@
 `_preprocessor-statement_`:
 {tab} `_include-statement_` `_line-end_`
 {tab} `_definition-statement_` `_line-end_`
-{tab} `_p-if-statement_`
-{tab} `_p-match-statement_`
-{tab} `_p-static-assert-statement_`
 
 `_include-statement_`:
 {tab} `*include*` `_file-path_`
@@ -26,49 +23,6 @@
 
 `_definition-statement_`:
 {tab} `*define*` `_identifier_`
-{tab} `*define*` `_identifier_` `*as*` `_token-string_`
-{tab} `*redefine*` `_identifier_` `*as*` `_token-string_`
+{tab} `*define*` `_identifier_` `*as*` `_constant-expression_`
+{tab} `*redefine*` `_identifier_` `*as*` `_constant-expression_`
 {tab} `*undefine*` `_identifier_`
-
-`_token-string_`:
-{tab} `_token_`
-{tab} `_token-string_` `_token_`
-
-`_p-if-statement_`:
-{tab} `*if*` `_p-expression_` `*:*` `_block-statement_` `_else-if-statement_`~opt~ `_else-statement_`~opt~
-
-`_p-else-if-statement_`:
-{tab} `*else*` `*if*` `_p-expression_` `*:*` `_block-statement_`
-{tab} `_p-else-if-statement_` `*else*` `*if*` `_p-expression_` `*:*` `_block-statement_`
-
-`_p-else-statement_`:
-{tab} `*else*` `*:*` `_block-statement_`
-
-`_p-comparative-expression_`:
-{tab} `_identifier_` `*is*` `*not*`~opt~ `*defined*`
-{tab} `_identifier_` `*is*` `*not*`~opt~ `*defined*` `*as*` `_p-value_`
-
-`_p-logical-and-expression_`:
-{tab} `_p-comparative-expression_`
-{tab} `_p-logical-and-expression_` `*and*` `_p-comparative-expression_`
-
-`_p-logical-or-expression_`:
-{tab} `_p-logical-and-expression_`
-{tab} `_p-logical-or-expression_` `*or*` `_p-logical-and-expression_`
-
-`_p-expression_`:
-{tab} `_p-logical-or-expression_`
-{tab} `_primary-keywords_`
-
-`_p-value_`:
-{tab} `*(*`~opt~ `_token-string_` `*)*`~opt~
-
-`_p-match-with-statement_`:
-{tab} `*match*` `_identifier_` `*:*` `_p-with-statement_` `_p-else-statement_`~opt~
-
-`_p-with-statement_`:
-{tab} `*with*` `_p-value_` `*:*` `_block-statement_`
-{tab} `_p-with-statement_` `*with*` `_p-value_` `*:*` `_block-statement_`
-
-`_p-static-assert-statement_`:
-{tab} `*static*`~opt~ `*assert*` `_p-expression_` `*else*` `_string-literal_` `_line-end_`

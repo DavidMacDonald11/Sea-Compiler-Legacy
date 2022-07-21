@@ -36,6 +36,7 @@
 
 `_postfix-unary-operator_`: one of
 {tab} `*++*` `*--*` `*%*` `*!*`
+{tab} `*is defined*` `*is not defined*`
 
 `_argument-expression-list_`:
 {tab} `_assignment-expression_`
@@ -114,7 +115,7 @@
 {tab} `_comparative-expression_` `_comparative-operator_` `_bitwise-or-expression_`
 
 `_comparative-operator_`: one of
-{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*` `*is*` `*is not*` `*in*` `*not in*`
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*` `*is*` `*is not*` `*is in*` `*is not in*` `*is defined as*` `*is not defined as*`
 
 `_logical-not-expression_`:
 {tab} `_comparative-expression_`

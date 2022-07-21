@@ -10,7 +10,7 @@ class CastExpression(Node):
 
         if not parser.next.may_be_type():
             parser.unignore()
-            return self
+            return parser.make("UnaryExpression")
 
         parser.take_previous()
         parser.make("TypeName")

@@ -6,23 +6,21 @@ class ComparativeExpression(Node):
 
     @Node.binary_operation(OPERATORS, "BitwiseOrExpression")
     def construct(self, parser):
-        if parser.next.has("is"):
-            parser.ignore()
-
-            if parser.next.has("not"):
-                parser.take_previous()
-                return
-
-            parser.unignore()
+        if parser.next.has("in", "not"):
+            parser.next.mark()
+            parser.warn(f"Cannot use {parser.next.string} alone in ComparativeExpression")
             return
 
-        if parser.next.has("not"):
-            parser.ignore()
+        if parser.next.has("is"):
+            parser.take()
+
+            if parser.next.has("not"):
+                parser.take()
 
             if parser.next.has("in"):
-                parser.take_previous()
-                return
+                parser.take()
+            elif parser.next.has("defined"):
+                parser.take()
+                parser.expecting_has("as")
 
-            parser.unignore()
-            parser.next.mark()
-            parser.warn("Cannot use not operator alone in ComparativeExpression")
+            parser.untake()
