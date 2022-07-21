@@ -1,13 +1,12 @@
 from ..node import Node
 
 class Block(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("block"):
+    def construct(self, parser):
+        if not parser.next.has("block"):
             return None
 
-        children.take()
-        children.expecting_has(":")
-        children.make("BlockStatement", children.next(1))
+        parser.take()
+        parser.expecting_has(":")
+        parser.make("BlockStatement", depth = 1)
 
-        return cls(children)
+        return self

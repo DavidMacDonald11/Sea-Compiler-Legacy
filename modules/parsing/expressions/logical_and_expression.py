@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class LogicalAndExpression(Node):
-    @classmethod
-    @binary_operation(["and"], "LogicalNotExpression")
-    def construct(cls, children):
+    @Node.binary_operation(["and"], "LogicalNotExpression")
+    def construct(self, parser):
         pass

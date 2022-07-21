@@ -2,73 +2,74 @@ from util.warnings import CompilerError
 from ..node import Node
 
 class TypeSpecifier(Node):
-    @classmethod
-    def construct(cls, children):
-        specifier = children.next_token
+    def construct(self, parser):
+        if parser.next.has("auto", "void", "str") or parser.next.of("Identifier"):
+            parser.take()
+            return self
 
-        if specifier.has("auto", "void", "str") or specifier.of("Identifier"):
-            children.take()
-            return cls(children)
+        if parser.next.has("func"):
+            return self.construct_function(parser)
 
-        if children.next_token.has("func"):
-            children.take()
-            children.expecting_has("(")
-            children.expecting_has("(")
+        if parser.next.has("complex", "imaginary", "real"):
+            parser.take()
 
-            if not children.next_token.has(")"):
-                children.make("FunctionVariadicList")
-
-            children.expecting_has(")")
-
-            if children.next_token.has("->"):
-                children.take().kind = "Punctuator"
-                children.make("TypeName")
-
-            children.expecting_has(")")
-
-            return cls(children)
-
-        if children.next_token.has("complex", "imaginary", "real"):
-            children.take()
-
-        unsigned = children.take() if children.next_token.has("+") else None
+        unsigned = parser.take() if parser.next.has("+") else None
 
         if unsigned is not None:
             unsigned.kind = "Punctuator"
 
-        if children.next_token.has("bool", "char", "int", "float"):
-            taken = children.take()
+        if parser.next.has("bool", "char", "int", "float"):
+            taken = parser.take()
 
-            if unsigned and taken.has("float"):
+            if unsigned is not None and taken.has("float"):
                 unsigned.mark()
                 taken.mark()
-                children.warn("Cannot declare unsigned float")
+                parser.warn("Cannot declare unsigned float")
 
-            return cls(children)
+            return self
 
-        if children.next_token.has("short", "long", "double"):
-            prefix = children.take()
+        if parser.next.has("short", "long", "double"):
+            prefix = parser.take()
 
-            if unsigned and prefix.has("double"):
+            if unsigned is not None and prefix.has("double"):
                 unsigned.mark()
                 prefix.mark()
-                children.warn("Cannot declare unsigned double")
+                parser.warn("Cannot declare unsigned double")
 
-            if children.next_token.has("int", "float"):
-                postfix = children.take()
+            if parser.next.has("int", "float"):
+                postfix = parser.take()
 
                 if prefix.has("short", "long") and postfix.has("float"):
                     prefix.mark()
                     postfix.mark()
-                    children.warn(f"Cannot declare {prefix} float")
+                    parser.warn(f"Cannot declare {prefix} float")
                 elif prefix.has("double") and postfix.has("int"):
                     prefix.mark()
                     postfix.mark()
-                    children.warn("Cannot declare double int")
+                    parser.warn("Cannot declare double int")
 
-        if len(children.nodes) == 0:
-            token = children.take()
+        if len(parser.children) == 0:
+            token = parser.take()
             token.mark()
-            raise CompilerError(f"Unexpected token {token}", children)
+            raise CompilerError(f"Unexpected type specifier {token}", parser.children)
 
-        return cls(children)
+        return self
+
+    def construct_function(self, parser):
+        parser.take()
+        parser.expecting_has("(")
+        parser.expecting_has("(")
+
+        if not parser.next.has(")"):
+            parser.make("FunctionVariadicList")
+
+        parser.expecting_has(")")
+
+        if parser.next.has("->"):
+            parser.take().kind = "Punctuator"
+            parser.make("TypeName")
+
+        parser.expecting_has(")")
+
+        self.specifier = "Func"
+        return self

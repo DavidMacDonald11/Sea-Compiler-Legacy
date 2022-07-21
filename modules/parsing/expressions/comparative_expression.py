@@ -1,29 +1,28 @@
 from lexing.token import COMPARATIVE_OPERATOR_LIST
-from ..node import Node, binary_operation
+from ..node import Node
 
 class ComparativeExpression(Node):
     OPERATORS = ["is", "in", "not"] + list(COMPARATIVE_OPERATOR_LIST)
 
-    @classmethod
-    @binary_operation(OPERATORS, "BitwiseOrExpression")
-    def construct(cls, children):
-        if children.next_token.has("is"):
-            children.ignore()
+    @Node.binary_operation(OPERATORS, "BitwiseOrExpression")
+    def construct(self, parser):
+        if parser.next.has("is"):
+            parser.ignore()
 
-            if children.next_token.has("not"):
-                children.take_previous()
+            if parser.next.has("not"):
+                parser.take_previous()
                 return
 
-            children.unignore()
+            parser.unignore()
             return
 
-        if children.next_token.has("not"):
-            children.ignore()
+        if parser.next.has("not"):
+            parser.ignore()
 
-            if children.next_token.has("in"):
-                children.take_previous()
+            if parser.next.has("in"):
+                parser.take_previous()
                 return
 
-            children.unignore()
-            children.next_token.mark()
-            children.warn("Cannot use not operator alone in ComparativeExpression")
+            parser.unignore()
+            parser.next.mark()
+            parser.warn("Cannot use not operator alone in ComparativeExpression")

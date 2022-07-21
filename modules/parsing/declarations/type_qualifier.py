@@ -1,11 +1,10 @@
 from ..node import Node
 
 class TypeQualifier(Node):
-    @classmethod
-    def construct(cls, children):
-        if children.next_token.has("atomic", "const", "restrict", "volatile"):
-            children.take()
-            children.make("TypeQualifier", children)
-            return cls(children)
+    def construct(self, parser):
+        if not parser.next.has("atomic", "const", "restrict", "volatile"):
+            return None
 
-        return None
+        parser.take()
+        parser.make("TypeQualifier", parser)
+        return self

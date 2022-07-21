@@ -1,43 +1,42 @@
 from ..node import Node
 
 class MatchWithStatement(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("match"):
+    def construct(self, parser):
+        if not parser.next.has("match"):
             return None
 
-        children.take()
-        children.make("Expression")
-        children.expecting_has(":")
+        parser.take()
+        parser.make("Expression")
+        parser.expecting_has(":")
 
-        if children.next_token.has("pass"):
-            children.take()
-            children.expecting_has("\n")
-            return cls(children)
+        if parser.next.has("pass"):
+            parser.take()
+            parser.expecting_has("\n")
+            return self
 
-        children.expecting_has("\n")
-        children.take_empty_lines()
-        children.expecting_indent()
+        parser.expecting_has("\n")
+        parser.take_empty_lines()
+        parser.expecting_indent()
 
-        if children.next_token.has("pass"):
-            children.take()
-            children.expecting_has("\n")
-            return cls(children)
+        if parser.next.has("pass"):
+            parser.take()
+            parser.expecting_has("\n")
+            return self
 
-        while children.next_token.has("with"):
-            children.take()
-            children.make("ConstantExpression")
-            children.expecting_has(":")
-            children.make("BlockStatement", children.next(1))
+        while parser.next.has("with"):
+            parser.take()
+            parser.make("ConstantExpression")
+            parser.expecting_has(":")
+            parser.make("BlockStatement", depth = 1)
 
-            if children.indent_count() < children.depth:
-                return cls(children)
+            if parser.indent_count() < parser.depth:
+                return self
 
-            children.expecting_indent()
+            parser.expecting_indent()
 
-        if children.next_token.has("else"):
-            children.take()
-            children.expecting_has(":")
-            children.make("BlockStatement", children.next(1))
+        if parser.next.has("else"):
+            parser.take()
+            parser.expecting_has(":")
+            parser.make("BlockStatement", depth = 1)
 
-        return cls(children)
+        return self

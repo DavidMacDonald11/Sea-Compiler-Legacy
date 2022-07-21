@@ -1,37 +1,33 @@
 from ..node import Node
 
 class RawBlockStatement(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("clang", "asm"):
+    def construct(self, parser):
+        if not parser.next.has("clang", "asm"):
             return None
 
-        children.take()
-        children.expecting_has("block")
-        children.expecting_has(":")
-        children.take_comments()
-        children.expecting_line_end()
-        children.take_empty_lines()
+        parser.take()
+        parser.expecting_has("block")
+        parser.expecting_has(":")
+        parser.expecting_line_end()
+        parser.take_empty_lines()
         empty = True
 
-        while children.indent_count() >= children.depth:
+        while parser.indent_count() >= parser.depth:
             empty = False
-            children.expecting_indent(atleast = True)
+            parser.expecting_indent(atleast = True)
 
-            if children.next_token == ("Keyword", "pass"):
-                children.take()
-                children.expecting_line_end()
-                children.take_empty_lines()
+            if parser.next == ("Keyword", "pass"):
+                parser.take()
+                parser.expecting_line_end()
+                parser.take_empty_lines()
                 break
 
-            children.expecting_of("Raw")
-            children.expecting_line_end()
-            children.take_empty_lines()
-
-        node = cls(children)
+            parser.expecting_of("Raw")
+            parser.expecting_line_end()
+            parser.take_empty_lines()
 
         if empty:
-            node.mark()
-            children.warn("Empty block")
+            self.mark()
+            parser.warn("Block cannot be empty; use pass")
 
-        return node
+        return self

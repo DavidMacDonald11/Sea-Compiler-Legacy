@@ -1,25 +1,23 @@
 from ..node import Node
 
 class DesignatedInitializer(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("["):
-            children.make("Initializer")
+    def construct(self, parser):
+        if not parser.next.has("["):
+            parser.make("Initializer")
 
-            if children.next_token.has(":"):
-                children.take()
-                children.make("Initializer")
+            if parser.next.has(":"):
+                parser.take()
+                parser.make("Initializer")
 
-            return cls(children)
+            return self
 
-        children.take()
-        made_generator = children.make("RangedGenerator") is not None
+        parser.take()
 
-        if not made_generator:
-            children.make("ConstantExpression")
+        if parser.make("RangedGenerator") is None:
+            parser.make("ConstantExpression")
 
-        children.expecting_has("]")
-        children.expecting_has(":")
-        children.make("Initializer")
+        parser.expecting_has("]")
+        parser.expecting_has(":")
+        parser.make("Initializer")
 
-        return cls(children)
+        return self

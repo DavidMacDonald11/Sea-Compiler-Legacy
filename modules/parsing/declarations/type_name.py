@@ -1,36 +1,29 @@
 from ..node import Node
 
 class TypeName(Node):
-    @classmethod
-    def construct(cls, children):
-        cls.construct_reference(children)
+    def construct(self, parser):
+        self.construct_reference(parser)
 
-        if not children.next_token.has("aligned"):
-            return cls(children)
+        if not parser.next.has("aligned"):
+            return self
 
-        children.take()
-        children.expecting_has("to")
+        parser.take()
+        parser.expecting_has("to")
+        parser.make("TypeName" if parser.next.may_be_type() else "ConstantExpression")
 
-        nextt = children.next_token
-        if nextt.of("Keyword") and not nextt.has("not") or nextt.has("+"):
-            children.make("TypeName")
-        else:
-            children.make("ConstantExpression")
+        return self
 
-        return cls(children)
+    def construct_reference(self, parser):
+        parser.make("NonReferenceTypeName")
+        qualifier = parser.make("TypeQualifier")
 
-    @classmethod
-    def construct_reference(cls, children):
-        children.make("NonReferenceTypeName")
-        qualfier = children.make("TypeQualifier")
+        if parser.next.has("@"):
+            parser.take().kind = "Punctuator"
+            return self
 
-        if children.next_token.has("@"):
-            children.take().kind = "Punctuator"
-            return cls(children)
+        if qualifier is not None:
+            qualifier.mark()
+            parser.warn("Incorrect type qualifier")
 
-        if qualfier is not None:
-            qualfier.mark()
-            children.warn("Incorrect type qualifier")
-
-        return cls(children)
+        return self
 

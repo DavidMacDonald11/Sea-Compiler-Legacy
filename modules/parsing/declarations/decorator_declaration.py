@@ -1,52 +1,27 @@
 from ..node import Node
 
 class DecoratorDeclaration(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("decorate"):
+    def construct(self, parser):
+        if not parser.next.has("decorate"):
             return None
 
-        children.take()
-        children.expecting_has("with")
+        parser.take()
+        parser.expecting_has("with")
 
         empty = True
 
-        while children.next_token.of("Identifier"):
+        while parser.next.of("Identifier"):
             empty = False
-            children.expecting_of("Identifier")
+            parser.take()
+            parser.make("CallOperator")
 
-            if children.next_token.has("("):
-                children.take()
+            if parser.next.has(","):
+                parser.take()
 
-                if children.next_token.has(")"):
-                    children.take()
-
-                    if children.next_token.has(","):
-                        children.take()
-
-                    continue
-
-                children.make("AssignmentExpression")
-
-                while children.next_token.has(","):
-                    children.take()
-
-                    if children.next_token.has(")"):
-                        children.take_and_warn("Expecting assignment-expression")
-                        break
-
-                    children.make("AssignmentExpression")
-
-                children.expecting_has(")")
-
-            if children.next_token.has(","):
-                children.take()
-
-        children.expecting_line_end()
-        node = cls(children)
+        parser.expecting_line_end()
 
         if empty:
-            node.mark()
-            children.warn("Cannot have empty decorator")
+            self.mark()
+            parser.warn("Cannot have empty decorator")
 
-        return node
+        return self

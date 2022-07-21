@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class LogicalOrExpression(Node):
-    @classmethod
-    @binary_operation(["or"], "LogicalAndExpression")
-    def construct(cls, children):
+    @Node.binary_operation(["or"], "LogicalAndExpression")
+    def construct(self, parser):
         pass

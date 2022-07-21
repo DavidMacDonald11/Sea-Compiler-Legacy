@@ -1,12 +1,11 @@
 from ..node import Node
 
 class VariableDeclaration(Node):
-    @classmethod
-    def construct(cls, children):
-        children.make("ElementDeclaration")
+    def construct(self, parser):
+        parser.make("ElementDeclaration")
 
-        if children.next_token.has("="):
-            children.take()
-            children.make("Initializer")
+        if parser.next.has("="):
+            parser.take()
+            parser.make("Initializer")
 
-        return cls(children)
+        return self

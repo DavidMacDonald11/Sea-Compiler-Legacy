@@ -32,6 +32,9 @@ class Token:
     def has(self, *strings):
         return self.string in strings
 
+    def may_be_type(self):
+        return not self.has("not") if self.of("Keyword") else self.has("+")
+
     def mark(self):
         self.line.mark(self)
 

@@ -1,12 +1,11 @@
 from ..node import Node
 
 class PrefixDeviationExpression(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("++", "--"):
-            return children.make("PostfixExpression")
+    def construct(self, parser):
+        if not parser.next.has("++", "--"):
+            return parser.make("PostfixExpression")
 
-        children.take()
-        children.make("PrefixDeviationExpression")
+        parser.take()
+        parser.make("PrefixDeviationExpression")
 
-        return cls(children)
+        return self

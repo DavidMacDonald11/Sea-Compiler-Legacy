@@ -1,37 +1,30 @@
 from ..node import Node
 
 class Initializer(Node):
-    @classmethod
-    def construct(cls, children):
-        return cls.full_construct(children, "AssignmentExpression")
+    expression_kind = "AssignmentExpression"
 
-    @classmethod
-    def full_construct(cls, children, expression_kind):
-        if children.next_token.has("alloc"):
-            children.take()
+    def construct(self, parser):
+        if parser.next.has("alloc"):
+            parser.take()
 
-            if children.next_token.has("as"):
-                children.take()
-                children.make("Initializer")
+            if parser.next.has("as"):
+                parser.take()
+                parser.make("Initializer")
 
-            return cls(children)
+            return self
 
-        if children.next_token.has("realloc"):
-            children.take()
-            children.make("Expression")
+        if parser.next.has("realloc"):
+            parser.take()
+            parser.make("Expression")
 
-            if children.next_token.has("to"):
-                children.take()
-                children.make("Initializer")
+            if parser.next.has("to"):
+                parser.take()
+                parser.make("Initializer")
 
-            if children.next_token.has("as"):
-                children.take()
-                children.make("Initializer")
+            return self
 
-            return cls(children)
+        is_expression = not parser.next.has("[", "{")
+        kind = type(self).expression_kind if is_expression else "InitializerCompoundLiteral"
+        parser.make(kind)
 
-        is_expression = not children.next_token.has("[", "{")
-        kind = expression_kind if is_expression else "InitializerCompoundLiteral"
-        children.make(kind)
-
-        return cls(children)
+        return self

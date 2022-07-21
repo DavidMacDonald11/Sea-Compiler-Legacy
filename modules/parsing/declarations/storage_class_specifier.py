@@ -1,24 +1,20 @@
 from ..node import Node
 
 class StorageClassSpecifier(Node):
-    @classmethod
-    def construct(cls, children):
-        if children.next_token.has("register"):
-            children.take()
-            return cls(children)
+    def construct(self, parser):
+        if parser.next.has("register"):
+            parser.take()
+            return self
 
-        specifier = None
+        specifier = parser.take() if parser.next.has("external", "static") else None
 
-        if children.next_token.has("external", "static"):
-            specifier = children.take()
+        if parser.next.has("thread"):
+            parser.take()
+            parser.expecting_has("local")
+            return self
 
-        if children.next_token.has("thread"):
-            children.take()
-            children.expecting_has("local")
-            return cls(children)
+        if parser.next.has("local"):
+            parser.take()
+            return self
 
-        if children.next_token.has("local"):
-            children.take()
-            return cls(children)
-
-        return None if specifier is None else cls(children)
+        return None if specifier is None else self

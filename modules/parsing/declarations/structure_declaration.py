@@ -1,18 +1,17 @@
 from ..node import Node
 
 class StructureDeclaration(Node):
-    @classmethod
-    def construct(cls, children):
-        i = children.parser.i
-        children.make("StorageClassSpecifier")
+    def construct(self, parser):
+        i = type(parser).index
+        parser.make("StorageClassSpecifier")
 
-        if not children.next_token.has("enum", "struct", "union"):
-            children.parser.i = i
-            return children.make("FunctionDeclaration")
+        if not parser.next.has("enum", "struct", "union"):
+            type(parser).index = i
+            return parser.make("FunctionDeclaration")
 
-        children.take()
-        children.expecting_of("Identifier")
-        children.expecting_has(":")
-        children.make("BlockStatement", children.next(1))
+        parser.take()
+        parser.expecting_of("Identifier")
+        parser.expecting_has(":")
+        parser.make("BlockStatement", depth = 1)
 
-        return cls(children)
+        return self

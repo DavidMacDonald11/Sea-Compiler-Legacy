@@ -1,32 +1,27 @@
 from ..node import Node
 
 class Statement(Node):
-    @classmethod
-    def construct(cls, children):
-        empty_line = children.check_empty_line()
+    def construct(self, parser):
+        if parser.take_if_empty_line() is not None:
+            return self
 
-        if empty_line is not None:
-            return cls(empty_line)
-
-        node = children.make("IfStatement", children.next())
-        node = node or children.make("MatchWithStatement", children.next(1))
-        node = node or children.make("ManageStatement", children.next())
-        node = node or children.make("WhileStatement", children.next())
-        node = node or children.make("DoWhileStatement", children.next())
-        node = node or children.make("ForStatement", children.next())
-        node = node or children.make("Block", children.next())
-        node = node or children.make("RawBlockStatement", children.next(1))
-        node = node or children.make("TemplateDeclaration", children.next())
-        node = node or children.make("DecoratorDeclaration", children.next())
+        node = parser.make("IfStatement")
+        node = node or parser.make("MatchWithStatement", depth = 1)
+        node = node or parser.make("ManageStatement")
+        node = node or parser.make("WhileStatement")
+        node = node or parser.make("DoWhileStatement")
+        node = node or parser.make("ForStatement")
+        node = node or parser.make("Block")
+        node = node or parser.make("RawBlockStatement", depth = 1)
+        node = node or parser.make("TemplateDeclaration")
+        node = node or parser.make("DecoratorDeclaration")
 
         if node is not None:
-            return cls(children)
+            return node
 
-        blockable = children.make("BlockableStatement")
+        if (node := parser.make("BlockableStatement")) is not None:
+            node.mark()
+            parser.warn(f"Unexpected {node.children.nodes[0].string} statement")
+            return self
 
-        if blockable is not None:
-            blockable.mark()
-            children.warn(f"Unexpected {blockable.children.nodes[0].string} statement")
-            return cls(children)
-
-        return children.make("StructureDeclaration", children)
+        return parser.make("StructureDeclaration", parser)

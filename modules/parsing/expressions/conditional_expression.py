@@ -1,16 +1,15 @@
 from ..node import Node
 
 class ConditionalExpression(Node):
-    @classmethod
-    def construct(cls, children):
-        node = children.make("LogicalOrExpression")
+    def construct(self, parser):
+        node = parser.make("LogicalOrExpression")
 
-        if not children.next_token.has("if"):
+        if not parser.next.has("if"):
             return node
 
-        children.take()
-        children.make("Expression")
-        children.expecting_has("else")
-        children.make("ConditionalExpression")
+        parser.take()
+        parser.make("Expression")
+        parser.expecting_has("else")
+        parser.make("ConditionalExpression")
 
-        return cls(children)
+        return self

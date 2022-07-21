@@ -1,26 +1,25 @@
 from ..node import Node
 
 class BlockableStatementComponent(Node):
-    @classmethod
-    def construct(cls, children):
-        if children.next_token.has("pass"):
-            children.take()
-            return cls(children)
+    def construct(self, parser):
+        if parser.next.has("pass"):
+            parser.take()
+            return self
 
-        if children.next_token.has("continue", "break"):
-            children.take()
+        if parser.next.has("continue", "break"):
+            parser.take()
 
-            if children.next_token.of("Identifier"):
-                children.take()
+            if parser.next.of("Identifier"):
+                parser.take()
 
-            return cls(children)
+            return self
 
-        if children.next_token.has("return", "yield"):
-            children.take()
+        if not parser.next.has("return", "yield"):
+            return None
 
-            if not children.next_token.has("\n", ""):
-                children.make("Expression")
+        parser.take()
 
-            return cls(children)
+        if not parser.next.has("\n", ""):
+            parser.make("Expression")
 
-        return None
+        return self

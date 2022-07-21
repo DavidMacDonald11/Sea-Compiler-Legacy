@@ -2,45 +2,41 @@ from lexing.token import UNARY_OPERATOR_LIST
 from ..node import Node
 
 class UnaryExpression(Node):
-    @classmethod
-    def construct(cls, children):
-        if children.next_token.has(*UNARY_OPERATOR_LIST):
-            children.take()
-            children.make("CastExpression")
-            return cls(children)
+    def construct(self, parser):
+        if parser.next.has(*UNARY_OPERATOR_LIST):
+            parser.take()
+            parser.make("CastExpression")
+            return self
 
-        if children.next_token.has("align", "size", "type"):
-            children.take()
-            children.expecting_has("of")
+        if parser.next.has("align", "size", "type"):
+            parser.take()
+            parser.expecting_has("of")
+            parser.make("TypeName" if parser.next.may_be_type() else "Expression")
 
-            if children.next_token_may_be_type:
-                children.make("TypeName")
-            else:
-                children.make("Expression")
+            return self
 
-            return cls(children)
+        if parser.next.has("dealloc", "realloc", "alloc"):
+            return self.construct_alloc(parser)
 
-        if children.next_token.has("dealloc", "realloc", "alloc"):
-            keyword = children.take()
+        return parser.make("ExponentialExpression")
 
-            if not keyword.has("alloc"):
-                children.make("Expression")
+    def construct_alloc(self, parser):
+        keyword = parser.take()
 
-            if keyword.has("dealloc"):
-                return cls(children)
+        if not keyword.has("alloc"):
+            parser.make("Expression")
 
-            if keyword.has("realloc"):
-                children.expecting_has("to")
+        if keyword.has("dealloc"):
+            return self
 
-            if children.next_token_may_be_type:
-                children.make("TypeName")
-            else:
-                children.make("Expression")
+        if keyword.has("realloc"):
+            parser.expecting_has("to")
 
-            if children.next_token.has("as"):
-                children.take()
-                children.make("Expression")
+        parser.make("TypeName" if parser.next.may_be_type() else "Expression")
 
-            return cls(children)
+        if parser.next.has("as"):
+            parser.take()
+            parser.make("Expression")
 
-        return children.make("ExponentialExpression")
+        self.specifier = "Alloc"
+        return self

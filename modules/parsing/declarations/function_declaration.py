@@ -1,33 +1,33 @@
 from ..node import Node
 
 class FunctionDeclaration(Node):
-    @classmethod
-    def construct(cls, children):
-        i = children.parser.i
-        children.make("FunctionSpecifier")
+    def construct(self, parser):
+        i = type(parser).index
+        parser.make("FunctionSpecifier")
 
-        if not children.next_token.has("func"):
-            return children.make("LineStatement")
+        if not parser.next.has("func"):
+            type(parser).index = i
+            return parser.make("LineStatement")
 
-        children.take()
+        parser.take()
 
-        if not children.next_token.of("Identifier"):
-            children.parser.i = i
-            return children.make("LineStatement")
+        if not parser.next.of("Identifier"):
+            type(parser).index = i
+            return parser.make("LineStatement")
 
-        children.take()
-        children.expecting_has("(")
+        parser.take()
+        parser.expecting_has("(")
 
-        if not children.next_token.has(")"):
-            children.make("FunctionVariadicList")
+        if not parser.next.has(")"):
+            parser.make("FunctionVariadicList")
 
-        children.expecting_has(")")
+        parser.expecting_has(")")
 
-        if children.next_token.has("->"):
-            children.take()
-            children.make("TypeName")
+        if parser.next.has("->"):
+            parser.take()
+            parser.make("TypeName")
 
-        children.expecting_has(":")
-        children.make("BlockStatement", children.next(1))
+        parser.expecting_has(":")
+        parser.make("BlockStatement", depth = 1)
 
-        return cls(children)
+        return self

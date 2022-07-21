@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class MultiplicativeExpression(Node):
-    @classmethod
-    @binary_operation(["*", "/", "mod"], "CastExpression")
-    def construct(cls, children):
+    @Node.binary_operation(["*", "/", "mod"], "CastExpression")
+    def construct(self, parser):
         pass

@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class BitwiseXorExpression(Node):
-    @classmethod
-    @binary_operation(["$"], "BitwiseAndExpression")
-    def construct(cls, children):
+    @Node.binary_operation(["$"], "BitwiseAndExpression")
+    def construct(self, parser):
         pass

@@ -1,12 +1,11 @@
 from ..node import Node
 
 class StaticAssertStatement(Node):
-    @classmethod
-    def construct(cls, children):
-        children.take()
-        children.make("ConstantExpression")
-        children.expecting_has("else")
-        children.expecting_of("StringLiteral")
-        children.expecting_line_end()
+    def construct(self, parser):
+        parser.take()
+        parser.make("ConstantExpression")
+        parser.expecting_has("else")
+        parser.expecting_of("StringLiteral")
+        parser.expecting_line_end()
 
-        return cls(children)
+        return self

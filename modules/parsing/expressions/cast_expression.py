@@ -2,23 +2,23 @@ from ..node import Node
 from .postfix_expression import PostfixExpression
 
 class CastExpression(Node):
-    @classmethod
-    def construct(cls, children):
-        if children.next_token.has("("):
-            children.ignore()
+    def construct(self, parser):
+        if not parser.next.has("("):
+            return parser.make("UnaryExpression")
 
-            if children.next_token_may_be_type:
-                children.take_previous()
-                children.make("TypeName")
-                children.expecting_has(")")
+        parser.ignore()
 
-                if children.next_token.has("[", "{"):
-                    children.make("InitializerCompoundLiteral")
-                    return PostfixExpression(children)
+        if not parser.next.may_be_type():
+            parser.unignore()
+            return self
 
-                children.make("CastExpression")
-                return cls(children)
+        parser.take_previous()
+        parser.make("TypeName")
+        parser.expecting_has(")")
 
-            children.unignore()
+        if parser.next.has("[", "{"):
+            parser.make("InitializerCompoundLiteral")
+            return PostfixExpression(parser)
 
-        return children.make("UnaryExpression")
+        parser.make("CastExpression")
+        return self

@@ -1,14 +1,13 @@
 from ..node import Node
 
 class ManageStatement(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("manage"):
+    def construct(self, parser):
+        if not parser.next.has("manage"):
             return None
 
-        children.take()
-        children.make("Declaration")
-        children.expecting_has(":")
-        children.make("BlockStatement", children.next(1))
+        parser.take()
+        parser.make("Declaration")
+        parser.expecting(":")
+        parser.make("BlockStatement", depth = 1)
 
-        return cls(children)
+        return self

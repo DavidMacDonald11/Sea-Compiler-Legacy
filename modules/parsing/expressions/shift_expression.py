@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class ShiftExpression(Node):
-    @classmethod
-    @binary_operation(["<<", ">>"], "AdditiveExpression")
-    def construct(cls, children):
+    @Node.binary_operation(["<<", ">>"], "AdditiveExpression")
+    def construct(self, parser):
         pass

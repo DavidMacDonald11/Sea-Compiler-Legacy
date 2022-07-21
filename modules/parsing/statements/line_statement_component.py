@@ -1,16 +1,15 @@
 from ..node import Node
 
 class LineStatementComponent(Node):
-    @classmethod
-    def construct(cls, children):
-        if children.next_token_may_be_type:
-            children.make("Declaration")
-            return cls(children)
+    def construct(self, parser):
+        if parser.next.may_be_type():
+            parser.make("Declaration")
+            return self
 
-        children.make("Expression")
+        parser.make("Expression")
 
-        if not children.next_token.has("\n", "", "while"):
-            children.untake()
-            children.make("Declaration")
+        if not parser.next.has("\n", "", "while"):
+            parser.untake()
+            parser.make("Declaration")
 
-        return cls(children)
+        return self

@@ -1,14 +1,13 @@
 from ..node import Node
 
 class ExponentialExpression(Node):
-    @classmethod
-    def construct(cls, children):
-        node = children.make("PrefixDeviationExpression")
+    def construct(self, parser):
+        node = parser.make("PrefixDeviationExpression")
 
-        if not children.next_token.has("**"):
+        if not parser.next.has("**"):
             return node
 
-        children.take()
-        children.make("CastExpression")
+        parser.take()
+        parser.make("CastExpression")
 
-        return cls(children)
+        return self

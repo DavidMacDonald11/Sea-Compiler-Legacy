@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class AdditiveExpression(Node):
-    @classmethod
-    @binary_operation(["+", "-"], "MultiplicativeExpression")
-    def construct(cls, children):
+    @Node.binary_operation(["+", "-"], "MultiplicativeExpression")
+    def construct(self, parser):
         pass

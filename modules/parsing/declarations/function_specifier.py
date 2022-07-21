@@ -1,22 +1,21 @@
 from ..node import Node
 
 class FunctionSpecifier(Node):
-    @classmethod
-    def construct(cls, children):
-        children.make("StorageClassSpecifier")
+    def construct(self, parser):
+        parser.make("StorageClassSpecifier")
 
-        if children.next_token.has("inline"):
-            children.take()
+        if parser.next.has("inline"):
+            parser.take()
 
-            if children.next_token.has("deviant"):
-                children.take()
+            if parser.next.has("deviant"):
+                parser.take()
 
-            return cls(children)
+            return self
 
-        if children.next_token.has("deviant"):
-            children.take()
+        if parser.next.has("deviant"):
+            parser.take()
 
-        if children.next_token.has("inline"):
-            children.take()
+        if parser.next.has("inline"):
+            parser.take()
 
-        return None if len(children.nodes) == 0 else cls(children)
+        return None if len(parser.children) == 0 else self

@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class BitwiseAndExpression(Node):
-    @classmethod
-    @binary_operation(["&"], "ShiftExpression")
-    def construct(cls, children):
+    @Node.binary_operation(["&"], "ShiftExpression")
+    def construct(self, parser):
         pass

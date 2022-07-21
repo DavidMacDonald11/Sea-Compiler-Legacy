@@ -1,12 +1,11 @@
 from ..node import Node
 
 class LogicalNotExpression(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("not"):
-            return children.make("ComparativeExpression")
+    def construct(self, parser):
+        if not parser.next.has("not"):
+            return parser.make("ComparativeExpression")
 
-        children.take()
-        children.make("LogicalNotExpression")
+        parser.take()
+        parser.make("LogicalNotExpression")
 
-        return cls(children)
+        return self

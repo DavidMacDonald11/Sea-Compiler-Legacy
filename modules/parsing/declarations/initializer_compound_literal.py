@@ -1,32 +1,38 @@
 from ..node import Node
 
 class InitializerCompoundLiteral(Node):
-    @classmethod
-    def construct(cls, children):
-        bracket = children.expecting_has("{", "[")
-        cls.construct_initializer_list(children, bracket)
-        children.expecting_has("]" if bracket.has("[") else "}")
+    def construct(self, parser):
+        lbracket = parser.expecting_has("{", "[")
+        rbracket = "]" if lbracket.has("[") else "}"
+        self.construct_initializer_list(parser, rbracket)
+        parser.expecting_has(rbracket)
 
-        return cls(children)
+        return self
 
-    @classmethod
-    def construct_initializer_list(cls, children, bracket):
-        node = children.make("RangedGenerator")
-        node = node or children.make("IterativeGenerator")
+    def construct_initializer_list(self, parser, rbracket):
+        node = parser.make("RangedGenerator")
+        node = node or parser.make("IterativeGenerator")
 
         if node is not None:
-            return node
+            return
 
-        children.ignore_format_tokens()
-        children.make("DesignatedInitializer")
+        self.ignore_format_tokens(parser)
+        parser.make("DesignatedInitializer")
 
-        while children.next_token.has(","):
-            children.take()
-            children.ignore_format_tokens()
+        while parser.next.has(","):
+            parser.take()
+            self.ignore_format_tokens(parser)
 
-            if children.next_token.has("]" if bracket.has("[") else "}"):
+            if parser.next.has(rbracket):
                 return
 
-            children.make("DesignatedInitializer")
+            parser.make("DesignatedInitailizer")
 
-        children.ignore_format_tokens()
+        self.ignore_format_tokens(parser)
+
+    def ignore_format_tokens(self, parser):
+        while parser.next.has("\n", "\t", " " * 4) or parser.next.of("Annotation"):
+            if parser.next.of("Annotation"):
+                parser.ignore()
+            else:
+                parser.take()

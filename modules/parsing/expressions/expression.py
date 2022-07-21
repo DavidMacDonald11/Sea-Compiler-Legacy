@@ -1,7 +1,6 @@
-from ..node import Node, binary_operation
+from ..node import Node
 
 class Expression(Node):
-    @classmethod
-    @binary_operation([","], "AssignmentExpression")
-    def construct(cls, children):
+    @Node.binary_operation([","], "AssignmentExpression")
+    def construct(self, parser):
         pass

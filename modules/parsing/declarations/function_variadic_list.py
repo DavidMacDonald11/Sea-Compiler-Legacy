@@ -1,24 +1,23 @@
 from ..node import Node
 
 class FunctionVariadicList(Node):
-    @classmethod
-    def construct(cls, children):
-        children.make("TypeName")
+    def construct(self, parser):
+        parser.make("TypeName")
 
-        if children.next_token.of("Identifier"):
-            children.take()
+        if parser.next.of("Identifier"):
+            parser.take()
 
         variadic = False
 
-        while not variadic and children.next_token.has(","):
-            children.take()
-            children.make("TypeName")
+        while not variadic and parser.next.has(","):
+            parser.take()
+            parser.make("TypeName")
 
-            if children.next_token.has("*"):
-                children.take()
+            if parser.next.has("*"):
+                parser.take()
                 variadic = True
 
-            if children.next_token.of("Identifier"):
-                children.take()
+            if parser.next.of("Identifier"):
+                parser.take()
 
-        return cls(children)
+        return self

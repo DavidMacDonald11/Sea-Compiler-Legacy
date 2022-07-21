@@ -1,4 +1,6 @@
 from .expressions.primary_expression import PrimaryExpression
+from .expressions.slice_operator import SliceOperator
+from .expressions.call_operator import CallOperator
 from .expressions.postfix_expression import PostfixExpression
 from .expressions.prefix_deviation_expression import PrefixDeviationExpression
 from .expressions.exponential_expression import ExponentialExpression
@@ -58,6 +60,8 @@ from .statements.file_statement import FileStatement
 
 CLASSES = (
     PrimaryExpression,
+    SliceOperator,
+    CallOperator,
     PostfixExpression,
     PrefixDeviationExpression,
     ExponentialExpression,
@@ -116,5 +120,5 @@ CLASSES = (
     FileStatement
 )
 
-CONSTRUCT_MAP = {cls.__name__: cls.construct for cls in CLASSES}
-CONSTRUCT_MAP["ConstantExpression"] = CONSTRUCT_MAP["ConditionalExpression"]
+NODE_MAP = {cls.__name__: cls for cls in CLASSES}
+NODE_MAP["ConstantExpression"] = NODE_MAP["ConditionalExpression"]

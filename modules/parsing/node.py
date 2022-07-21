@@ -2,9 +2,10 @@ from abc import ABC, abstractmethod
 from functools import wraps
 
 class Node(ABC):
-    def __init__(self, children, specifier = None):
-        self.children = children
-        self.specifier = specifier
+    def __init__(self, parser):
+        self.parser = parser
+        self.children = parser.children
+        self.specifier = None
 
     def __repr__(self):
         return self.tree_repr()
@@ -17,35 +18,35 @@ class Node(ABC):
         for node in self.children.nodes:
             node.mark()
 
-    @classmethod
     @abstractmethod
-    def construct(cls, children):
+    def construct(self, parser):
         pass
 
     # TODO uncomment
-    #@abstractmethod
+    # @abstractmethod
     def transpile(self):
         pass
 
-def binary_operation(has_list, right):
-    def decorator(func):
-        @wraps(func)
-        def construct(cls, children):
-            def recursive_construct(children, head):
-                children = children.next()
-                children += head
+    @classmethod
+    def binary_operation(cls, has_list, right):
+        def decorator(func):
+            @wraps(func)
+            def construct(self, parser):
+                def recursive_construct(parser, node):
+                    parser = parser.new()
+                    parser.children += node
 
-                if not children.next_token.has(*has_list):
-                    return head
+                    if not parser.next.has(*has_list):
+                        return node
 
-                func(cls, children)
+                    func(self, parser)
 
-                children.take()
-                children.make(right)
+                    parser.take()
+                    parser.make(right)
 
-                return recursive_construct(children, cls(children))
+                    return recursive_construct(parser, type(self)(parser))
 
-            return recursive_construct(children, children.make(right))
+                return recursive_construct(parser, parser.make(right))
 
-        return construct
-    return decorator
+            return construct
+        return decorator

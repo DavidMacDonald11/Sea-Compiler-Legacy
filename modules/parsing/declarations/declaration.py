@@ -1,12 +1,11 @@
 from ..node import Node
 
 class Declaration(Node):
-    @classmethod
-    def construct(cls, children):
-        children.make("VariableDeclaration")
+    def construct(self, parser):
+        parser.make("VariableDeclaration")
 
-        while children.next_token.has(","):
-            children.take()
-            children.make("VariableDeclaration")
+        while parser.next.has(","):
+            parser.take()
+            parser.make("VariableDeclaration")
 
-        return cls(children)
+        return self

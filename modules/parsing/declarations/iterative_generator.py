@@ -1,20 +1,19 @@
 from ..node import Node
 
 class IterativeGenerator(Node):
-    @classmethod
-    def construct(cls, children):
-        if not children.next_token.has("yield"):
+    def construct(self, parser):
+        if not parser.next.has("yield"):
             return None
 
-        children.take()
-        children.make("Initializer")
-        children.expecting_has("for")
-        children.make("ElementDeclaration")
-        children.expecting_has("in")
-        children.make("SafeInitializer")
+        parser.take()
+        parser.make("Initializer")
+        parser.expecting_has("for")
+        parser.make("ElementDeclaration")
+        parser.expecting_has("in")
+        parser.make("SafeInitializer")
 
-        if children.next_token.has("if"):
-            children.take()
-            children.make("Expression")
+        if parser.next.has("if"):
+            parser.take()
+            parser.make("Expression")
 
-        return cls(children)
+        return self

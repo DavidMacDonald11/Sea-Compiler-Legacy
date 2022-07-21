@@ -23,25 +23,23 @@ def main():
 
 def compile_file(options, file_pair):
     try:
-        parser = None
-
         lexer = Lexer(options, file_pair[0])
         lexer.make_tokens()
         print_warnings(lexer)
 
-        parser = Parser(lexer.tokens)
-        parser.make_tree()
-        print_warnings(parser)
+        Parser.set(lexer.tokens)
+        Parser.make_tree()
+        print_warnings(Parser)
 
         write_output(file_pair[1])
     except CompilerError as error:
         print(error.printable())
         print_warnings(lexer, throw = False)
-        print_warnings(parser, throw = False)
+        print_warnings(Parser, throw = False)
     except Stop:
         pass
     finally:
-        output_debug(options, file_pair[0], lexer, parser)
+        output_debug(options, file_pair[0], lexer)
 
 def print_warnings(component, throw = True):
     if component is None:
@@ -57,13 +55,13 @@ def write_output(out_file_path):
     with open(out_file_path, "w", encoding = "UTF-8") as out_file:
         pass
 
-def output_debug(options, name, lexer, parser):
+def output_debug(options, name, lexer):
     if "d" not in options:
         return
 
     print(f"{name}:")
     print(f"  Tokens:\n    {None if lexer is None else lexer.tokens}")
-    print(f"  AST:\n    {None if parser is None else parser.tree}")
+    print(f"  AST:\n    {Parser.tree}")
 
 if __name__ == "__main__":
     main()

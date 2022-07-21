@@ -1,63 +1,61 @@
 from ..node import Node
 
 class NonReferenceTypeName(Node):
-    @classmethod
-    def construct(cls, children):
-        def recursive_construct(children, head):
-            children = children.next()
-            children += head
+    def construct(self, parser):
+        def recursive_construct(parser, head):
+            parser = parser.new()
+            parser.children += head
 
-            qualifier = children.make("TypeQualifier")
+            qualifier = parser.make("TypeQualifier")
 
-            node = cls.construct_array(children)
-            node = node or cls.construct_pointer(children)
+            node = self.construct_array(parser)
+            node = node or self.construct_pointer(parser)
 
-            if node is None:
-                if qualifier is not None:
-                    head.children += qualifier
-                    qualifier.mark()
-                    head.children.warn("Incorrect type qualifier")
+            if node is not None:
+                return recursive_construct(parser, node)
 
+            if qualifier is None:
                 return head
 
-            return recursive_construct(children, node or head)
+            head.children += qualifier
+            qualifier.mark()
+            head.parser.warn("Incorrect type qualifier")
 
-        qualifier = children.make("SpecifiersAndQualifiers")
-        node = children.make("TypeSpecifier")
+            return head
 
+        qualifier = parser.make("SpecifiersAndQualifiers")
+        node = parser.make("TypeSpecifier")
         node.children += qualifier
 
-        return recursive_construct(children, node)
+        return recursive_construct(parser, node)
 
-    @classmethod
-    def construct_array(cls, children):
-        if not children.next_token.has("["):
+    def construct_array(self, parser):
+        if not parser.next.has("["):
             return None
 
-        children.take()
+        parser.take()
 
-        if children.next_token.has("*"):
-            children.ignore()
+        if parser.next.has("*"):
+            parser.ignore()
 
-            if children.next_token.has("]"):
-                children.take_previous().kind = "Punctuator"
-                children.take()
-                return cls(children)
+            if parser.next.has("]"):
+                parser.take_previous().kind = "Punctuator"
+                parser.take()
+                return self
 
-            children.unignore()
+            parser.unignore()
 
-        if children.next_token.has(">="):
-            children.take().kind = "Punctuator"
+        if parser.next.has(">="):
+            parser.take().kind = "Punctuator"
 
-        children.make("AssignmentExpression")
-        children.expecting_has("]")
+        parser.make("AssignmentExpression")
+        parser.expecting_has("]")
 
-        return cls(children)
+        return self
 
-    @classmethod
-    def construct_pointer(cls, children):
-        if not children.next_token.has("^"):
+    def construct_pointer(self, parser):
+        if not parser.next.has("^"):
             return None
 
-        children.take().kind = "Punctuator"
-        return cls(children)
+        parser.take().kind = "Punctuator"
+        return self

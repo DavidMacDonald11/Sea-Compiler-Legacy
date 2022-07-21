@@ -1,19 +1,18 @@
 from ..node import Node
 
 class AliasStatement(Node):
-    @classmethod
-    def construct(cls, children):
-        children.take()
+    def construct(self, parser):
+        parser.take()
 
-        if children.next_token.has("type"):
-            children.take()
-            children.expecting_has("of")
-            children.make("Expression")
+        if parser.next.has("type"):
+            parser.take()
+            parser.expecting_has("of")
+            parser.make("Expression")
         else:
-            children.make("TypeName")
+            parser.make("TypeName")
 
-        children.expecting_has("as")
-        children.expecting_of("Identifier")
-        children.expecting_line_end()
+        parser.expecting_has("as")
+        parser.expecting_of("Identifier")
+        parser.expecting_line_end()
 
-        return cls(children)
+        return self

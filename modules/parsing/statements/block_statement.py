@@ -1,36 +1,30 @@
 from ..node import Node
 
 class BlockStatement(Node):
-    @classmethod
-    def construct(cls, children):
-        children.take_comments()
+    def construct(self, parser):
+        parser.take_any_comments()
 
-        if not children.next_token.has("\n"):
-            blockable = children.make("BlockableStatement")
+        if not parser.next.has("\n"):
+            if parser.make("BlockableStatement") is None:
+                parser.make("LineStatement")
 
-            if blockable is None:
-                children.make("LineStatement")
+            return self
 
-            return cls(children)
-
-        children.take()
-        children.take_empty_lines()
+        parser.take()
+        parser.take_any_empty_lines()
         empty = True
 
-        while children.indent_count() == children.depth:
+        while parser.indent_count() == parser.depth:
             empty = False
-            children.expecting_indent()
-            blockable = children.make("BlockableStatement")
+            parser.expecting_indent()
 
-            if blockable is None:
-                children.make("Statement", children.next())
+            if parser.make("BlockableStatement") is None:
+                parser.make("Statement")
 
-            children.take_empty_lines()
-
-        node = cls(children)
+            parser.take_any_empty_lines()
 
         if empty:
-            node.mark()
-            children.warn("Empty block")
+            self.mark()
+            parser.warn("Block cannot be empty; use pass")
 
-        return node
+        return self

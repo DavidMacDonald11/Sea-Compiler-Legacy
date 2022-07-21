@@ -1,60 +1,56 @@
 from ..node import Node
 
 class DoWhileStatement(Node):
-    @classmethod
-    def construct(cls, children):
+    def construct(self, parser):
         label = None
 
-        if children.next_token.of("Identifier"):
-            label = children.take()
+        if parser.next.of("Identifier"):
+            label = parser.take()
 
-            if not children.next_token.has("do"):
-                children.untake()
+            if not parser.next.has("do"):
+                parser.untake()
                 return None
 
-        if not children.next_token.has("do"):
+        if not parser.next.has("do"):
             return None
 
-        children.take()
+        parser.take()
 
-        if children.next_token.of("Identifier"):
-            post_label = children.take()
+        if parser.next.of("Identifier"):
+            post_label = parser.take()
 
             if label is not None:
                 label.mark()
                 post_label.mark()
-                children.warn("Cannot double label do-while statement")
+                parser.warn("Cannot double label do-while statement")
 
-        children.expecting_has(":")
-        children.take_comments()
+        parser.expecting_has(":")
+        parser.take_any_comments()
 
-        if children.next_token.has("\n", ""):
-            children.make("BlockStatement", children.next(1))
-            children.expecting_indent()
+        if parser.next.has("\n", ""):
+            parser.make("BlockStatement", depth = 1)
+            parser.expecting_indent()
         else:
-            blockable = children.make("BlockableStatementComponent")
+            if parser.make("BlockableStatementComponent") is None:
+                parser.make("LineStatementComponent")
 
-            if blockable is None:
-                children.make("LineStatementComponent")
+            if parser.next.has("\n"):
+                parser.take()
+                parser.take_any_empty_lines()
+                parser.expecting_indent()
 
-            if children.next_token.has("\n"):
-                children.take()
-                children.take_empty_lines()
-                children.expecting_indent()
+        parser.expecting_has("while")
+        parser.make("Expression")
+        parser.expecting_line_end()
 
-        children.expecting_has("while")
-        children.make("Expression")
-        children.take_comments()
-        children.expecting_line_end()
+        if parser.indent_count() < parser.depth:
+            return self
 
-        if children.indent_count() < children.depth:
-            return cls(children)
+        parser.expecting_indent()
 
-        children.expecting_indent()
+        if parser.next.has("else"):
+            parser.take()
+            parser.expecting_has(":")
+            parser.make("BlockStatement", depth = 1)
 
-        if children.next_token.has("else"):
-            children.take()
-            children.expecting_has(":")
-            children.make("BlockStatement", children.next(1))
-
-        return cls(children)
+        return self
