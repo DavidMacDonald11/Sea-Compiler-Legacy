@@ -22,9 +22,7 @@ class Node(ABC):
     def construct(self, parser):
         pass
 
-    # TODO uncomment
-    # @abstractmethod
-    def transpile(self):
+    def transpile(self, transpiler):
         pass
 
     @classmethod

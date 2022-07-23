@@ -139,6 +139,7 @@
 {tab} `_constant-expression_` `*:*`
 
 `_function-declaration_`:
+{tab} `_function-specifier_`~opt~ `*func*` `_identifier_` `_function-values_`
 {tab} `_function-specifier_`~opt~ `*func*` `_identifier_` `_function-values_` `*:*` `_block-statement_`
 
 `_function-specifier_`:

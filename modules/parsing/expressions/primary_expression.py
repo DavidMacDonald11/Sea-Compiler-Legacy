@@ -7,9 +7,11 @@ class PrimaryExpression(Node):
     def construct(self, parser):
         if parser.next.of("Identifier", "CharacterConstant", "StringLiteral"):
             parser.take()
+            self.specifier = "Single"
             return self
 
         if parser.next.of("NumericConstant"):
+            self.specifier = "Number"
             return self.construct_numeric_constant(parser)
 
         if parser.next.has("(", "||"):
@@ -17,6 +19,7 @@ class PrimaryExpression(Node):
 
         if parser.next.has(*token.PRIMARY_KEYWORD_LIST):
             parser.take()
+            self.specifier = "Keyword"
             return self
 
         error = parser.take()
@@ -59,10 +62,39 @@ class PrimaryExpression(Node):
         parser.expecting_has(")" if lbracket.has("(") else "||")
 
         if lbracket.has("||"):
+            self.specifier = "||"
             return self
 
         if parser.next.has("{", "["):
             parser.make("InitializerCompoundLiteral")
             return PostfixExpression(parser)
 
+        self.specifier = "()"
         return self
+
+    def transpile(self, transpiler):
+        match self.specifier:
+            case "Single":
+                pass
+            case "Number":
+                pass
+            case "()":
+                pass
+            case "||":
+                pass
+            case "Keyword":
+                pass
+
+KEYWORD_MAP = {
+    "True": "1",
+    "False": "0",
+    "Null": "0",
+    "Infinity": "__sea_reserved_INFINITY__"
+}
+
+C_KEYWORDS = (
+    "default", "extern", "goto", "signed", "sizeof", "switch",
+    "typedef", "unsigned", "_Alignas", "_Alignof", "_Atomic",
+    "_Bool", "_Complex", "_Generic", "_Imaginary", "_Noreturn",
+    "_Static_assert", "_Thread_local"
+)

@@ -27,7 +27,10 @@ class FunctionDeclaration(Node):
             parser.take()
             parser.make("TypeName")
 
-        parser.expecting_has(":")
+        if not parser.next.has(":"):
+            return self
+
+        parser.take()
         parser.make("BlockStatement", depth = 1)
 
         return self
