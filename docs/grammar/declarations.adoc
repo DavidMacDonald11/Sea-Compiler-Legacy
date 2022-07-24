@@ -97,12 +97,12 @@
 {tab} `*realloc*` `_expression_` `_initializer-realloc-arguments_`~opt~
 
 `_initializer-alloc-arguments_`:
-{tab} `*as*` `_initializer_`
+{tab} `*with*` `_initializer_`
 
 `_initialzier-realloc-arguments_`:
-{tab} `*as*` `_initializer_`
+{tab} `*with*` `_initializer_`
 {tab} `*to*` `_initializer_`
-{tab} `*to*` `_initializer_` `*as*` `_initializer_`
+{tab} `*to*` `_initializer_` `*with*` `_initializer_`
 
 `_initializer-compound-literal_`:
 {tab} `*[*` `_generator_` `*]*`

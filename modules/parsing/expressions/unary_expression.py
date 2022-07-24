@@ -34,7 +34,7 @@ class UnaryExpression(Node):
 
         parser.make("TypeName" if parser.next.may_be_type() else "Expression")
 
-        if parser.next.has("as"):
+        if parser.next.has("with"):
             parser.take()
             parser.make("Expression")
 

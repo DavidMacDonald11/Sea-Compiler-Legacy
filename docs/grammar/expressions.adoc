@@ -18,7 +18,7 @@
 {tab} `_primary-keyword_`
 
 `_primary-keyword_`: one of
-{tab} `*True*` `*False*` `*Null*` `*Infinity*` `*NaN*` `*Pi*`
+{tab} `*True*` `*False*` `*Null*`
 
 `_postfix-expression_`:
 {tab} `_primary-expression_`
@@ -36,7 +36,6 @@
 
 `_postfix-unary-operator_`: one of
 {tab} `*++*` `*--*` `*%*` `*!*`
-{tab} `*is defined*` `*is not defined*`
 
 `_argument-expression-list_`:
 {tab} `_assignment-expression_`
@@ -74,9 +73,9 @@
 
 `_alloc-arguments_`:
 {tab} `_expression_`
-{tab} `_expression_` `*as*` `_expression_`
+{tab} `_expression_` `*with*` `_expression_`
 {tab} `_type-name_`
-{tab}  `_type-name_` `*as*` `_expression_`
+{tab}  `_type-name_` `*with*` `_expression_`
 
 `_cast-expression_`:
 {tab} `_unary-expression_`
@@ -115,7 +114,7 @@
 {tab} `_comparative-expression_` `_comparative-operator_` `_bitwise-or-expression_`
 
 `_comparative-operator_`: one of
-{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*` `*is*` `*is not*` `*is in*` `*is not in*` `*is defined as*` `*is not defined as*`
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*` `*is in*` `*is not in*`
 
 `_logical-not-expression_`:
 {tab} `_comparative-expression_`

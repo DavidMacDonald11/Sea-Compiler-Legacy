@@ -7,7 +7,7 @@ class Initializer(Node):
         if parser.next.has("alloc"):
             parser.take()
 
-            if parser.next.has("as"):
+            if parser.next.has("with"):
                 parser.take()
                 parser.make("Initializer")
 
@@ -18,6 +18,10 @@ class Initializer(Node):
             parser.make("Expression")
 
             if parser.next.has("to"):
+                parser.take()
+                parser.make("Initializer")
+
+            if parser.next.has("with"):
                 parser.take()
                 parser.make("Initializer")
 

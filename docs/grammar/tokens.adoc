@@ -39,7 +39,7 @@
 {tab} `*for*` `*do*` `*while*`
 {tab} `*manage*` `*clang*` `*asm*` `*block*`
 {tab} `*break*` `*continue*` `*pass*` `*return*` `*yield*`
-{tab} `*True*` `*False*` `*Null*` `*Infinity*` `*NaN*` `*Pi*`
+{tab} `*True*` `*False*` `*Null*`
 
 == Identifiers
 `_identifier_`:

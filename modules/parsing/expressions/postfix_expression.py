@@ -32,31 +32,7 @@ class PostfixExpression(Node):
         if not parser.next.has("++", "--", "%", "!", "is"):
             return None
 
-        if not parser.next.has("is"):
-            parser.take()
-
-            self.specifier = "Unary"
-            return self
-
         parser.take()
-        negation = parser.take() if parser.next.has("not") else None
-
-        if not parser.next.has("defined"):
-            if negation is not None:
-                parser.untake()
-
-            return None
-
-        parser.take()
-
-        if parser.next.has("as"):
-            parser.untake()
-            parser.untake()
-
-            if negation is not None:
-                parser.untake()
-
-            return None
 
         self.specifier = "Unary"
         return self

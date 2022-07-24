@@ -103,7 +103,7 @@ class Token:
 
         return CompilerWarning("Incorrect universal character name", self)
 
-PRIMARY_KEYWORD_LIST = ("False","Infinity", "NaN", "Null", "Pi", "True")
+PRIMARY_KEYWORD_LIST = ("False", "Null", "True")
 
 KEYWORD_LIST = PRIMARY_KEYWORD_LIST + (
         "alias", "align", "aligned", "alloc", "and", "as", "asm",
