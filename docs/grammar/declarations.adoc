@@ -20,7 +20,7 @@
 
 `_non-reference-type-name_`:
 {tab} `_specifiers-and-qualifiers_` `_type-specifier_`
-{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*[*` `*{star}*` `*]*`
+{tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*[*` `*{star}*`~opt~ `*]*`
 {tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*[*` `*>=*`~opt~ `_assignment-expression_` `*]*`
 {tab} `_non-reference-type-name_` `_type-qualifier_`~opt~ `*^*`
 

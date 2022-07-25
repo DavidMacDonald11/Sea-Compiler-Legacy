@@ -34,20 +34,15 @@
 {tab} `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~
 {tab} `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~ `*:*` `_assignment-expression_`~opt~
 
-`_postfix-unary-operator_`: one of
-{tab} `*++*` `*--*` `*%*` `*!*`
-
 `_argument-expression-list_`:
 {tab} `_assignment-expression_`
 {tab} `_argument-expression-list_` `*,*` `_assignment-expression_`
 
-`_prefix-deviation-expression_`:
-{tab} `_postfix-expression_`
-{tab} `*++*` `_prefix-deviation-expression_`
-{tab} `*--*` `_prefix-deviation-expression_`
+`_postfix-unary-operator_`: one of
+{tab} `*++*` `*--*` `*%*` `*!*`
 
 `_exponential-expression_`:
-{tab} `_prefix-deviation-expression_`
+{tab} `_postfix-expression_`
 {tab} `_exponential-expression_` `*{star}{star}*` `_cast-expression_`
 
 `_unary-expression_`:
@@ -57,7 +52,7 @@
 {tab} `_unary-alloc-expression_`
 
 `_unary-operator_`: one of
-{tab} `*^*` `*@*` `*-*` `*!*` `*~*` `*~<*` `*~>*` `*{star}*`
+{tab} `*^*` `*@*` `*+*` `*-*` `*!*` `*~*` `*~<*` `*~>*` `*{star}*` `*++*` `*--*`
 
 `_unary-type-expression_`:
 {tab} `_unary-type-keyword_` `*of*` `_expression_`
@@ -142,7 +137,6 @@
 
 `_expression_`:
 {tab} `_assignment-expression_`
-{tab} `_expression_` `*,*` `_assignment-expression_`
 
 `_constant-expression_`:
 {tab} `_conditional-expression_`

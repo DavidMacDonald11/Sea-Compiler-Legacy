@@ -49,17 +49,13 @@ Compound literal (struct) +
 |Left-to-right
 
 |*3*
-|++ \--
-|Prefix deviation; increment and decrement
-|Right-to-left
-
-|*4*
 |**
 |Exponentiation
 |Left-to-right
 
-|*5*
-|+ - +
+|*4*
+| ++ \-- +
+- +
 ~ ~< ~> +
 ! +
 ( _type_ ) +
@@ -73,7 +69,8 @@ alloc +
 realloc +
 dealloc
 
-|Unary plus and minus +
+|Prefix deviation; increment and decrement +
+Unary minus +
 Round, round down (floor), round up (ceil) +
 Bitwise not +
 Cast +
@@ -89,7 +86,7 @@ Deallocate memory
 
 |Right-to-left
 
-|*6*
+|*5*
 |* / +
 mod
 
@@ -97,32 +94,32 @@ mod
 Modulo (remainder)
 |Left-to-right
 
-|*7*
+|*6*
 |+ -
 |Addition and subtraction
 |Left-to-right
 
-|*8*
+|*7*
 |<< >>
 |Bitwise left shift and right shift
 |Left-to-right
 
-|*9*
+|*8*
 |&
 |Bitwise and
 |Left-to-right
 
-|*10*
+|*9*
 |$
 |Bitwise xor
 |Left-to-right
 
-|*11*
+|*10*
 |\|
 |Bitwise or
 |Left-to-right
 
-|*12*
+|*11*
 |< > +
 \<= >= +
 == != +
@@ -142,27 +139,27 @@ Is in +
 Is not in
 |Left-to-right
 
-|*13*
+|*12*
 |not
 |Logical not
 |Left-to-right
 
-|*14*
+|*13*
 |and
 |Logical and
 |Left-to-right
 
-|*15*
+|*14*
 |or
 |Logical or
 |Left-to-right
 
-|*16*
+|*15*
 |_ if _ else _
 |Ternary conditional
 |Left-to-right
 
-|*17*
+|*16*
 |= +
 **= +
 *= /= %= +
@@ -177,10 +174,5 @@ Assignment by sum and difference +
 Assignment by bitwise left shift and right shfit +
 Assignment by bitwise and, xor, and or
 |Right-to-right
-
-|*18*
-|,
-|Comma
-|Left-to-right
 
 |===

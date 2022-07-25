@@ -13,13 +13,46 @@
 :stick: \`
 
 `_token_`:
+{tab} `_punctuator_`
+{tab} `_operator_`
 {tab} `_keyword_`
 {tab} `_identifier_`
-{tab} `_constant_`
+{tab} `_numeric-constant_`
+{tab} `_character-constant_`
 {tab} `_string-literal_`
-{tab} `_operator_`
-{tab} `_keyword-operator_`
-{tab} `_punctuator_`
+{tab} `_raw_`
+
+== Punctuators
+`_punctuator_`: one of
+{tab} `*[*` `*]*` `*(*` `*)*` `*{*` `*}*` `*||*`
+{tab} `*,*` `*:*` `*'*` `*{tick}*` `*"*`
+{tab} `_indent_` `_dedent_` `_line-end_` `*\*`
+
+`_indent_`:
+{tab} four spaces
+{tab} (through configuration) at least one space
+
+`_dedent_`:
+{tab} the removal of a previous `_indent_` indicating the end of a block
+
+`_line-end_`:
+{tab} `*\n*`
+{tab} `_EOF_`
+
+`_EOF_`:
+{tab} end of file character
+
+== Operators
+_All operators are punctuators_
+
+`_operator_`: one of
+{tab} `*.*` `*\->*` `*++*` `*--*` `*%*` `*!*`
+{tab} `*^*` `*@*` `*-*` `*~*` `*~<*` `*~>*` `*{star}*`
+{tab} `*{star}{star}*` `*/*` `*+*`
+{tab} `*<<*` `*>>*` `*&*` `*|*` `*$*`
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*`
+{tab} `*=*` `*{star}{star}=*` `*{star}=*` `*/=*` `*%=*` `*+=*` `*-=*`
+{tab} `*<\<=*` `*>>=*` `*&=*` `*|=*` `*$=*`
 
 == Keywords
 `_keyword_`: one of
@@ -37,9 +70,10 @@
 {tab} `*enum*` `*struct*` `*union*`
 {tab} `*if*` `*else*` `*match*` `*with*`
 {tab} `*for*` `*do*` `*while*`
-{tab} `*manage*` `*clang*` `*asm*` `*block*`
+{tab} `*manage*` `*block*` `*cblock*` `*ablock*`
 {tab} `*break*` `*continue*` `*pass*` `*return*` `*yield*`
 {tab} `*True*` `*False*` `*Null*`
+{tab} `*mod*` `*and*` `*not*` `*or*` `*is*` `*in*`
 
 == Identifiers
 `_identifier_`:
@@ -79,17 +113,15 @@
 `_hex-quad_`:
 {tab} `_hexadecimal-digit_` `_hexadecimal-digit_` `_hexadecimal-digit_` `_hexadecimal-digit_`
 
-== Constants
-`_constant_`:
+== Numeric Constants
+`_numeric-constant_`:
 {tab} `_integer-constant_` `*i*`~opt~
 {tab} `_integer-constant_` `*bytes*`~opt~
 {tab} `_floating-constant_` `*i*`~opt~
-{tab} `_enumeration-constant_`
-{tab} `_character-constant_`
 
 `_integer-constant_`:
-{tab} `_sign_`~opt~  `_decimal-constant_`
-{tab} `_sign_`~opt~ `_base-n-constant_`
+{tab} `*+*`~opt~  `_decimal-constant_`
+{tab} `*+*`~opt~ `_base-n-constant_`
 
 `_decimal-constant_`:
 {tab} `_digit-sequence_`
@@ -143,10 +175,7 @@
 {tab} `_base-n-digit-sequence_`~opt~ `*.*` `_base-n-digit-sequence_`
 {tab} `_base-n-digit-sequence_` `*.*`
 
-`_enuemration-constant_`:
-{tab} `_identifier_`
-
-`_character-constant_`:
+== Character Constants`_character-constant_`:
 {tab} `*'*` `_c-char-sequence_` `*'*`
 {tab} `*{tick}*` `_w-char-sequence_` `*{tick}*`
 
@@ -188,6 +217,7 @@
 == String Literals
 `_string-literal_`:
 {tab} `_string-prefix_` `*"*` `_s-char-sequence_` `*"*`
+{tab} `_string-prefix_` `*"""*` `_ls-char-sequence_` `*"""*`
 
 `_string-prefix_`: one of
 {tab} `*b*` `*B*` `*f*` `*F*` `*r*` `*R*`
@@ -196,44 +226,18 @@
 {tab} `_s-char_`
 {tab} `_s-char-sequence_` `_s-char_`
 
+`_ls-char-sequence_`:
+{tab} `_ls-char_`
+{tab} `_ls-char-sequence_` `_ls-char_`
+
 `_s-char_`:
 {tab} `_escape-sequence_`
 {tab} any member of the source character set except `*"*`, `*\*`, or new-line charcter
 
-== Operators
-_All non-keyword operators are punctuators_
+`_ls-char_`:
+{tab} `_escape-sequence_`
+{tab} any member of the source character set except `*"""*`
 
-`_operator_`: one of
-{tab} `*||*`
-{tab} `*.*` `*\->*` `*++*` `*--*` `*%*` `*!*`
-{tab} `*^*` `*@*` `*-*` `*~*` `*~<*` `*~>*` `*{star}*`
-{tab} `*{star}{star}*` `*/*` `*+*`
-{tab} `*<<*` `*>>*` `*&*` `*|*` `*$*`
-{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*`
-{tab} `*=*` `*{star}{star}=*` `*{star}=*` `*/=*` `*%=*` `*+=*` `*-=*`
-{tab} `*<\<=*` `*>>=*` `*&=*` `*|=*` `*$=*`
-
-== Keyword Operators
-_Keyword operators are both keywords and operators_
-
-`_keyword-operator_`: one of
-{tab} `*mod*`
-{tab} `*and*` `*not*` `*or*`
-{tab} `*in*` `*is*`
-
-== Punctuators
-`_punctuator_`: one of
-{tab} `*[*` `*]*` `*(*` `*)*` `*{*` `*}*`
-{tab} `*,*` `*:*`
-{tab} `_indent_` `_line-end_`
-
-`_indent_`:
-{tab} four spaces
-{tab} (through configuration) at least one space
-
-`_EOF_`:
-{tab} end of file character
-
-`_line-end_`:
-{tab} `*\n*`
-{tab} `_EOF_`
+== Raws
+`_raw_`:
+{tab} any symbols

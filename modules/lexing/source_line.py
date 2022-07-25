@@ -1,50 +1,60 @@
 from .token import Token
 
-class TokenLine:
+class SourceLine:
     @property
-    def captured(self):
-        return self.string[self.locale[0]:self.locale[1]]
+    def next(self):
+        return SourceLine(self.number + 1)
 
-    def __init__(self, filename, number):
-        self.filename = filename
+    @property
+    def string_remainder(self):
+        return self.string[self._locale[1]:]
+
+    def __init__(self, number = 1):
         self.number = number
         self.string = ""
         self.tokens = []
-        self.locale = [0, 0]
         self.marks = []
+        self._locale = [0, 0]
 
     def __iadd__(self, other):
         if isinstance(other, str):
             self.string += other
-        elif isinstance(other, Token):
-            self.tokens += [other]
-            other.locale = self.locale.copy()
-            self.locale[0] = self.locale[1]
-        else:
-            raise NotImplementedError(f"Cannot add {type(other)} to TokenLine.")
+            return self
 
-        return self
+        if isinstance(other, Token):
+            self.tokens += [other]
+            other.locale = self._locale.copy()
+            self._locale[0] = self._locale[1]
+            return self
+
+        raise NotImplementedError(f"Cannot iadd {type(other).__name__} to SourceLine")
 
     def __eq__(self, other):
         if isinstance(other, str):
             return self.string == other
 
-        if isinstance(other, TokenLine):
+        if isinstance(other, SourceLine):
             return self.number == other.number
 
-        raise NotImplementedError(f"Cannot compare {type(other)} to TokenLine.")
+        raise NotImplementedError(f"Cannot compare {type(other).__name__} to SourceLine")
 
     def __repr__(self):
         return repr(self.tokens)
 
     def ignore(self):
-        self.locale[0] = self.locale[1]
+        self._locale[0] = self._locale[1]
 
     def increment(self):
-        self.locale[1] += 1
+        self._locale[1] += 1
 
     def mark(self, token):
         self.marks += [token.locale]
+
+    def last_was_slash(self):
+        taken = self.string[self._locale[0]:self._locale[1]]
+        taken = taken.replace(r"\\", "")
+
+        return len(taken) > 1 and taken[-1] == "\\"
 
     def raw(self):
         col1, col2 = -1, -1

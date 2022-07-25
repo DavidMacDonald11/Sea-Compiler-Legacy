@@ -1,17 +1,15 @@
-from .token_line import TokenLine
+from .source_line import SourceLine
 
-class SmartFile:
+class SourceFile:
     @property
     def next(self):
-        string = self.line.string
-        return string[self.i] if self.i < len(string) else ""
+        string = self.line.string_remainder
+        return string[0] if string != "" else ""
 
     def __init__(self, filepath):
         self.filepath = filepath
         self.file = open(filepath, "r", encoding = "UTF-8")
         self.line = None
-        self.lines = 0
-        self.i = 0
 
         self.read_line()
 
@@ -19,8 +17,7 @@ class SmartFile:
         self.file.close()
 
     def read_line(self):
-        self.lines += 1
-        self.line = TokenLine(self.filepath, self.lines)
+        self.line = SourceLine() if self.line is None else self.line.next
         symbol = "\0"
 
         while symbol not in "\n":
@@ -33,19 +30,17 @@ class SmartFile:
         if self.line == "" or num == 0:
             return string
 
-        for i, char in enumerate(self.line.string[self.i:], self.i):
+        for char in self.line.string_remainder:
             if char in until or these != "" and char not in these:
                 return string
 
             string += char
-            self.i = i + 1
             self.line.increment()
 
             if num > 0 and len(string) == num:
                 break
 
-        if self.i >= len(self.line.string):
-            self.i = 0
+        if self.line.string_remainder == "" and self.line != "":
             self.read_line()
 
         return string

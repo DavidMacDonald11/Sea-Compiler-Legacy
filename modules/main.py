@@ -1,7 +1,5 @@
 import sys
 from lexing.lexer import Lexer
-from parsing.parser import Parser
-from transpiling.transpiler import Transpiler
 from util.file import generate_map
 from util.misc import check_verbose, printv
 from util.warnings import CompilerError, Stop
@@ -28,16 +26,16 @@ def compile_file(options, file_pair):
         lexer.make_tokens()
         print_warnings(lexer)
 
-        Parser.set(lexer.tokens)
-        Parser.make_tree()
-        print_warnings(Parser)
+        # Parser.set(lexer.tokens)
+        # Parser.make_tree()
+        # print_warnings(Parser)
 
-        transpiler = Transpiler(options, file_pair[1])
-        Parser.tree.transpile(transpiler)
+        # transpiler = Transpiler(options, file_pair[1])
+        # Parser.tree.transpile(transpiler)
     except CompilerError as error:
         print(error.printable())
         print_warnings(lexer, throw = False)
-        print_warnings(Parser, throw = False)
+        # print_warnings(Parser, throw = False)
     except Stop:
         pass
     finally:
@@ -59,7 +57,7 @@ def output_debug(options, name, lexer):
 
     print(f"{name}:")
     print(f"  Tokens:\n    {None if lexer is None else lexer.tokens}")
-    print(f"  Token Tree:\n    {Parser.tree}")
+    # print(f"  Token Tree:\n    {Parser.tree}")
 
 if __name__ == "__main__":
     main()

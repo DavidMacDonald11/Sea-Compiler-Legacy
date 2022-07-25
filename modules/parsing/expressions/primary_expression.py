@@ -88,8 +88,7 @@ class PrimaryExpression(Node):
 KEYWORD_MAP = {
     "True": "1",
     "False": "0",
-    "Null": "0",
-    "Infinity": "__sea_reserved_INFINITY__"
+    "Null": "0"
 }
 
 C_KEYWORDS = (
