@@ -120,46 +120,45 @@ Modulo (remainder)
 |Left-to-right
 
 |*11*
+|\<\=>
+|Three-way comparison
+|Left-to-right
+
+|*12*
 |< > +
 \<= >= +
 == != +
-\<\=> +
-is +
-is not +
-in +
-not in
+is in +
+is not in
 
 |Less than and greater than +
 Less than or equal to and greater than or equal to +
 Equal to, and not equal to +
-Three-way comparison +
-Is the same as +
-Is not the same as +
 Is in +
 Is not in
 |Left-to-right
 
-|*12*
+|*13*
 |not
 |Logical not
 |Left-to-right
 
-|*13*
+|*14*
 |and
 |Logical and
 |Left-to-right
 
-|*14*
+|*15*
 |or
 |Logical or
 |Left-to-right
 
-|*15*
+|*16*
 |_ if _ else _
 |Ternary conditional
 |Left-to-right
 
-|*16*
+|*17*
 |= +
 **= +
 *= /= %= +

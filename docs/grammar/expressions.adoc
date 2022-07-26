@@ -104,12 +104,16 @@
 {tab} `_bitwise-xor-expression_`
 {tab} `_bitwise-or-expression_` `*|*` `_bitwise-xor-expression_`
 
-`_comparative-expression_`:
+`_three-way-comparison-expression_`:
 {tab} `_bitwise-or-expression_`
-{tab} `_comparative-expression_` `_comparative-operator_` `_bitwise-or-expression_`
+{tab} `_three-way-comparison-expression_` `*\<\=>*` `_bitwise-or-expression_`
+
+`_comparative-expression_`:
+{tab} `_three-way-comparison-expression_`
+{tab} `_comparative-expression_` `_comparative-operator_` `_three-way-comparison-expression_`
 
 `_comparative-operator_`: one of
-{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*\<\=>*` `*is in*` `*is not in*`
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*` `*is in*` `*is not in*`
 
 `_logical-not-expression_`:
 {tab} `_comparative-expression_`
