@@ -1,5 +1,5 @@
 from lexing.token import Token
-from lexing.token_line import TokenLine
+from lexing.source_line import SourceLine
 from util.misc import last_enumerate
 from .node import Node
 
@@ -12,7 +12,7 @@ class NodeChildren:
         if other is None:
             return self
 
-        if isinstance(other, TokenLine):
+        if isinstance(other, SourceLine):
             if other not in self.lines:
                 self.lines += [other]
 

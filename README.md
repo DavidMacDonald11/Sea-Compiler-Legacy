@@ -1,23 +1,23 @@
 # The Sea Programming Language
-The Sea language is essentially a translation of the C language, with Python-like syntax. The goal is to make C easier to read, write, and debug. This increase in programming speed will more than make up for the small increase in compilation time.
+The Sea language began as a translation of the C language, with Python-like syntax.
+Now, it is more of an overhaul than first anticipated.
+Sea blends many features of languages such as C, Python, Rust, JS, Java, etc. into one simple language.
+The goal is to create a simple low-level language with fast runtimes, that is easy to read and develop.
 
 Sea - It's C, just written differently.
 
 # File Extensions and Pronunciation
-With this language comes a few file extension requirements:
+With this language comes a few file extensions:
 * `.sea`; equivalent to `.c`
-* `.hea`; equivalent to `.h`
 * `.seatmp`; used for temporary compiler data
 
 Let's set the record straight now and avoid creating a "gif" situation.
 The `.sea` file extension is pronounced like the English word "sea."
-The `.hea` file extension is pronounced like the English word "he."
-
-If you are talking about Sea in the same context as C, I will accept the pronunciation "**ess**ay **sea**." (pronounce the **bold** only)
 
 Sea is a play-on-words of C.
 The name matches the concept of writing C in a different way.
-For headers, `.hea` was the obvious choice as it is `.sea` with an "h" and contains the first three letters of "header." I chose the pronunciation so that it would rhyme.
+
+If you are talking about Sea in the same context as C, I will accept the pronunciation "**ess**ay **sea**." (pronounce the **bold** only)
 
 # Compiler Functionality
 This program includes a versatile Sea compiler, as well as language documentation.
@@ -87,7 +87,6 @@ I'd like to...
 * make syntax highlighting, icons, logos, and a linter for VS Code.
 Perhaps for other IDEs as well.
 * make the compiler usable on non-Unix systems.
-* create optional libraries to make Sea more like Python.
 
 # Documentation and Syntax
 I've included [documentation](./docs/docs.adoc) for the Sea language and compiler.

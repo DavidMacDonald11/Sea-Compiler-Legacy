@@ -13,21 +13,20 @@
 {tab} `_identifier_`
 {tab} `_constant_`
 {tab} `_string-literal_`
+{tab} `_primary-keyword_`
 {tab} `*(*` `_expression_` `*)*`
 {tab} `*||*` `_expression_` `*||*`
-{tab} `_primary-keyword_`
 
-`_primary-keyword_`: one of
-{tab} `*True*` `*False*` `*Null*`
+`_namespace-expression_`:
+{tab} `_primary-expression_`
+{tab} `_identifier_` `*::*` `_postfix-expression_`
 
 `_postfix-expression_`:
-{tab} `_primary-expression_`
+{tab} `_namespace-expression_`
 {tab} `_postfix-expression_` `*[*` `_slice-operator_` `*]*`
 {tab} `_postfix-expression_` `*(*` `_argument-expression-list_`~opt~ `*)*`
 {tab} `_postfix-expression_` `*.*` `_identifier_`
-{tab} `_postfix-expression_` `*\->*` `_identifier_`
 {tab} `_postfix-expression_` `_postfix-unary-operator_`
-{tab} `*(*` `_type-name_` `*)*` `_initializer-compound-literal_`
 
 `_slice-operator_`:
 {tab} `_assignment-expression_`

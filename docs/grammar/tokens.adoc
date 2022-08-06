@@ -20,7 +20,6 @@
 {tab} `_numeric-constant_`
 {tab} `_character-constant_`
 {tab} `_string-literal_`
-{tab} `_raw_`
 
 == Punctuators
 `_punctuator_`: one of
@@ -46,7 +45,7 @@
 _All operators are punctuators_
 
 `_operator_`: one of
-{tab} `*.*` `*\->*` `*++*` `*--*` `*%*` `*!*`
+{tab} `*::*` `*.*` `*++*` `*--*` `*%*` `*!*`
 {tab} `*^*` `*@*` `*-*` `*~*` `*~<*` `*~>*` `*{star}*`
 {tab} `*{star}{star}*` `*/*` `*+*`
 {tab} `*<<*` `*>>*` `*&*` `*|*` `*$*`
@@ -56,24 +55,25 @@ _All operators are punctuators_
 
 == Keywords
 `_keyword_`: one of
-{tab} `*include*` `*define*` `*redefine*` `*undefine*` `*defined*`
+{tab} `*import*` `*from*`
 {tab} `*assert*`
 {tab} `*alias*` `*as*`
-{tab} `*align*` `*size*` `*type*` `*of*` `*aligned*` `*to*`
-{tab} `*alloc*` `*realloc*` `*dealloc*`
-{tab} `*external*` `*register*` `*static*` `*thread*` `*local*`
-{tab} `*atomic*` `*const*` `*restrict*` `*volatile*`
-{tab} `*template*` `*decorate*` `*inline*` `*deviant*`
-{tab} `*complex*` `*imaginary*` `*real*`
+{tab} `*size*` `*type*` `*of*` `*to*`
+{tab} `*static*` `*thread*`
+{tab} `*const*` `*let*`
 {tab} `*auto*` `*void*` `*str*` `*func*` `*float*` `*double*`
 {tab} `*bool*` `*char*` `*short*` `*int*` `*long*`
 {tab} `*enum*` `*struct*` `*union*`
 {tab} `*if*` `*else*` `*match*` `*with*`
 {tab} `*for*` `*do*` `*while*`
-{tab} `*manage*` `*block*` `*cblock*` `*ablock*`
+{tab} `*manage*` `*block*`
 {tab} `*break*` `*continue*` `*pass*` `*return*` `*yield*`
-{tab} `*True*` `*False*` `*Null*`
+{tab} `*True*` `*False*` `*None*`
 {tab} `*mod*` `*and*` `*not*` `*or*` `*is*` `*in*`
+{tab} `_primary-keyword_`
+
+`_primary-keyword_`: one of
+{tab} `*True*` `*False*` `*None*`
 
 == Identifiers
 `_identifier_`:
@@ -237,7 +237,3 @@ _All operators are punctuators_
 `_ls-char_`:
 {tab} `_escape-sequence_`
 {tab} any member of the source character set except `*"""*`
-
-== Raws
-`_raw_`:
-{tab} any symbols
