@@ -1,17 +1,46 @@
-class CompilerWarning:
-    def __init__(self, message, component):
-        self.message = message
-        self.component = component
+from lexing.token import Token
 
-    def printable(self, prefix = "warning: "):
-        string = f"{prefix}{self.message}\n"
-        string += "" if self.component is None else self.component.raw()
+class Warnings:
+    def __init__(self):
+        self.warnings = []
+        self.errors = []
+        self.failure = ""
 
-        return string
+    def __repr__(self):
+        return "\n".join(self.warnings + self.errors) + self.failure
 
-class CompilerError(CompilerWarning, Exception):
-    def printable(self, prefix = "error: "):
-        return super().printable(prefix)
+    def _add(self, component, message, label):
+        string = ""
 
-class Stop(Exception):
-    pass
+        if isinstance(component, Token):
+            component.mark()
+            string = component.line.raw()
+        elif component is not None:
+            raise NotImplementedError(f"Must define Warnings.add(: {type(component).__name__})")
+
+        string = f"{label}: {message}\n{string}"
+
+        match label:
+            case "warning":
+                self.warnings += [string]
+            case "error":
+                self.errors += [string]
+            case "failure":
+                self.failure = string
+
+    def warn(self, component, message):
+        self._add(component, message, "warning")
+
+    def error(self, component, message):
+        self._add(component, message, "error")
+
+    def fail(self, component, message):
+        self._add(component, message, "failure")
+        raise Warnings.CompilerFailure()
+
+    def check(self):
+        if len(self.warnings + self.errors) > 0:
+            raise Warnings.CompilerFailure()
+
+    class CompilerFailure(Exception):
+        pass

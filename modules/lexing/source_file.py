@@ -3,7 +3,7 @@ from .source_line import SourceLine
 class SourceFile:
     @property
     def next(self):
-        string = self.line.string_remainder
+        string = self.line.unread_string
         return string[0] if string != "" else ""
 
     def __init__(self, filepath):
@@ -17,7 +17,7 @@ class SourceFile:
         self.file.close()
 
     def read_line(self):
-        self.line = SourceLine() if self.line is None else self.line.next
+        self.line = SourceLine() if self.line is None else self.line.next()
         symbol = "\0"
 
         while symbol not in "\n":
@@ -30,7 +30,7 @@ class SourceFile:
         if self.line == "" or num == 0:
             return string
 
-        for char in self.line.string_remainder:
+        for char in self.line.unread_string:
             if char in until or these != "" and char not in these:
                 return string
 
@@ -40,7 +40,7 @@ class SourceFile:
             if num > 0 and len(string) == num:
                 break
 
-        if self.line.string_remainder == "" and self.line != "":
+        if self.line.unread_string == "" and self.line != "":
             self.read_line()
 
         return string

@@ -1,13 +1,3 @@
-VERBOSE = [False]
-
-def check_verbose(options):
-    if "v" in options:
-        VERBOSE[0] = True
-
-def printv(*args, **kwargs):
-    if VERBOSE[0]:
-        print(*args, **kwargs)
-
 class MatchIn:
     def __init__(self, obj):
         self.obj = obj
@@ -18,7 +8,7 @@ class MatchIn:
 def last_enumerate(iterable, **kwargs):
     for i, thing in enumerate(iterable, **kwargs):
         at_last = i == len(iterable) - 1
-        yield at_last, thing
+        yield (at_last, thing)
 
 def repr_expand(iterable):
     iterable = [escape_whitespace(obj) for obj in iterable]

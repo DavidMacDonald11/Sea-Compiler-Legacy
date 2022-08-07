@@ -2,11 +2,7 @@ from .token import Token
 
 class SourceLine:
     @property
-    def next(self):
-        return SourceLine(self.number + 1)
-
-    @property
-    def string_remainder(self):
+    def unread_string(self):
         return self.string[self._locale[1]:]
 
     def __init__(self, number = 1):
@@ -27,7 +23,7 @@ class SourceLine:
             self._locale[0] = self._locale[1]
             return self
 
-        raise NotImplementedError(f"Cannot iadd {type(other).__name__} to SourceLine")
+        raise NotImplementedError(f"Cannot += {type(other).__name__} to SourceLine")
 
     def __eq__(self, other):
         if isinstance(other, str):
@@ -36,10 +32,13 @@ class SourceLine:
         if isinstance(other, SourceLine):
             return self.number == other.number
 
-        raise NotImplementedError(f"Cannot compare {type(other).__name__} to SourceLine")
+        raise NotImplementedError(f"Cannot == {type(other).__name__} to SourceLine")
 
     def __repr__(self):
         return repr(self.tokens)
+
+    def next(self):
+        return SourceLine(self.number + 1)
 
     def ignore(self):
         self._locale[0] = self._locale[1]

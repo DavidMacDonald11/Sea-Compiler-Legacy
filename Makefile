@@ -16,29 +16,32 @@ $(VENV):
 	$(PY) -m venv $(VENV)
 	$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install $(PIP_MODULES)
+	source $(VENV)/bin/activate
 
 .git:
 	git init
 	git add .
 	git commit -m "Create initial project"
 
-.PHONY: activate
-activate: $(VENV)
-	source $(VENV)/bin/activate
-
 .PHONY: init
-init: activate .git
+init: $(VENV) .git
 
 .PHONY: run
-run: $(VENV) activate
+run: $(VENV)
 	./sea.bash
 
+.PHONY: test
+test: $(VENV)
+	-$(RM) -r test/bin
+	mkdir test/bin
+	cd test/src; ../../sea.bash -d -o=../bin -m=t .
+
 .PHONY: lint
-lint: $(VENV) activate
+lint: $(VENV)
 	$(PYTHON) -m pylint --rcfile=.pylintrc $(MODULES)
 
 .PHONY: full_lint
-full_lint: $(VENV) activate
+full_lint: $(VENV)
 	$(PYTHON) -m pylint $(MODULES)
 
 .PHONY: deep
