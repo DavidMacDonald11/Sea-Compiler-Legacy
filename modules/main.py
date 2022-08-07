@@ -1,6 +1,8 @@
 import sys
 from lexing.lexer import Lexer
 from lexing.token import Token
+from parsing.node import Node
+from parsing.parser import Parser
 from util.file import generate_map
 from util.warnings import Warnings
 
@@ -23,6 +25,10 @@ def compile_file(options, file_pair):
     try:
         lexer = Lexer(warnings, file_pair[0])
         lexer.make_tokens()
+        warnings.check()
+
+        Node.parser = parser = Parser(warnings, lexer.tokens)
+        parser.make_tree()
         warnings.check()
     except Warnings.CompilerFailure:
         print(warnings)

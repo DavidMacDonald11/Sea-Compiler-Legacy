@@ -1,4 +1,5 @@
 from lexing.token import Token
+from parsing.node import Node
 
 class Warnings:
     def __init__(self):
@@ -15,6 +16,9 @@ class Warnings:
         if isinstance(component, Token):
             component.mark()
             string = component.line.raw()
+        elif isinstance(component, Node):
+            component.mark()
+            string = component.raw()
         elif component is not None:
             raise NotImplementedError(f"Must define Warnings.add(: {type(component).__name__})")
 
@@ -36,7 +40,7 @@ class Warnings:
 
     def fail(self, component, message):
         self._add(component, message, "failure")
-        raise Warnings.CompilerFailure()
+        return Warnings.CompilerFailure()
 
     def check(self):
         if len(self.warnings + self.errors) > 0:

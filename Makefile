@@ -1,4 +1,4 @@
-SHELL 		:= /bin/bash
+SHELL 		:= /bin/zsh
 
 PIP_MODULES	:= pylint pydocstyle pycodestyle mypy rope
 
@@ -10,7 +10,7 @@ VENV 		:= venv
 PY			:= python3
 PYTHON 		:= ./$(VENV)/bin/$(PY)
 
-.DEFAULT_GOAL := run
+.DEFAULT_GOAL := test
 
 $(VENV):
 	$(PY) -m venv $(VENV)
@@ -25,10 +25,6 @@ $(VENV):
 
 .PHONY: init
 init: $(VENV) .git
-
-.PHONY: run
-run: $(VENV)
-	./sea.bash
 
 .PHONY: test
 test: $(VENV)

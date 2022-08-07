@@ -22,7 +22,7 @@
 
 `_exponential-expression_`:
 {tab} `_postfix-expression_`
-{tab} `_exponential-expresion_` `*^*` `_unary-expression_`
+{tab} `_exponential-expression_` `*^*` `_unary-expression_`
 
 `_unary-expression_`:
 {tab} `_exponential-expression_`

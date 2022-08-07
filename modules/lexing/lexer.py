@@ -48,7 +48,7 @@ class Lexer:
                 self.make_operator()
             case _:
                 self.file.take(1)
-                self.warnings.fail(self.new_token("Error"), "Unrecognized symbol")
+                raise self.warnings.fail(self.new_token("Error"), "Unrecognized symbol")
 
     def check_spaces(self):
         if not self.file.next.isspace():
