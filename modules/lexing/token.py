@@ -61,8 +61,8 @@ class Token:
 
         type(self).warnings.error(self, "Incorrect float constant")
 
-POSTFIX_UNARY_OPERATORS = {"++", "--", "%", "!"}
-PREFIX_UNARY_OPERATORS = {"+", "-", "!", "~", "<~", "~>", "++", "--"}
+POSTFIX_UNARY_OPERATORS = {"%", "!"}
+PREFIX_UNARY_OPERATORS = {"+", "-", "!", "~", "<~", "~>"}
 BINARY_OPERATORS = {"^", "*", "/", "+", "-", "<<", ">>", "&", "$", "|"}
 
 OPERATORS = POSTFIX_UNARY_OPERATORS | PREFIX_UNARY_OPERATORS | BINARY_OPERATORS | {"||"}

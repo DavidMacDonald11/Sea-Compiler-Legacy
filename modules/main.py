@@ -3,6 +3,7 @@ from lexing.lexer import Lexer
 from lexing.token import Token
 from parsing.node import Node
 from parsing.parser import Parser
+from transpiling.transpiler import Transpiler
 from util.file import generate_map
 from util.warnings import Warnings
 
@@ -20,7 +21,7 @@ def main():
 
 def compile_file(options, file_pair):
     Token.warnings = warnings = Warnings()
-    lexer = parser = None
+    lexer = parser = transpiler = None
 
     try:
         lexer = Lexer(warnings, file_pair[0])
@@ -30,12 +31,16 @@ def compile_file(options, file_pair):
         Node.parser = parser = Parser(warnings, lexer.tokens)
         parser.make_tree()
         warnings.check()
+
+        transpiler = Transpiler(warnings, file_pair[1])
+        print(parser.tree.transpile(transpiler))
+        warnings.check()
     except Warnings.CompilerFailure:
         print(warnings)
     finally:
-        output_debug(options, file_pair[0], lexer, parser)
+        output_debug(options, file_pair[0], lexer, parser, transpiler)
 
-def output_debug(options, name, lexer, parser):
+def output_debug(options, name, lexer, parser, transpiler):
     if "d" not in options:
         return
 

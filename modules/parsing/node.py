@@ -6,7 +6,7 @@ class Node(ABC):
 
     @property
     @abstractmethod
-    def nodes(self):
+    def nodes(self) -> list:
         pass
 
     def __repr__(self):
@@ -35,12 +35,12 @@ class Node(ABC):
         pass
 
     #TODO@abstractmethod
-    def transpile(self):
+    def transpile(self, transpiler):
         pass
 
 class PrimaryNode(Node):
     @property
-    def nodes(self):
+    def nodes(self) -> list:
         return [self.token, *self.tokens]
 
     def __init__(self, token, *tokens):
@@ -53,7 +53,7 @@ class PrimaryNode(Node):
 
 class BinaryOperation(Node):
     @property
-    def nodes(self):
+    def nodes(self) -> list:
         return [self.left, self.operator, self.right]
 
     def __init__(self, left, operator, right):
@@ -76,3 +76,11 @@ class BinaryOperation(Node):
             node = cls(node, operator, right.construct())
 
         return node
+
+    def transpile(self, transpiler):
+        return self.transpile_binary(transpiler, self.operator.string)
+
+    def transpile_binary(self, transpiler, operator):
+        left = self.left.transpile(transpiler)
+        right = self.right.transpile(transpiler)
+        return f"{left} {operator} {right}"

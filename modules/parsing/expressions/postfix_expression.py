@@ -4,7 +4,7 @@ from ..node import Node
 
 class PostfixExpression(Node):
     @property
-    def nodes(self):
+    def nodes(self) -> list:
         return [self.expression, self.operator]
 
     def __init__(self, expression, operator):
@@ -22,3 +22,14 @@ class PostfixExpression(Node):
             node = cls(node, cls.parser.take())
 
         return node
+
+    def transpile(self, transpiler):
+        expression = self.expression.transpile(transpiler)
+
+        if self.operator.has("++", "--"):
+            return expression + (1 if self.operator.has("++") else -1)
+
+        if self.operator.has("%"):
+            return expression * .01
+
+        # TODO factorial

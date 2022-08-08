@@ -21,9 +21,15 @@ class NumericConstant(PrimaryNode):
     def construct(cls):
         return cls(cls.parser.take())
 
+    def transpile(self, transpiler):
+        return {
+            "int": int,
+            "float": float
+        }[self.token.specifier](self.token.string)
+
 class ParenthesesExpression(Node):
     @property
-    def nodes(self):
+    def nodes(self) -> list:
         return [self.expression]
 
     def __init__(self, expression):
@@ -36,6 +42,9 @@ class ParenthesesExpression(Node):
         cls.parser.expecting_has(")")
         return node
 
+    def transpile(self, transpiler):
+        return self.expression.transpile(transpiler)
+
 class NormExpression(ParenthesesExpression):
     @classmethod
     def construct(cls):
@@ -43,3 +52,6 @@ class NormExpression(ParenthesesExpression):
         node = cls(cls.parser.expression.construct())
         cls.parser.expecting_has("||")
         return node
+
+    def transpile(self, transpiler):
+        return abs(self.expression.transpile(transpiler))

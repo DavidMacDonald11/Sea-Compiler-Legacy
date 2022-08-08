@@ -51,7 +51,7 @@ Compound literal (struct) +
 |*3*
 |**
 |Exponentiation
-|Left-to-right
+|Right-to-left
 
 |*4*
 | ++ \-- +

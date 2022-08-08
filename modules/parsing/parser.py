@@ -1,6 +1,7 @@
 from util.misc import repr_expand
 from .expressions.unary_expression import UnaryExpression
 from .expressions.expression import Expression
+from .statements.file_statement import FileStatement
 
 class Parser:
     @property
@@ -16,7 +17,8 @@ class Parser:
         self.tree = None
 
     def make_tree(self):
-        self.tree = Expression.construct()
+        self.tree = FileStatement.construct()
+        self.tree.make_tree(self)
 
     def take(self):  # sourcery skip: inline-immediately-returned-variable
         token = self.next
