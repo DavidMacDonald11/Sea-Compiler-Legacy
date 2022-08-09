@@ -33,7 +33,7 @@ def compile_file(options, file_pair):
         warnings.check()
 
         transpiler = Transpiler(warnings, file_pair[1])
-        print(parser.tree.transpile(transpiler))
+        parser.tree.transpile(transpiler)
         warnings.check()
     except Warnings.CompilerFailure:
         print(warnings)

@@ -17,4 +17,5 @@ class ExpressionStatement(Node):
 
     def transpile(self, transpiler):
         expression = self.expression.transpile(transpiler)
-        transpiler.write(f"{expression};")
+        e_type = transpiler.expression_type
+        transpiler.write(f"{expression}; /*{e_type}*/")

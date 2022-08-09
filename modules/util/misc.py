@@ -23,3 +23,12 @@ def escape_whitespace(string):
         return "EOF"
 
     return string.replace("\n", r"\n").replace("    ", r"\t")
+
+def set_add(items, new_items):
+    for item in new_items:
+        if item in items:
+            continue
+
+        items += [item]
+
+    return items

@@ -2,8 +2,8 @@ class Transpiler:
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
+        self.expression_type = None
         self.includes = []
-        self.used = []
 
         self.standard()
 
@@ -30,14 +30,12 @@ class Transpiler:
             self.includes += [header]
             self.write(f"#include <{header}.h>")
 
-    def write(self, string = ""):
-        self.file.write(f"{string}\n")
+    def write(self, string = "", end = "\n"):
+        self.file.write(f"{string}{end}")
 
     def alias(self, c_name, sea_name):
         self.write(f"typedef {c_name} {sea_name};")
 
-    def use(self, alias, bits):
-        if alias not in self.used:
-            self.used += [alias]
-            message = f'"{alias} is not supported on this architecture"'
-            self.write(f'_Static_assert(sizeof({alias}) * CHAR_BIT == {bits}, {message});')
+    def set_type(self, e_type1, e_type2):
+        points = {"u64": 1, "i64": 2, "f64": 3}
+        self.expression_type = e_type1 if points[e_type1] > points[e_type2] else e_type2

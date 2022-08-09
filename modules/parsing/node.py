@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from util.misc import last_enumerate
+from util.misc import last_enumerate, set_add
 
 class Node(ABC):
     parser = None
@@ -26,8 +26,19 @@ class Node(ABC):
         for node in self.nodes:
             node.mark()
 
+    def lines(self):
+        lines = []
+
+        for node in self.nodes:
+            set_add(lines, node.lines() if isinstance(node, Node) else [node.line])
+
+        return lines
+
     def raw(self):
-        return "".join(n.raw() if isinstance(n, Node) else n.line.raw() for n in self.nodes)
+        return "".join(line.raw() for line in self.lines())
+
+    def of(self, *kinds):
+        return isinstance(self, kinds)
 
     @classmethod
     @abstractmethod
@@ -82,5 +93,10 @@ class BinaryOperation(Node):
 
     def transpile_binary(self, transpiler, operator):
         left = self.left.transpile(transpiler)
+        left_e_type = transpiler.expression_type
         right = self.right.transpile(transpiler)
+        right_e_type = transpiler.expression_type
+
+        transpiler.set_type(left_e_type, right_e_type)
+
         return f"{left} {operator} {right}"

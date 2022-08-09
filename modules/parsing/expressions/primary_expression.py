@@ -22,10 +22,8 @@ class NumericConstant(PrimaryNode):
         return cls(cls.parser.take())
 
     def transpile(self, transpiler):
-        return {
-            "int": int,
-            "float": float
-        }[self.token.specifier](self.token.string)
+        transpiler.expression_type = f"{self.token.specifier[0]}64"
+        return self.token.string
 
 class ParenthesesExpression(Node):
     @property
@@ -43,7 +41,7 @@ class ParenthesesExpression(Node):
         return node
 
     def transpile(self, transpiler):
-        return self.expression.transpile(transpiler)
+        return f"({self.expression.transpile(transpiler)})"
 
 class NormExpression(ParenthesesExpression):
     @classmethod
@@ -54,4 +52,12 @@ class NormExpression(ParenthesesExpression):
         return node
 
     def transpile(self, transpiler):
-        return abs(self.expression.transpile(transpiler))
+        expression = self.expression.transpile(transpiler)
+
+        if transpiler.expression_type == "u64":
+            return expression
+
+        transpiler.include("math")
+        cast = "" if transpiler.expression_type != "i64" else "(i64)"
+
+        return f"({cast}fabs({expression}))"

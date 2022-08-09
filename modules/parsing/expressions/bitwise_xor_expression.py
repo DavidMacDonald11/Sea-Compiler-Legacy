@@ -7,7 +7,4 @@ class BitwiseXorExpression(BinaryOperation):
         return cls.construct_binary(["$"], BitwiseAndExpression)
 
     def transpile(self, transpiler):
-        left = self.left.transpile(transpiler)
-        right = self.right.transpile(transpiler)
-
-        return left ^ right
+        return self.transpile_binary(transpiler, "^")
