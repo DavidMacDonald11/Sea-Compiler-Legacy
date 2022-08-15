@@ -24,6 +24,3 @@
 `_identifier-list_`:
 {tab} `_identifier_`
 {tab} `_identifier-list_` `*,*` `_identifier_`
-
-`_variable-definition_`:
-{tab} `_variable-declaration_` `*=*` `_expression_`

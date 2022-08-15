@@ -12,13 +12,27 @@
 `_expression-statement_`:
 {tab} `_expression_` `_line-end_`
 
+`_variable-definition_`:
+{tab} `_variable-declaration_` `*=*` `_expression-statement_`
+
 `_variable-statement_`:
 {tab} `_variable-declaration_` `_line-end_`
-{tab} `_variable-definition_` `_line-end_`
+{tab} `_variable-definition_`
+
+`_assignment-statement_`:
+{tab} `_expression-statement_`
+{tab} `_identifier_` `*=*` `_assignment-statement_`
+
+`_compound-assignment-statement_`:
+{tab} `_assignment-statement_`
+{tab} `_identifier_` `_compound_assignment-operator_` `_expression-statement_`
+`_compound_assignment-operator_`: one of
+{tab} `*^=*`, `*{star}=*`, `*/=*`, `*%=*`, `*+=*`, `*-=*`
+{tab} `*<\<=*`, `*>>=*`, `*&=*`, `*$=*`, `*|=*`
 
 `_statement_`:
-{tab} `_expression-statement_`
 {tab} `_variable-statement_`
+{tab} `_compound-assignment-statement_`
 
 `_file-statement_`:
 {tab} `_statement_`

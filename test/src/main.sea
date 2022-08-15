@@ -1,8 +1,8 @@
-int64 num1, num2
-bool condition = 6?
+int64 num1, num2, num3
+cplex z = 1 + 1i
 
-cplex z, z2, z3, z4 = 1 + 3i if ||1 + 3i|| < 1 else 1i
+num1 = 6
+num2 = num3 = 7
 
-bool value = 1000000 < 0 < -1
-char letter_a = 'a'
-imag32 one, two = 6i
+num1 ^= 2
+num2 %= 6i

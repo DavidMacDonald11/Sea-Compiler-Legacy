@@ -1,3 +1,4 @@
+from parsing.declarations.type_keyword import TYPE_MAP
 from .symbol_table import SymbolTable
 
 class Transpiler:
@@ -68,6 +69,9 @@ class Transpiler:
 
     def safe_type(self, e_type):
         return f"__sea_type_{e_type}__"
+
+    def c_type(self, s_type):
+        return TYPE_MAP[s_type]
 
 POINTS = {
     "bool": 0,

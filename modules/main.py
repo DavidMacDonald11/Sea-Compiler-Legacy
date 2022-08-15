@@ -1,6 +1,6 @@
 import sys
 from lexing.lexer import Lexer
-from lexing.token import Token
+from lexing.token import Token, FakeToken
 from parsing.node import Node
 from parsing.parser import Parser
 from transpiling.transpiler import Transpiler
@@ -20,7 +20,7 @@ def main():
         compile_file(options, file_pair)
 
 def compile_file(options, file_pair):
-    Token.warnings = warnings = Warnings()
+    Token.warnings = FakeToken.warnings = warnings = Warnings()
     transpiler = lexer = parser = None
 
     try:

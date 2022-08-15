@@ -32,6 +32,12 @@ test: $(VENV)
 	mkdir test/bin
 	cd test/src; ../../sea.bash -d -o=../bin -m=a .
 
+.PHONY: run
+run: $(VENV)
+	-$(RM) -r test/bin
+	mkdir test/bin
+	cd test/src; ../../sea.bash -d -o=../bin -m=r .
+
 .PHONY: lint
 lint: $(VENV)
 	$(PYTHON) -m pylint --rcfile=.pylintrc $(MODULES)

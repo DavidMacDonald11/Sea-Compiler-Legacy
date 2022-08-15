@@ -3,21 +3,23 @@ from functools import cached_property
 from string import ascii_letters
 from util.misc import escape_whitespace, MatchRe
 
-class Token:
+class FakeToken:
     warnings = None
 
     @cached_property
     def string(self):
-        return escape_whitespace(self.line.string[self.locale[0]:self.locale[1]])
+        return self._string
 
-    def __init__(self, line, kind, depth):
+    @classmethod
+    def copy(cls, token, string = None):
+        return cls(token.line, token.kind, token.depth, string or token.string)
+
+    def __init__(self, line, kind, depth, string):
         self.line = line
         self.kind = kind
         self.depth = depth
-        self.locale = [0, 0]
         self.specifier = None
-
-        self.line += self
+        self._string = string
 
     def __repr__(self):
         specifier = "" if self.specifier is None else self.specifier[0]
@@ -99,11 +101,23 @@ class Token:
 
         type(self).warnings.error(self, "Incorrect operator function")
 
+class Token(FakeToken):
+    warnings = None
+
+    @cached_property
+    def string(self):
+        return escape_whitespace(self.line.string[self.locale[0]:self.locale[1]])
+
+    def __init__(self, line, kind, depth):
+        self.locale = [0, 0]
+        super().__init__(line, kind, depth, "")
+        self.line += self
+
 POSTFIX_UNARY_OPERATORS = {"%", "!", "?"}
 PREFIX_UNARY_OPERATORS = {"+", "-", "!", "~", "<~", "~>"}
 BINARY_OPERATORS = {"^", "*", "/", "+", "-", "<<", ">>", "&", "$", "|", "<=>"}
 COMPARATIVE_OPERATORS = {"<", ">", "<=", ">=", "==", "!="}
-ASSIGNMENT_OPERATORS = {"="}
+ASSIGNMENT_OPERATORS = {"=", "^=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "$=", "|="}
 
 POSTFIX_OPERATORS = POSTFIX_UNARY_OPERATORS | BINARY_OPERATORS | COMPARATIVE_OPERATORS
 POSTFIX_OPERATORS |= ASSIGNMENT_OPERATORS

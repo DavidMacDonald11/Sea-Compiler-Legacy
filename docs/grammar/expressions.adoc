@@ -12,6 +12,7 @@
 `_primary-expression_`:
 {tab} `_numeric-constant_`
 {tab} `_character-constant_`
+{tab} `_identifier_`
 {tab} `*(*` `_expression_` `*)*`
 {tab} `*||*` `_expression_` `*||*`
 {tab} `_primary-keyword_`

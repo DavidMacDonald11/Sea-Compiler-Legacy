@@ -25,3 +25,16 @@ class Variable(Symbol):
     @property
     def c_name(self):
         return f"__sea_var_{self.name}__"
+
+    def assign(self, node, e_type, expression, identifier = None):
+        identifier = identifier or self.c_name
+
+        if self.s_type == "bool" and e_type != "bool":
+            node.transpiler.warnings.error(node, "Cannot assign non-boolean value to bool variable")
+
+        if self.s_type not in ("imag32", "imag64", "imag"):
+            return (e_type, f"{identifier} = {expression}")
+
+        suffix = "f" if self.s_type == "imag32" else ("l" if self.s_type == "imag" else "")
+        node.transpiler.include("complex")
+        return (e_type, f"{identifier} = cimag{suffix}({expression})")

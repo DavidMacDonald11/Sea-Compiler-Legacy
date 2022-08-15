@@ -10,6 +10,9 @@ class PrimaryExpression(Node):
         if cls.parser.next.of("CharacterConstant"):
             return CharacterConstant.construct()
 
+        if cls.parser.next.of("Identifier"):
+            return Identifier.construct()
+
         if cls.parser.next.has("("):
             return ParenthesesExpression.construct()
 
@@ -38,6 +41,22 @@ class NumericConstant(PrimaryNode):
 class CharacterConstant(PrimaryNode):
     def transpile(self):
         return ("u64", self.token.string)
+
+class Identifier(PrimaryNode):
+    def transpile(self):
+        name = self.token.string
+        var = self.transpiler.symbols[name]
+
+        if var is None:
+            self.transpiler.warnings.error(self, f"Reference to undeclared variable '{name}'")
+            return ("cmax", f"/*{name}*/")
+
+        e_type, _ = self.transpiler.c_type(var.s_type)
+
+        if var.s_type in ("imag32", "imag64", "imag"):
+            return (e_type, f"({var.c_name} * 1.0j)")
+
+        return (e_type, var.c_name)
 
 class ParenthesesExpression(Node):
     @property

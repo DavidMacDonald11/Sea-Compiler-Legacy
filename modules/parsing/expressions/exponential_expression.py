@@ -17,11 +17,11 @@ class ExponentialExpression(BinaryOperation):
             case "u64"|"i64"|"f64":
                 self.transpiler.include("math")
                 func = "pow"
-                cast = self.transpiler.safe_type(e_type) if e_type != "f64" else ""
+                cast = "" if e_type == "f64" else f"({self.transpiler.safe_type(e_type)})"
             case "umax"|"imax"|"fmax":
                 self.transpiler.include("math")
                 func = "powl"
-                cast = self.transpiler.safe_type(e_type) if e_type != "fmax" else ""
+                cast = "" if e_type == "fmax" else f"({self.transpiler.safe_type(e_type)})"
             case "c64":
                 self.transpiler.include("complex")
                 func = "cpow"

@@ -1,4 +1,5 @@
-from ..declarations.variable_definition import VariableDefinition
+from .variable_definition import VariableDefinition
+from ..declarations.variable_declaration import VariableDeclaration
 from ..node import Node
 
 class VariableStatement(Node):
@@ -12,9 +13,13 @@ class VariableStatement(Node):
     @classmethod
     def construct(cls):
         statement = VariableDefinition.construct()
-        cls.parser.expecting_has(r"\n", "EOF")
+
+        if isinstance(statement, VariableDeclaration):
+            cls.parser.expecting_has(r"\n", "EOF")
+
         return cls(statement)
 
     def transpile(self):
         e_type, statement = self.statement.transpile()
-        self.transpiler.write(f"{statement};{e_type}")
+        e_type = f"/*{e_type}*/" if e_type != "" else ""
+        self.transpiler.write(f"{statement}{e_type};")
