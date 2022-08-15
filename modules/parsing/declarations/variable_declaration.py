@@ -32,9 +32,10 @@ class VariableDeclaration(Node):
             name = self.transpiler.symbols.new_variable(sea_keyword, identifier.string)
 
             if name is None:
-                self.transpiler.error(self, f"Cannot declare variable {identifier} twice.")
-                return f"{keyword} {identifiers}/*, {identifier}*/"
+                message = f"Cannot declare variable '{identifier.string}' twice."
+                self.transpiler.warnings.error(self, message)
+                return ("", f"{keyword} {identifiers}/*, {identifier}*/")
 
             identifiers = name if identifiers == "" else f"{identifiers}, {name}"
 
-        return "", f"{keyword} {identifiers}"
+        return ("", f"{keyword} {identifiers}")
