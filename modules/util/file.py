@@ -43,9 +43,9 @@ def create_out_path(mode, out_dir, path):
     if mode == "g":
         return f"{out_path}.conf"
 
-    return out_path.replace("/./", "/").replace(".sea", ".c").replace(".hea", ".h")
+    return out_path.replace("/./", "/").replace(".sea", ".c")
 
 def write_manifest(out_dir, file_map):
     with open(f"{out_dir}/manifest.seatmp", "w", encoding = "UTF-8") as manifest:
         for _, file in file_map:
-            manifest.write(f"{file}\n")
+            manifest.write(f"{file.replace('.c', '')}\n")

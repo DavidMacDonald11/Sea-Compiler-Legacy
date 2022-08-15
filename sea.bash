@@ -1,4 +1,5 @@
 #!/bin/bash
+shopt -s extglob
 
 sea_path="$(dirname "$0" | sed s/' '/'\\ '/g)"
 working="$(pwd | sed s/' '/'\\ '/g)"
@@ -36,7 +37,8 @@ usage() {
     print_usage "" "  MODE=p    does above and preprocesses C"
     print_usage "" "  MODE=c    does above and compiles C to asm,"
     print_usage "" "  MODE=a    does above and assembles asm to objects,"
-    print_usage "" "  MODE=l    does above and links objects (default)"
+    print_usage "" "  MODE=l    does above and links objects (default),"
+    print_usage "" "  MODE=r    does above and runs generated program"
     print_usage "-o, --out=OUT" "specifies the output directory to compile to;"
     print_usage "" "all files will be written into OUT, which is"
     print_usage "" "the current directory by default; The directory"
@@ -81,9 +83,9 @@ get_single_arg() {
     exit 3
 }
 
-mode_args="tpcal"
+mode_args="tpcalr"
 
-while getopts ":-:hduvm:o:c:" arg
+while getopts ":-:hdum:o:c:" arg
 do
     case "${arg}" in
         -)
@@ -96,8 +98,6 @@ do
                 "update")
                     update
                     exit "$?" ;;
-                "verbose")
-                    add "v" ;;
                 "version")
                     printf "Sea 0.0.0\n"
                     exit 0 ;;
@@ -122,8 +122,6 @@ do
         "u")
             update
             exit "$?" ;;
-        "v")
-            add "v" ;;
         "c")
             get_arg "-c"
             callback="$get_arg_return" ;;
@@ -189,13 +187,45 @@ eval cd "$working"
 
 eval "$python" "$main" "$options" "$mode" "$out_dir" "${files[*]@Q}"
 
-if [[ "$callback" != "" ]]
+if [[ "$callback" != "" || "$mode" == "t" ]]
 then
     printv "Running callback..."
     eval "$callback"
     exit $?
 fi
 
-# Call GCC
+gcc_arg=""
+gcc_output=""
+objects=""
+
+case "$mode" in
+    "p")
+        gcc_arg="-E"
+        gcc_output="_preprocessed.c" ;;
+    "c")
+        gcc_arg="-S"
+        gcc_output=".s" ;;
+    "a"|"l"|"r")
+        gcc_arg="-c"
+        gcc_output=".o" ;;
+esac
+
+manifest="$out_dir/manifest.seatmp"
+
+while read -r line
+do
+    objects="$objects $line.o"
+    eval gcc "$gcc_arg" "$line.c" -o "$line$gcc_output"
+done <"$manifest"
+
+if [[ "$mode" == "l" || "$mode" == "r" ]]
+then
+    eval gcc "$objects" -o "$out_dir/main" -lm -lgcc_s -lgcc -lc && eval cd "$out_dir" && rm -r !(main)
+fi
+
+if [[ "$mode" == "r" ]]
+then
+    ./main
+fi
 
 exit 0

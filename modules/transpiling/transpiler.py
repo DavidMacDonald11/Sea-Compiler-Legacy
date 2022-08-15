@@ -2,40 +2,78 @@ class Transpiler:
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
-        self.expression_type = None
         self.includes = []
+        self.lines = ""
 
         self.standard()
 
     def __del__(self):
+        self.close()
+
+    def close(self):
+        if self.file.closed: return
+
+        self.file.write("\n".join((
+            "#include <stdio.h>",
+            "int main()", "{",
+            f"{self.lines}",
+            'printf("Success!\\n");',
+            "return 0;", "}"
+        )))
+
         self.file.close()
 
     def standard(self):
         self.include("stdint")
         self.include("limits")
-        self.write()
+        self.header()
 
-        self.alias("float", "f32")
-        self.alias("double", "f64")
+        self.alias("float", "__sea_type_f32__")
+        self.alias("double", "__sea_type_f64__")
+        self.alias("long double", "__sea_type_fmax__")
+        self.alias("_Complex float", "__sea_type_c32__")
+        self.alias("_Complex double", "__sea_type_c64__")
+        self.alias("_Complex long double", "__sea_type_cmax__")
 
         for i in range(3, 7):
             bits = 2 ** i
-            self.alias(f"int{bits}_t", f"i{bits}")
-            self.alias(f"uint{bits}_t", f"u{bits}")
+            self.alias(f"int_least{bits}_t", f"__sea_type_i{bits}__")
+            self.alias(f"uint_least{bits}_t", f"__sea_type_u{bits}__")
 
-        self.write()
+        self.alias("intmax_t", "__sea_type_imax__")
+        self.alias("uintmax_t", "__sea_type_umax__")
+
+        self.header()
 
     def include(self, header):
         if header not in self.includes:
             self.includes += [header]
-            self.write(f"#include <{header}.h>")
+            self.header(f"#include <{header}.h>")
 
-    def write(self, string = "", end = "\n"):
+    def header(self, string = "", end = "\n"):
         self.file.write(f"{string}{end}")
 
     def alias(self, c_name, sea_name):
-        self.write(f"typedef {c_name} {sea_name};")
+        self.header(f"typedef {c_name} {sea_name};")
 
-    def set_type(self, e_type1, e_type2):
-        points = {"u64": 1, "i64": 2, "f64": 3}
-        self.expression_type = e_type1 if points[e_type1] > points[e_type2] else e_type2
+    def write(self, string = "", end = "\n"):
+        self.lines += f"{string}{end}"
+
+    def resolve_type(self, e_type1, e_type2):
+        if e_type1 == e_type2 == "bool": return "u64"
+        return e_type1 if POINTS[e_type1] > POINTS[e_type2] else e_type2
+
+    def safe_type(self, e_type):
+        return f"__sea_type_{e_type}__"
+
+POINTS = {
+    "bool": 0,
+    "u64": 1,
+    "i64": 2,
+    "umax": 2.25,
+    "imax": 2.5,
+    "f64": 3,
+    "fmax": 3.5,
+    "c64": 4,
+    "cmax": 4.5
+}

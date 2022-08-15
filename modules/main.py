@@ -21,7 +21,7 @@ def main():
 
 def compile_file(options, file_pair):
     Token.warnings = warnings = Warnings()
-    lexer = parser = transpiler = None
+    transpiler = lexer = parser = None
 
     try:
         lexer = Lexer(warnings, file_pair[0])
@@ -32,15 +32,21 @@ def compile_file(options, file_pair):
         parser.make_tree()
         warnings.check()
 
-        transpiler = Transpiler(warnings, file_pair[1])
-        parser.tree.transpile(transpiler)
+        Node.c_transpiler = transpiler = Transpiler(warnings, file_pair[1])
+        parser.tree.transpile()
         warnings.check()
     except Warnings.CompilerFailure:
         print(warnings)
     finally:
-        output_debug(options, file_pair[0], lexer, parser, transpiler)
+        if lexer is not None:
+            lexer.close()
 
-def output_debug(options, name, lexer, parser, transpiler):
+        if transpiler is not None:
+            transpiler.close()
+
+        output_debug(options, file_pair[0], lexer, parser)
+
+def output_debug(options, name, lexer, parser):
     if "d" not in options:
         return
 

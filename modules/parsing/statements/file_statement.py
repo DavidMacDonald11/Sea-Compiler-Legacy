@@ -17,6 +17,6 @@ class FileStatement(Node):
         while not parser.next.has("EOF"):
             self.statements += [Statement.construct()]
 
-    def transpile(self, transpiler):
+    def transpile(self):
         for statement in self.statements:
-            statement.transpile(transpiler)
+            statement.transpile()

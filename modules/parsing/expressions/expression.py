@@ -1,7 +1,7 @@
-from .bitwise_or_expression import BitwiseOrExpression
+from .logical_or_expression import LogicalOrExpression
 from ..node import Node
 
 class Expression(Node):
     @classmethod
     def construct(cls):
-        return BitwiseOrExpression.construct()
+        return LogicalOrExpression.construct()

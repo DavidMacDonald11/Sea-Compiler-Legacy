@@ -12,8 +12,13 @@
 `_expression-statement_`:
 {tab} `_expression_` `_line-end_`
 
+`_variable-statement_`:
+{tab} `_variable-declaration_` `_line-end_`
+{tab} `_variable-definition_` `_line-end_`
+
 `_statement_`:
 {tab} `_expression-statement_`
+{tab} `_variable-statement_`
 
 `_file-statement_`:
 {tab} `_statement_`

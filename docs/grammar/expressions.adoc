@@ -11,14 +11,18 @@
 
 `_primary-expression_`:
 {tab} `_numeric-constant_`
+{tab} `_character-constant_`
 {tab} `*(*` `_expression_` `*)*`
 {tab} `*||*` `_expression_` `*||*`
+{tab} `_primary-keyword_`
+`_primary-keyword_`: one of
+{tab} `*True*` `*False*`
 
 `_postfix-expression_`:
 {tab} `_primary-expression_`
 {tab} `_postfix-expression_` `_postfix-unary-operator_`
 `_postfix-unary-operator_`: one of
-{tab} `*%*` `*!*`
+{tab} `*%*` `*!*` `*?*`
 
 `_exponential-expression_`:
 {tab} `_postfix-expression_`
@@ -60,5 +64,39 @@
 {tab} `_bitwise-xor-expression_`
 {tab} `_bitwise-or-expression_` `*|*` `_bitwise-xor-expression_`
 
-`_expression_`:
+`_remainder-expression_`:
 {tab} `_bitwise-or-expression_`
+{tab} `_remainder-expression_` `*mod*` `_bitwise-or-expression_`
+
+`_three-way-comparison-expression_`:
+{tab} `_remainder-expression_`
+{tab} `_three-way-comparison-expression_` `*\<\=>*` `_remainder-expression_`
+
+`_comparative-expression_`:
+{tab} `_three-way-comparison-expression_`
+{tab} `_comparative-expression_` `_comparative-operator_` `_three-way-comparison-expression_`
+`_comparative-operator_`: one of
+{tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*`
+
+`_logical-not-expression_`:
+{tab} `_comparative-expression_`
+{tab} `*not*` `_logical-not-expression_`
+
+`_logical-and-expression_`:
+{tab} `_logical-not-expression_`
+{tab} `_logical-and-expression_` `*and*` `_logical-not-expression_`
+
+`_logical-or-expression_`:
+{tab} `_logical-and-expression_`
+{tab} `_logical-or-expression_` `*or*` `_logical-and-expression_`
+
+`_cast-expression_`:
+{tab} `_logical-or-expression_`
+{tab} `_cast-expression_` `*as*` `_type-keyword_`
+
+`_conditional-expression_`:
+{tab} `_cast-expression_`
+{tab} `_cast-expression_` `*if*` `_expression_` `*else*` `_conditional-expression_`
+
+`_expression_`:
+{tab} `_conditional-expression_`

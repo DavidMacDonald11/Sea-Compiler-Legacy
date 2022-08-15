@@ -12,13 +12,20 @@ class Lexer:
         self.depth = 0
         self.tokens = []
 
-    def new_token(self, kind, line = None):
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        if not self.file.file.closed:
+            self.file.file.close()
+
+    def new_token(self, kind, line = None, validate = True):
         if line is None:
             line = self.file.line
 
         new_token = Token(line, kind, self.depth)
         self.tokens += [new_token]
-        new_token.validate()
+        if validate: new_token.validate()
 
         return new_token
 
@@ -42,8 +49,14 @@ class Lexer:
             case [""]|token.PUNCTUATOR_SYMBOLS:
                 self.file.take(1)
                 self.new_token("Punctuator")
+            case "#":
+                self.make_comment()
             case token.NUMERIC_START_SYMBOLS:
                 self.make_numeric_constant()
+            case "'":
+                self.make_character_constant()
+            case token.IDENTIFIER_START_SYMBOLS:
+                self.make_identifier()
             case token.OPERATOR_SYMBOLS:
                 self.make_operator()
             case _:
@@ -97,13 +110,62 @@ class Lexer:
 
         self.new_token("Punctuator", line)
 
+    def make_comment(self):
+        self.file.take(until = "\n")
+        self.file.line.ignore()
+
     def make_numeric_constant(self):
         if self.file.take(1) == "." and self.file.next not in "0123456789":
             self.new_token("Operator")
             return
 
-        string = self.file.take(these = token.NUMERIC_SYMBOLS)
+        self.file.take(these = token.NUMERIC_SYMBOLS)
         self.new_token("NumericConstant")
+
+    def make_character_constant(self):
+        self.file.take(1)
+
+        if self.file.next != "\\":
+            char = self.file.take(1)
+            self.file.take(1)
+            self.new_token("CharacterConstant")
+            return
+
+        self.file.take(1)
+        escape = self.file.take(1)
+        unknown = False
+
+        match MatchIn(escape):
+            case "01234567":
+                self.file.take(these = "01234567")
+            case "abfnrtv'`\"\\?":
+                pass
+            case "xuU":
+                self.file.take(these = "0123456789ABCDEF")
+            case _:
+                unknown = True
+
+        self.file.take(1)
+        char = self.new_token("CharacterConstant", validate = not unknown)
+
+        if unknown:
+            self.warnings.error(char, "Unknown escape sequence")
+
+    def make_identifier(self):
+        string = self.file.take(these = token.IDENTIFIER_SYMBOLS)
+
+        if string == "__operator":
+            self.file.take(these = token.OPERATOR_SYMBOLS)
+            self.file.take(these = "_")
+        elif string[:2] == "__":
+            operator = self.file.take(these = token.OPERATOR_SYMBOLS)
+            self.file.take(these = token.IDENTIFIER_SYMBOLS)
+
+            if operator == "||":
+                self.file.take(2, these = "|")
+                self.file.take(these = "_")
+
+        self.new_token("Keyword" if string in token.KEYWORDS else "Identifier")
 
     def make_operator(self):
         string = ""

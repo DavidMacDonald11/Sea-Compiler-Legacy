@@ -13,9 +13,6 @@ class SourceFile:
 
         self.read_line()
 
-    def __del__(self):
-        self.file.close()
-
     def read_line(self):
         self.line = SourceLine() if self.line is None else self.line.next()
         symbol = "\0"

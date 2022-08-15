@@ -1,9 +1,19 @@
+import re
+
 class MatchIn:
     def __init__(self, obj):
         self.obj = obj
 
     def __eq__(self, other):
         return self.obj in other
+
+class MatchRe:
+    def __init__(self, string):
+        self.string = string
+
+    def __eq__(self, other):
+        pattern = re.compile(other)
+        return pattern.matches(self.string)
 
 def last_enumerate(iterable, **kwargs):
     for i, thing in enumerate(iterable, **kwargs):

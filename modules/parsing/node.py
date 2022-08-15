@@ -3,11 +3,16 @@ from util.misc import last_enumerate, set_add
 
 class Node(ABC):
     parser = None
+    c_transpiler = None
 
     @property
     @abstractmethod
     def nodes(self) -> list:
         pass
+
+    @property
+    def transpiler(self):
+        return type(self).c_transpiler
 
     def __repr__(self):
         return self.tree_repr("     ")
@@ -45,14 +50,18 @@ class Node(ABC):
     def construct(cls):
         pass
 
-    #TODO@abstractmethod
-    def transpile(self, transpiler):
+    @abstractmethod
+    def transpile(self):
         pass
 
 class PrimaryNode(Node):
     @property
     def nodes(self) -> list:
         return [self.token, *self.tokens]
+
+    @classmethod
+    def construct(cls):
+        return cls(cls.parser.take())
 
     def __init__(self, token, *tokens):
         self.token = token
@@ -88,15 +97,30 @@ class BinaryOperation(Node):
 
         return node
 
-    def transpile(self, transpiler):
-        return self.transpile_binary(transpiler, self.operator.string)
+    def transpile(self):
+        return self.transpile_binary(self.operator.string)
 
-    def transpile_binary(self, transpiler, operator):
-        left = self.left.transpile(transpiler)
-        left_e_type = transpiler.expression_type
-        right = self.right.transpile(transpiler)
-        right_e_type = transpiler.expression_type
+    def transpile_binary(self, operator, bitwise = False, boolean = False):
+        le_type, left = self.left.transpile()
+        re_type, right = self.right.transpile()
+        e_type = self.transpiler.resolve_type(le_type, re_type)
 
-        transpiler.set_type(left_e_type, right_e_type)
+        if not boolean and not bitwise:
+            return (e_type, f"{left} {operator} {right}")
 
-        return f"{left} {operator} {right}"
+        if bitwise:
+            if e_type not in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
+                return (e_type, f"{left} {operator} {right}")
+
+            message = f"Cannot perform bitwise operation '{self.operator.string}' on "
+            message += "floating type."
+            self.transpiler.warnings.error(self, message)
+            return (e_type, f"{left} /*{self.operator.string} {right}*/")
+
+        if not le_type == re_type == "bool":
+            message = f"Cannot perform boolean operation '{self.operator.string}' on "
+            message += "non-boolean type. (Consider using '?' operator to get boolean value)"
+            self.transpiler.warnings.error(self, message)
+            return (e_type, f"{left} /*{self.operator.string} {right}*/")
+
+        return ("bool", f"{left} {operator} {right}")

@@ -5,3 +5,6 @@ class BitwiseOrExpression(BinaryOperation):
     @classmethod
     def construct(cls):
         return cls.construct_binary(["|"], BitwiseXorExpression)
+
+    def transpile(self):
+        return self.transpile_binary(self.operator.string, bitwise = True)

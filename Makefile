@@ -30,7 +30,7 @@ init: $(VENV) .git
 test: $(VENV)
 	-$(RM) -r test/bin
 	mkdir test/bin
-	cd test/src; ../../sea.bash -d -o=../bin -m=t .
+	cd test/src; ../../sea.bash -d -o=../bin -m=a .
 
 .PHONY: lint
 lint: $(VENV)
@@ -47,5 +47,3 @@ deep:
 .PHONY: clean
 clean:
 	-$(RM) -r $(CACHE)
-	cd bin; ./clean.bash
-	cd output; ./clean.bash

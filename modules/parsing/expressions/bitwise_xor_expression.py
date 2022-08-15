@@ -6,5 +6,5 @@ class BitwiseXorExpression(BinaryOperation):
     def construct(cls):
         return cls.construct_binary(["$"], BitwiseAndExpression)
 
-    def transpile(self, transpiler):
-        return self.transpile_binary(transpiler, "^")
+    def transpile(self):
+        return self.transpile_binary("^", bitwise = True)

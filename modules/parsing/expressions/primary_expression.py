@@ -1,3 +1,4 @@
+from lexing.token import PRIMARY_KEYWORDS
 from ..node import Node, PrimaryNode
 
 class PrimaryExpression(Node):
@@ -6,11 +7,17 @@ class PrimaryExpression(Node):
         if cls.parser.next.of("NumericConstant"):
             return NumericConstant.construct()
 
+        if cls.parser.next.of("CharacterConstant"):
+            return CharacterConstant.construct()
+
         if cls.parser.next.has("("):
             return ParenthesesExpression.construct()
 
         if cls.parser.next.has("||"):
             return NormExpression.construct()
+
+        if cls.parser.next.has(*PRIMARY_KEYWORDS):
+            return PrimaryKeyword.construct()
 
         failure = cls.parser.take()
         message = f"PrimaryExpression error; unexpected token {failure}"
@@ -19,11 +26,18 @@ class PrimaryExpression(Node):
 class NumericConstant(PrimaryNode):
     @classmethod
     def construct(cls):
-        return cls(cls.parser.take())
+        num = cls.parser.take()
+        return cls(num, cls.parser.take()) if cls.parser.next.has("i") else cls(num)
 
-    def transpile(self, transpiler):
-        transpiler.expression_type = f"{self.token.specifier[0]}64"
-        return self.token.string
+    def transpile(self):
+        if len(self.nodes) == 1:
+            return (f"{self.token.specifier}64", self.token.string)
+
+        return ("c64", f"{self.token.string}j")
+
+class CharacterConstant(PrimaryNode):
+    def transpile(self):
+        return ("u64", self.token.string)
 
 class ParenthesesExpression(Node):
     @property
@@ -40,10 +54,13 @@ class ParenthesesExpression(Node):
         cls.parser.expecting_has(")")
         return node
 
-    def transpile(self, transpiler):
-        return f"({self.expression.transpile(transpiler)})"
+    def transpile(self):
+        e_type, expression = self.expression.transpile()
+        return (e_type, f"({expression})")
 
 class NormExpression(ParenthesesExpression):
+    wrote = []
+
     @classmethod
     def construct(cls):
         cls.parser.expecting_has("||")
@@ -51,13 +68,42 @@ class NormExpression(ParenthesesExpression):
         cls.parser.expecting_has("||")
         return node
 
-    def transpile(self, transpiler):
-        expression = self.expression.transpile(transpiler)
+    def transpile(self):
+        e_type, expression = self.expression.transpile()
 
-        if transpiler.expression_type == "u64":
-            return expression
+        match e_type:
+            case "bool":
+                return ("u64", f"({expression})")
+            case "u64"|"umax":
+                return (e_type, f"({expression})")
+            case "i64"|"imax":
+                func = self.write_generic_func(e_type)
+                return ("umax", f"({func}({expression}))")
+            case "f64":
+                self.transpiler.include("math")
+                return (e_type, f"(fabs({expression}))")
+            case "c64":
+                self.transpiler.include("complex")
+                return ("f64", f"(cabs({expression}))")
+            case "fmax"|"cmax":
+                self.transpiler.include("complex")
+                return ("fmax", f"(cabsl({expression}))")
 
-        transpiler.include("math")
-        cast = "" if transpiler.expression_type != "i64" else "(i64)"
+    def write_generic_func(self, e_type):
+        func = f"__sea_func_norm_{e_type}__"
 
-        return f"({cast}fabs({expression}))"
+        if func in type(self).wrote: return func
+        type(self).wrote += [func]
+
+        e_type = self.transpiler.safe_type(e_type)
+
+        self.transpiler.header("\n".join((
+            f"{e_type} {func}({e_type} num)", "{",
+            "\treturn (num < 0) ? -num : num; ", "}\n"
+        )))
+
+        return func
+
+class PrimaryKeyword(PrimaryNode):
+    def transpile(self):
+        return ("bool", "1" if self.token.has("True") else "0")

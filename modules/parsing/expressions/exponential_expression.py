@@ -6,16 +6,27 @@ class ExponentialExpression(BinaryOperation):
     def construct(cls):
         return cls.construct_binary(["^"], PostfixExpression, cls.parser.unary_expression)
 
-    def transpile(self, transpiler):
-        left = self.left.transpile(transpiler)
-        e_type = transpiler.expression_type
-        right = self.right.transpile(transpiler)
+    def transpile(self):
+        le_type, left = self.left.transpile()
+        re_type, right = self.right.transpile()
+        e_type = self.transpiler.resolve_type(le_type, re_type)
 
-        transpiler.expression_type = e_type
-        transpiler.include("math")
         cast = ""
 
-        if e_type != "f64":
-            cast = "(i64)" if e_type == "i64" else "(u64)"
+        match e_type:
+            case "u64"|"i64"|"f64":
+                self.transpiler.include("math")
+                func = "pow"
+                cast = self.transpiler.safe_type(e_type) if e_type != "f64" else ""
+            case "umax"|"imax"|"fmax":
+                self.transpiler.include("math")
+                func = "powl"
+                cast = self.transpiler.safe_type(e_type) if e_type != "fmax" else ""
+            case "c64":
+                self.transpiler.include("complex")
+                func = "cpow"
+            case "cmax":
+                self.transpiler.include("tgmath")
+                func = "cpowl"
 
-        return f"({cast}pow({left}, {right}))"
+        return (e_type, f"({cast}{func}({left}, {right}))")
