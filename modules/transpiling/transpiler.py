@@ -1,7 +1,10 @@
+from .symbol_table import SymbolTable
+
 class Transpiler:
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
+        self.symbols = SymbolTable()
         self.includes = []
         self.lines = ""
 

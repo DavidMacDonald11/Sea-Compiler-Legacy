@@ -1,1 +1,6 @@
-True if ||3i + 2|| > 6 > True as int8 else 69
+int64 num1, num2
+bool condition = 6
+
+cplex z, z2, z3, z4 = 1 + 3i if ||1 + 3i|| < 1 else 1i
+
+bool value = 1000000 as real
