@@ -1,7 +1,7 @@
-from .logical_or_expression import LogicalOrExpression
+from .cast_expression import CastExpression
 from ..node import Node
 
 class Expression(Node):
     @classmethod
     def construct(cls):
-        return LogicalOrExpression.construct()
+        return CastExpression.construct()

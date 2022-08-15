@@ -1,3 +1,8 @@
-||3i + 1 mod 2 ||
-<~5i
-||3i^1i||
+3i
+3i as imag32
+3i as imag32 as imag
+3i as imag32 as imag as int
+
+15? as nat32
+100000000 as int8 as char
+1 + 17i as imag as real
