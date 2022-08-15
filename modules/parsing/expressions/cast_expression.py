@@ -1,4 +1,4 @@
-from .logical_or_expression import LogicalOrExpression
+from .bitwise_or_expression import BitwiseOrExpression
 from ..declarations.type_keyword import TypeKeyword
 from ..node import Node
 
@@ -13,7 +13,7 @@ class CastExpression(Node):
 
     @classmethod
     def construct(cls):
-        expression = LogicalOrExpression.construct()
+        expression = BitwiseOrExpression.construct()
 
         while cls.parser.next.has("as"):
             cls.parser.take()

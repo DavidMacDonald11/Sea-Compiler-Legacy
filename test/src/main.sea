@@ -1,8 +1,1 @@
-3i
-3i as imag32
-3i as imag32 as imag
-3i as imag32 as imag as int
-
-15? as nat32
-100000000 as int8 as char
-1 + 17i as imag as real
+True if ||3i + 2|| > 6 > True as int8 else 69

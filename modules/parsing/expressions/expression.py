@@ -1,7 +1,7 @@
-from .cast_expression import CastExpression
+from .conditional_expression import ConditionalExpression
 from ..node import Node
 
 class Expression(Node):
     @classmethod
     def construct(cls):
-        return CastExpression.construct()
+        return ConditionalExpression.construct()

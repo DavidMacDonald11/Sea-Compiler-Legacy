@@ -1,5 +1,5 @@
 from .unary_expression import UnaryExpression
-from .bitwise_or_expression import BitwiseOrExpression
+from .cast_expression import CastExpression
 from ..node import BinaryOperation
 
 class RemainderExpression(BinaryOperation):
@@ -7,7 +7,7 @@ class RemainderExpression(BinaryOperation):
 
     @classmethod
     def construct(cls):
-        return cls.construct_binary(["mod"], BitwiseOrExpression)
+        return cls.construct_binary(["mod"], CastExpression)
 
     def transpile(self):
         le_type, left = self.left.transpile()

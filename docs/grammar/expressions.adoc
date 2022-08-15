@@ -64,9 +64,13 @@
 {tab} `_bitwise-xor-expression_`
 {tab} `_bitwise-or-expression_` `*|*` `_bitwise-xor-expression_`
 
-`_remainder-expression_`:
+`_cast-expression_`:
 {tab} `_bitwise-or-expression_`
-{tab} `_remainder-expression_` `*mod*` `_bitwise-or-expression_`
+{tab} `_cast-expression_` `*as*` `_type-keyword_`
+
+`_remainder-expression_`:
+{tab} `_cast-expression_`
+{tab} `_remainder-expression_` `*mod*` `_cast-expression_`
 
 `_three-way-comparison-expression_`:
 {tab} `_remainder-expression_`
@@ -90,13 +94,9 @@
 {tab} `_logical-and-expression_`
 {tab} `_logical-or-expression_` `*or*` `_logical-and-expression_`
 
-`_cast-expression_`:
-{tab} `_logical-or-expression_`
-{tab} `_cast-expression_` `*as*` `_type-keyword_`
-
 `_conditional-expression_`:
-{tab} `_cast-expression_`
-{tab} `_cast-expression_` `*if*` `_expression_` `*else*` `_conditional-expression_`
+{tab} `_logical-or-expression_`
+{tab} `_logical-or-expression_` `*if*` `_expression_` `*else*` `_conditional-expression_`
 
 `_expression_`:
 {tab} `_conditional-expression_`

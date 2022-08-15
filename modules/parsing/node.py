@@ -119,7 +119,7 @@ class BinaryOperation(Node):
 
         if not le_type == re_type == "bool":
             message = f"Cannot perform boolean operation '{self.operator.string}' on "
-            message += "non-boolean type. (Consider using '?' operator to get boolean value)"
+            message += "non-boolean type. (Consider using the '?' operator to get boolean value)"
             self.transpiler.warnings.error(self, message)
             return (e_type, f"{left} /*{self.operator.string} {right}*/")
 
