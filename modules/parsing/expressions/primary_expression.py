@@ -51,12 +51,13 @@ class Identifier(PrimaryNode):
             self.transpiler.warnings.error(self, f"Reference to undeclared variable '{name}'")
             return ("cmax", f"/*{name}*/")
 
+        c_name = var.access(self)
         e_type, _ = self.transpiler.c_type(var.s_type)
 
         if var.s_type in ("imag32", "imag64", "imag"):
-            return (e_type, f"({var.c_name} * 1.0j)")
+            return (e_type, f"({c_name} * 1.0j)")
 
-        return (e_type, var.c_name)
+        return (e_type, c_name)
 
 class ParenthesesExpression(Node):
     @property

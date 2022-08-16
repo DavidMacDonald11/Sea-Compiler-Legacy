@@ -22,11 +22,22 @@ class Symbol:
         self.name = name
 
 class Variable(Symbol):
+    def __init__(self, s_type, name):
+        self.initialized = False
+        super().__init__(s_type, name)
+
     @property
     def c_name(self):
         return f"__sea_var_{self.name}__"
 
+    def access(self, node):
+        if self.initialized: return self.c_name
+
+        node.transpiler.warnings.error(node, f"Accessing uninitialized variable '{self.name}'")
+        return f"/*{self.c_name}*/"
+
     def assign(self, node, e_type, expression, identifier = None):
+        self.initialized = True
         identifier = identifier or self.c_name
 
         if self.s_type == "bool" and e_type != "bool":
