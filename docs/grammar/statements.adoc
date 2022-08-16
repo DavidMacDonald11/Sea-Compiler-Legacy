@@ -12,16 +12,16 @@
 `_expression-statement_`:
 {tab} `_expression_` `_line-end_`
 
+`_assignment-statement_`:
+{tab} `_expression-statement_`
+{tab} `_identifier_` `*=*` `_assignment-statement_`
+
 `_variable-definition_`:
-{tab} `_variable-declaration_` `*=*` `_expression-statement_`
+{tab} `_variable-declaration_` `*=*` `_assignment-statement_`
 
 `_variable-statement_`:
 {tab} `_variable-declaration_` `_line-end_`
 {tab} `_variable-definition_`
-
-`_assignment-statement_`:
-{tab} `_expression-statement_`
-{tab} `_identifier_` `*=*` `_assignment-statement_`
 
 `_compound-assignment-statement_`:
 {tab} `_assignment-statement_`

@@ -32,7 +32,7 @@ def compile_file(options, file_pair):
         parser.tree.transpile()
         warnings.check()
     except Warnings.CompilerFailure:
-        print(warnings)
+        pass
     finally:
         if lexer is not None:
             lexer.close()
@@ -41,6 +41,7 @@ def compile_file(options, file_pair):
             transpiler.close()
 
         output_debug(options, file_pair[0], lexer, parser)
+        print(warnings)
 
 def output_debug(options, name, lexer, parser):
     if "d" not in options:

@@ -1,15 +1,15 @@
 from ..declarations.variable_declaration import VariableDeclaration
-from ..statements.expression_statement import ExpressionStatement
+from ..statements.assignment_statement import AssignmentStatement
 from ..node import Node
 
 class VariableDefinition(Node):
     @property
     def nodes(self) -> list:
-        return [self.declaration, self.expression]
+        return [self.declaration, self.statement]
 
-    def __init__(self, declaration, expression):
+    def __init__(self, declaration, statement):
         self.declaration = declaration
-        self.expression = expression
+        self.statement = statement
 
     @classmethod
     def construct(cls):
@@ -19,11 +19,11 @@ class VariableDefinition(Node):
             return declaration
 
         cls.parser.take()
-        return cls(declaration, ExpressionStatement.construct())
+        return cls(declaration, AssignmentStatement.construct())
 
     def transpile(self):
         _, declaration = self.declaration.transpile()
-        e_type, expression = self.expression.transpile()
+        e_type, statement = self.statement.transpile()
         var = self.transpiler.symbols[self.declaration.identifiers[0].string]
 
-        return var.assign(self, e_type, expression, declaration)
+        return var.assign(self, e_type, statement, declaration)

@@ -10,6 +10,9 @@ class VariableStatement(Node):
     def __init__(self, statement):
         self.statement = statement
 
+    def tree_repr(self, prefix):
+        return self.statement.tree_repr(prefix)
+
     @classmethod
     def construct(cls):
         statement = VariableDefinition.construct()

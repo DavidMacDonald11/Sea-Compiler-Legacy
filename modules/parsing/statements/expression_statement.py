@@ -9,6 +9,9 @@ class ExpressionStatement(Node):
     def __init__(self, expression):
         self.expression = expression
 
+    def tree_repr(self, prefix):
+        return self.expression.tree_repr(prefix)
+
     @classmethod
     def construct(cls):
         expression = Expression.construct()

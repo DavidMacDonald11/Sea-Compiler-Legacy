@@ -1,6 +1,8 @@
 int64 num1, num2, num3
 cplex z = 1 + 1i
 
+int num4, num5 = num3 = 52 mod 2
+
 num1 = 6
 num2 = num3 = 7
 
