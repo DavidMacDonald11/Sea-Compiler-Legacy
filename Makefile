@@ -30,13 +30,13 @@ init: $(VENV) .git
 test: $(VENV)
 	-$(RM) -r test/bin
 	mkdir test/bin
-	cd test/src; ../../sea.bash -d -o=../bin -m=a .
+	cd test; ../sea.bash -d -m=a -o=bin src
 
 .PHONY: run
 run: $(VENV)
 	-$(RM) -r test/bin
 	mkdir test/bin
-	cd test/src; ../../sea.bash -d -o=../bin -m=r .
+	cd test; ../sea.bash -d -m=r -o=bin src
 
 .PHONY: lint
 lint: $(VENV)

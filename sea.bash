@@ -22,7 +22,6 @@ usage() {
     print_usage "-d, --debug" "writes debug information to a file."
     print_usage "-h, --help" "prints the sea command's usage information."
     print_usage "-u, --update" "uses git to update Sea to the latest version."
-    print_usage "-v, --verbose" "prints a message as actions are performed."
     print_usage "--version" "prints the program version information."
     printf "\n"
 
@@ -33,7 +32,7 @@ usage() {
     print_usage "" "the C files as you wish; FUNC should be a"
     print_usage "" "callable script."
     print_usage "-m, --mode=MODE" "specifies what the program should do;"
-    print_usage "" "  MODE=t    does above and compiles Sea to C,"
+    print_usage "" "  MODE=t    transpiles Sea to C,"
     print_usage "" "  MODE=p    does above and preprocesses C"
     print_usage "" "  MODE=c    does above and compiles C to asm,"
     print_usage "" "  MODE=a    does above and assembles asm to objects,"
@@ -211,20 +210,23 @@ case "$mode" in
 esac
 
 manifest="$out_dir/manifest.seatmp"
+generated="$manifest"
 
 while read -r line
 do
     objects="$objects $line.o"
     eval gcc "$gcc_arg" "$line.c" -o "$line$gcc_output"
+    generated="$generated $line.c $line$gcc_output"
 done <"$manifest"
 
 if [[ "$mode" == "l" || "$mode" == "r" ]]
 then
-    eval gcc "$objects" -o "$out_dir/main" -lm -lgcc_s -lgcc -lc && eval cd "$out_dir" && rm -r !(main)
+    eval gcc "$objects" -o "$out_dir/main" -lm -lgcc_s -lgcc -lc && eval rm -r "$generated"
 fi
 
 if [[ "$mode" == "r" ]]
 then
+    eval cd "$out_dir"
     ./main
 fi
 

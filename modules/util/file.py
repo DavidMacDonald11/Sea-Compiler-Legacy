@@ -1,14 +1,14 @@
 import os
 
-def generate_map(mode, out_dir, filenames):
+def generate_map(out_dir, filenames):
     result = []
     paths = make_paths(filenames)
 
     for path in paths:
-        if not path.endswith((".sea", ".hea")):
+        if not path.endswith(".sea"):
             continue
 
-        out_path = create_out_path(mode, out_dir, path)
+        out_path = create_out_path(out_dir, path)
         out_path_dirs = os.path.dirname(out_path)
 
         if out_path_dirs != "" and not os.path.exists(out_path_dirs):
@@ -36,14 +36,14 @@ def find_files_in_dir(directory):
         for name in names:
             yield os.path.join(root, name)
 
-def create_out_path(mode, out_dir, path):
-    out_path = f"{out_dir}/"
-    out_path += os.path.basename(path) if path[0] == "/" else path
+def create_out_path(out_dir, path):
+    if path[0] == "/":
+        out_path = f"{out_dir}/{os.path.basename(path)}"
+    else:
+        path = "/".join(path.replace("./", "").split("/")[1:])
+        out_path = f"{out_dir}/{path}"
 
-    if mode == "g":
-        return f"{out_path}.conf"
-
-    return out_path.replace("/./", "/").replace(".sea", ".c")
+    return out_path.replace(".sea", ".c")
 
 def write_manifest(out_dir, file_map):
     with open(f"{out_dir}/manifest.seatmp", "w", encoding = "UTF-8") as manifest:

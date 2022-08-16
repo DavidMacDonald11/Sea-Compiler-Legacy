@@ -8,13 +8,9 @@ from util.file import generate_map
 from util.warnings import Warnings
 
 def main():
-    options, mode, out_dir, *filenames = sys.argv[1:]
+    options, _, out_dir, *filenames = sys.argv[1:]
     out_dir = out_dir[:-1] if out_dir[-1] == "/" else out_dir
-
-    if mode == "t":
-        options += "t"
-
-    file_map = generate_map(mode, out_dir, filenames)
+    file_map = generate_map(out_dir, filenames)
 
     for file_pair in file_map:
         compile_file(options, file_pair)
