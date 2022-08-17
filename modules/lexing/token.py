@@ -12,9 +12,10 @@ class FakeToken:
 
     @classmethod
     def copy(cls, token, string = None):
-        return cls(token.line, token.kind, token.depth, string or token.string)
+        return cls(token.line, token.kind, token.depth, string or token.string, token)
 
-    def __init__(self, line, kind, depth, string):
+    def __init__(self, line, kind, depth, string, token = None):
+        self.token = token or self
         self.line = line
         self.kind = kind
         self.depth = depth
@@ -38,7 +39,7 @@ class FakeToken:
         return self.string in strings
 
     def mark(self):
-        self.line.mark(self)
+        self.line.mark(self.token)
 
     def validate(self):
         match self.kind:
@@ -131,7 +132,8 @@ NAT_TYPE_KEYWORDS = {"bool", "char"} | {"nat"} | {f"nat{2 ** x}" for x in range(
 FLOAT_TYPE_KEYWORDS = {"real", "imag", "cplex"}
 FLOAT_TYPE_KEYWORDS |= {f"{t}{2 ** x}" for x in range(5, 7) for t in FLOAT_TYPE_KEYWORDS}
 TYPE_KEYWORDS = INT_TYPE_KEYWORDS | NAT_TYPE_KEYWORDS | FLOAT_TYPE_KEYWORDS
-KEYWORDS = PRIMARY_KEYWORDS | TYPE_KEYWORDS | {
+TYPE_MODIFIER_KEYWORDS = {"var", "invar"}
+KEYWORDS = PRIMARY_KEYWORDS | TYPE_KEYWORDS | TYPE_MODIFIER_KEYWORDS | {
     "mod", "not", "and", "or", "as", "if", "else"
 }
 

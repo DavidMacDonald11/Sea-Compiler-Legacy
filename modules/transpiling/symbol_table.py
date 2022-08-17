@@ -12,6 +12,13 @@ class SymbolTable:
         self.symbols[name] = var = Variable(s_type, name)
         return var.c_name
 
+    def new_invariable(self, s_type, name):
+        if name in self.symbols:
+            return None
+
+        self.symbols[name] = invar = Invariable(s_type, name)
+        return invar.c_name
+
 class Symbol:
     @property
     def c_name(self):
@@ -49,3 +56,14 @@ class Variable(Symbol):
         suffix = "f" if self.s_type == "imag32" else ("l" if self.s_type == "imag" else "")
         node.transpiler.include("complex")
         return (e_type, f"{identifier} = cimag{suffix}({expression})")
+
+class Invariable(Variable):
+    @property
+    def c_name(self):
+        return f"__sea_invar_{self.name}__"
+
+    def assign(self, node, e_type, expression, identifier = None):
+        if self.initialized:
+            node.transpiler.warnings.error(node, f"Cannot reassign invariable '{self.name}'")
+
+        return super().assign(node, e_type, expression, identifier)

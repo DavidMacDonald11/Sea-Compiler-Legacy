@@ -18,9 +18,18 @@
 {tab} `*imag32*` `*imag64*` `*imag*`
 {tab} `*cplex32*` `*cplex64*` `*cplex*`
 
-`_variable-declaration_`:
-{tab} `_type-keyword_` `_identifier-list_`
+`_type_`:
+{tab} `_type-keyword_`
+{tab} `_type_` `*[*` `*]*`
 
+`_identifier-declaration_`:
+{tab} `_type-keyword_` `_identifier-list_`
 `_identifier-list_`:
 {tab} `_identifier_`
 {tab} `_identifier-list_` `*,*` `_identifier_`
+
+`_variable-declaration_`:
+{tab} `*var*`~opt~ `_identifier-declaration_`
+
+`_invariable-declaration_`:
+{tab} `*invar*` `_identifier-declaration_`

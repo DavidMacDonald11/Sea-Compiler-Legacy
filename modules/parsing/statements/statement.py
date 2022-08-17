@@ -1,6 +1,6 @@
-from lexing.token import TYPE_KEYWORDS
+from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .expression_statement import ExpressionStatement
-from .variable_statement import VariableStatement
+from .identifier_statement import IdentifierStatement
 from .compound_assignment_statement import CompoundAssignmentStatement
 from ..node import Node
 
@@ -17,8 +17,8 @@ class Statement(Node):
 
     @classmethod
     def construct(cls):
-        if cls.parser.next.has(*TYPE_KEYWORDS):
-            return VariableStatement.construct()
+        if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS, *TYPE_KEYWORDS):
+            return IdentifierStatement.construct()
 
         if cls.parser.next.of("Identifier"):
             return cls(CompoundAssignmentStatement.construct())

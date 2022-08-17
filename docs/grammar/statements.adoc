@@ -19,9 +19,13 @@
 `_variable-definition_`:
 {tab} `_variable-declaration_` `*=*` `_assignment-statement_`
 
-`_variable-statement_`:
+`_invariable-definition_`:
+{tab} `_invariable-declaration_` `*=*` `_assignment-statement_`
+
+`_identifier-statement_`:
 {tab} `_variable-declaration_` `_line-end_`
 {tab} `_variable-definition_`
+{tab} `_invariable-definition_`
 
 `_compound-assignment-statement_`:
 {tab} `_assignment-statement_`
@@ -31,7 +35,7 @@
 {tab} `*<\<=*`, `*>>=*`, `*&=*`, `*$=*`, `*|=*`
 
 `_statement_`:
-{tab} `_variable-statement_`
+{tab} `_identifier-statement_`
 {tab} `_compound-assignment-statement_`
 
 `_file-statement_`:
