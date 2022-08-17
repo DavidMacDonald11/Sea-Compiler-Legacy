@@ -11,3 +11,6 @@ num2 = num1 + 2
 
 num1 ^= 2
 num2 %= 6i
+
+invar int CONST = \
+5

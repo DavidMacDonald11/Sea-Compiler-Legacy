@@ -49,6 +49,8 @@ class Lexer:
             case [""]|token.PUNCTUATOR_SYMBOLS:
                 self.file.take(1)
                 self.new_token("Punctuator")
+            case "\\":
+                self.make_line_continuation()
             case "#":
                 self.make_comment()
             case token.NUMERIC_START_SYMBOLS:
@@ -109,6 +111,18 @@ class Lexer:
             self.file.take(1)
 
         self.new_token("Punctuator", line)
+
+    def make_line_continuation(self):
+        self.file.take(1)
+        self.file.take(these = " \t")
+        self.file.line.ignore()
+
+        if self.file.take(1) in "\n":
+            self.file.line.ignore()
+            return
+
+        symbol = self.new_token("Error")
+        self.warnings.error(symbol, "Unexpected symbol after line continuation character")
 
     def make_comment(self):
         self.file.take(until = "\n")
