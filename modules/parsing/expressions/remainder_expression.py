@@ -1,4 +1,4 @@
-from .unary_expression import UnaryExpression
+from .unary_expression import RoundExpression
 from .cast_expression import CastExpression
 from ..node import BinaryOperation
 
@@ -34,7 +34,7 @@ class RemainderExpression(BinaryOperation):
         if func in type(self).wrote: return func
         type(self).wrote += [func]
 
-        round_func = UnaryExpression.write_round_func(self.transpiler, "floor", e_type)
+        round_func = RoundExpression.write_round_func(self.transpiler, "floor", e_type)
         e_type = self.transpiler.safe_type(e_type)
 
         self.transpiler.header("\n".join((

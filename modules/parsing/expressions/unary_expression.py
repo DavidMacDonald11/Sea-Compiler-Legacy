@@ -3,8 +3,6 @@ from .exponential_expression import ExponentialExpression
 from ..node import Node, PrimaryNode
 
 class UnaryExpression(Node):
-    wrote = []
-
     @property
     def nodes(self) -> list:
         return [self.operator, self.expression]
@@ -19,36 +17,37 @@ class UnaryExpression(Node):
             return ExponentialExpression.construct()
 
         operator = cls.parser.take()
-        return cls(operator, cls.construct())
 
+        match operator.string:
+            case "+":
+                node_cls = UnaryPlusExpression
+            case "-":
+                node_cls = UnaryMinusExpression
+            case "!":
+                node_cls = BitwiseNotExpression
+            case "~"|"<~"|"~>":
+                node_cls = RoundExpression
+
+        return node_cls(operator, cls.construct())
+
+class UnaryPlusExpression(UnaryExpression):
+    def transpile(self):
+        e_type, exp = self.expression.transpile()
+        if e_type == "i64" and exp.of(PrimaryNode) and exp.token.of("NumericConstant"):
+            return ("u64", f"{exp}U")
+
+        return (e_type, exp)
+
+class UnaryMinusExpression(UnaryExpression):
     def transpile(self):
         e_type, expression = self.expression.transpile()
-
-        if self.operator.has("+"):
-            return self.transpile_plus(e_type, expression)
-
-        if self.operator.has("-"):
-            return self.transpile_minus(e_type, expression)
-
-        if self.operator.has("!"):
-            return self.transpile_not(e_type, expression)
-
-        return self.transpile_round(e_type, expression)
-
-    def transpile_plus(self, e_type, expression):
-        exp = self.expression
-
-        if e_type == "i64" and exp.of(PrimaryNode) and exp.token.of("NumericConstant"):
-            return ("u64", f"{expression}U")
-
-        return expression
-
-    def transpile_minus(self, e_type, expression):
         e_type = "i64" if e_type in ("u64", "bool") else e_type
         e_type = "imax" if e_type == "umax" else e_type
         return (e_type, f"-{expression}")
 
-    def transpile_not(self, e_type, expression):
+class BitwiseNotExpression(UnaryExpression):
+    def transpile(self):
+        e_type, expression = self.expression.transpile()
         e_type = "u64" if e_type == "bool" else e_type
 
         if e_type not in ("f64", "fmax", "c64", "cmax"):
@@ -59,7 +58,11 @@ class UnaryExpression(Node):
         self.transpiler.warnings.error(self, message)
         return (e_type, f"/*!*/{expression}")
 
-    def transpile_round(self, e_type, expression):
+class RoundExpression(UnaryExpression):
+    wrote = []
+
+    def transpile(self):
+        e_type, expression = self.expression.transpile()
         e_type = "u64" if e_type == "bool" else e_type
 
         if e_type in ("u64", "umax", "i64", "imax"):

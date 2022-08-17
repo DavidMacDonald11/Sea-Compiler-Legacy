@@ -12,5 +12,9 @@ num2 = num1 + 2
 num1 ^= 2
 num2 %= 6i
 
+bool condition = 21!?
+
+~-+23.2
+
 invar int CONST = \
-5
+5!

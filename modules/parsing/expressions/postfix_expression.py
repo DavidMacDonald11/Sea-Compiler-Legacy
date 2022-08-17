@@ -3,8 +3,6 @@ from .primary_expression import PrimaryExpression
 from ..node import Node
 
 class PostfixExpression(Node):
-    wrote_factorial_func = False
-
     @property
     def nodes(self) -> list:
         return [self.expression, self.operator]
@@ -21,29 +19,30 @@ class PostfixExpression(Node):
             return node
 
         while cls.parser.next.has(*POSTFIX_UNARY_OPERATORS):
-            node = cls(node, cls.parser.take())
+            operator = cls.parser.take()
+
+            match operator.string:
+                case "%":
+                    node = PercentExpression(node, operator)
+                case "!":
+                    node = FactorialExpression(node, operator)
+                case "?":
+                    node = TestExpression(node, operator)
 
         return node
+
+class PercentExpression(PostfixExpression):
+    def transpile(self):
+        e_type, expression = self.expression.transpile()
+        e_type = "u64" if e_type == "bool" else e_type
+        return (e_type, f"({expression} / 100)")
+
+class FactorialExpression(PostfixExpression):
+    wrote_factorial_func = False
 
     def transpile(self):
         e_type, expression = self.expression.transpile()
 
-        if self.operator.has("%"):
-            return self.transpile_percent(e_type, expression)
-
-        if self.operator.has("?"):
-            return self.transpile_test(e_type, expression)
-
-        return self.transpile_factorial(e_type, expression)
-
-    def transpile_percent(self, e_type, expression):
-        e_type = "u64" if e_type == "bool" else e_type
-        return (e_type, f"({expression} / 100)")
-
-    def transpile_test(self, e_type, expression):
-        return ("bool", expression if e_type == "bool" else f"({expression} != 0)")
-
-    def transpile_factorial(self, e_type, expression):
         if e_type in ("f64", "fmax", "c64", "cmax"):
             self.transpiler.warnings.error(self, "Cannot use factorial on floats")
             return (e_type, f"({expression}/*!*/)")
@@ -67,3 +66,8 @@ class PostfixExpression(Node):
         )))
 
         return func
+
+class TestExpression(PostfixExpression):
+    def transpile(self):
+        e_type, expression = self.expression.transpile()
+        return ("bool", expression if e_type == "bool" else f"({expression} != 0)")
