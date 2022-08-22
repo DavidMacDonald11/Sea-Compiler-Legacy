@@ -33,30 +33,30 @@ class PostfixExpression(Node):
 
 class PercentExpression(PostfixExpression):
     def transpile(self):
-        e_type, expression = self.expression.transpile()
-        e_type = "u64" if e_type == "bool" else e_type
-        return (e_type, f"({expression} / 100)")
+        expression = self.expression.transpile().operate(self)
+        return expression.new("(%s / 100)").cast_up()
 
 class FactorialExpression(PostfixExpression):
-    wrote_factorial_func = False
+    wrote = []
 
     def transpile(self):
-        e_type, expression = self.expression.transpile()
+        expression = self.expression.transpile().operate(self)
 
-        if e_type in ("f64", "fmax", "c64", "cmax"):
+        if expression.e_type in ("f64", "fmax", "c64", "cmax"):
             self.transpiler.warnings.error(self, "Cannot use factorial on floats")
-            return (e_type, f"({expression}/*!*/)")
+            return expression.new("%s/*!*/")
 
-        func = self.write_factorial_func()
-        return ("u64", f"({func}({expression}))")
+        largest = expression.e_type in ("imax", "umax")
+        func = self.write_func(expression.cast("u64" if largest else "umax"))
+        return expression.new(f"({func}(%s))")
 
-    def write_factorial_func(self):
-        func = "__sea_func_factorial__"
+    def write_func(self, expression):
+        func = f"__sea_func_factorial_{expression.e_type}__"
 
-        if type(self).wrote_factorial_func:return func
-        type(self).wrote_factorial_func = True
+        if func in type(self).wrote: return func
+        type(self).wrote += [func]
 
-        e_type = self.transpiler.safe_type("u64")
+        e_type = expression.c_type
 
         self.transpiler.header("\n".join((
             f"{e_type} {func}({e_type} num)", "{",
@@ -69,5 +69,5 @@ class FactorialExpression(PostfixExpression):
 
 class TestExpression(PostfixExpression):
     def transpile(self):
-        e_type, expression = self.expression.transpile()
-        return ("bool", expression if e_type == "bool" else f"({expression} != 0)")
+        expression = self.expression.transpile().operate(self)
+        return expression.new("%s" if expression.e_type == "bool" else "(%s != 0)").cast("bool")

@@ -1,20 +1,7 @@
-int64 num1, num2, num3
-invar cplex z = 1 + 1i
-var cplex z2 = z + 2i
+var int64 num1, num2 = 15
+invar char c1, c2 = 'a'
 
-var int num4, num5 = num3 = 52 mod 2
+int64 num = &num1
+invar char c3, c4 = &c1
 
-num1 = 6
-num2 = num3 = 7
-
-num2 = num1 + 2
-
-num1 ^= 2
-num2 %= 6i
-
-bool condition = 21!?
-
-~-+23.2
-
-invar int CONST = \
-5!
+var real f1, f2 = 3.14

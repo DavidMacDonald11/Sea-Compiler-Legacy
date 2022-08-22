@@ -8,11 +8,12 @@ class ComparativeExpression(BinaryOperation):
         return cls.construct_binary(COMPARATIVE_OPERATORS, ThreeWayComparisonExpression)
 
     def transpile(self):
-        _, left = self.left.transpile()
-        _, right = self.right.transpile()
+        left = self.left.transpile().operate(self)
+        right = self.right.transpile().operate(self)
+        result = self.transpiler.expression.resolve(left, right).cast("bool")
 
         if not isinstance(self.left, ComparativeExpression):
-            return ("bool", f"{left} {self.operator.string} {right}")
+            return result.new(f"{left} {self.operator.string} {right}")
 
-        _, left_arg = self.left.right.transpile()
-        return ("bool", f"{left} && {left_arg} {self.operator.string} {right}")
+        left_arg = self.left.right.transpile()
+        return result.new(f"{left} && {left_arg} {self.operator.string} {right}")

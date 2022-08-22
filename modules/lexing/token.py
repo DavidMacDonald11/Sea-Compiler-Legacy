@@ -98,6 +98,10 @@ class FakeToken:
             return
 
         if self.string in OPERATOR_FUNCS:
+            if self.string in DISALLOWED_OPERATOR_FUNCS:
+                op = DISALLOWED_OPERATOR_FUNCS[self.string]
+                type(self).warnings.error(self, f"Cannot overload {op} operator")
+
             return
 
         type(self).warnings.error(self, "Incorrect operator function")
@@ -115,7 +119,7 @@ class Token(FakeToken):
         self.line += self
 
 POSTFIX_UNARY_OPERATORS = {"%", "!", "?"}
-PREFIX_UNARY_OPERATORS = {"+", "-", "!", "~", "<~", "~>"}
+PREFIX_UNARY_OPERATORS = {"+", "-", "!", "~", "<~", "~>", "&"}
 BINARY_OPERATORS = {"^", "*", "/", "+", "-", "<<", ">>", "&", "$", "|", "<=>"}
 COMPARATIVE_OPERATORS = {"<", ">", "<=", ">=", "==", "!="}
 ASSIGNMENT_OPERATORS = {"=", "^=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "$=", "|="}
@@ -145,3 +149,4 @@ IDENTIFIER_SYMBOLS = f"{IDENTIFIER_START_SYMBOLS}0123456789"
 
 OPERATOR_FUNCS = {"__||operator||__"} | {f"__{x}operator__" for x in PREFIX_UNARY_OPERATORS}
 OPERATOR_FUNCS |= {f"__operator{x}__" for x in POSTFIX_OPERATORS}
+DISALLOWED_OPERATOR_FUNCS = {"__&operator__": "prefix &"}

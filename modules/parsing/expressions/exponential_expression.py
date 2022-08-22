@@ -7,21 +7,21 @@ class ExponentialExpression(BinaryOperation):
         return cls.construct_binary(["^"], PostfixExpression, cls.parser.unary_expression)
 
     def transpile(self):
-        le_type, left = self.left.transpile()
-        re_type, right = self.right.transpile()
-        e_type = self.transpiler.resolve_type(le_type, re_type)
+        left = self.left.transpile().operate(self)
+        right = self.right.transpile().operate(self)
+        result = self.transpiler.expression.resolve(left, right).cast_up()
 
         cast = ""
 
-        match e_type:
+        match result.e_type:
             case "u64"|"i64"|"f64":
                 self.transpiler.include("math")
                 func = "pow"
-                cast = "" if e_type == "f64" else f"({self.transpiler.safe_type(e_type)})"
+                cast = "" if result.e_type == "f64" else f"({result.c_type})"
             case "umax"|"imax"|"fmax":
                 self.transpiler.include("math")
                 func = "powl"
-                cast = "" if e_type == "fmax" else f"({self.transpiler.safe_type(e_type)})"
+                cast = "" if result.e_type == "fmax" else f"({result.c_type})"
             case "c64":
                 self.transpiler.include("complex")
                 func = "cpow"
@@ -29,4 +29,4 @@ class ExponentialExpression(BinaryOperation):
                 self.transpiler.include("tgmath")
                 func = "cpowl"
 
-        return (e_type, f"({cast}{func}({left}, {right}))")
+        return result.new(f"({cast}{func}({left}, {right}))")

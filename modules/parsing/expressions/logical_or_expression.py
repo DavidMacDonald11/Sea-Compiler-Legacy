@@ -7,4 +7,4 @@ class LogicalOrExpression(BinaryOperation):
         return cls.construct_binary(["or"], LogicalAndExpression)
 
     def transpile(self):
-        return self.transpile_binary("&&", boolean = True)
+        return self.transpile_binary("||", boolean = True)

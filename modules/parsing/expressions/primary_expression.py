@@ -34,30 +34,28 @@ class NumericConstant(PrimaryNode):
 
     def transpile(self):
         if len(self.nodes) == 1:
-            return (f"{self.token.specifier}64", self.token.string)
+            return self.transpiler.expression(f"{self.token.specifier}64", self.token.string)
 
-        return ("c64", f"{self.token.string}j")
+        return self.transpiler.expression("c64", f"{self.token.string}j")
 
 class CharacterConstant(PrimaryNode):
     def transpile(self):
-        return ("u64", self.token.string)
+        return self.transpiler.expression("u64", self.token.string)
 
 class Identifier(PrimaryNode):
     def transpile(self):
         name = self.token.string
-        var = self.transpiler.symbols[name]
+        var = self.transpiler.symbols.at(self, name)
 
         if var is None:
-            self.transpiler.warnings.error(self, f"Reference to undeclared variable '{name}'")
-            return ("cmax", f"/*{name}*/")
+            return self.transpiler.expression("cmax", f"/*{name}*/")
 
         c_name = var.access(self)
-        e_type, _ = self.transpiler.c_type(var.s_type)
 
         if var.s_type in ("imag32", "imag64", "imag"):
-            return (e_type, f"({c_name} * 1.0j)")
+            return self.transpiler.expression(None, f"({c_name} * 1.0j)").cast(var.s_type)
 
-        return (e_type, c_name)
+        return self.transpiler.expression(None, f"{c_name}").cast(var.s_type)
 
 class ParenthesesExpression(Node):
     @property
@@ -75,8 +73,7 @@ class ParenthesesExpression(Node):
         return node
 
     def transpile(self):
-        e_type, expression = self.expression.transpile()
-        return (e_type, f"({expression})")
+        return self.expression.transpile().new("(%s)")
 
 class NormExpression(ParenthesesExpression):
     wrote = []
@@ -89,33 +86,33 @@ class NormExpression(ParenthesesExpression):
         return node
 
     def transpile(self):
-        e_type, expression = self.expression.transpile()
+        expression = self.expression.transpile().operate(self)
 
-        match e_type:
+        match expression.e_type:
             case "bool":
-                return ("u64", f"({expression})")
+                return expression.new("(%s)").cast("u64")
             case "u64"|"umax":
-                return (e_type, f"({expression})")
+                return expression.new("(%s)")
             case "i64"|"imax":
-                func = self.write_generic_func(e_type)
-                return ("umax", f"({func}({expression}))")
+                func = self.write_generic_func(expression)
+                return expression.new(f"({func}(%s))").cast("umax")
             case "f64":
                 self.transpiler.include("math")
-                return (e_type, f"(fabs({expression}))")
+                return expression.new("(fabs(%s))")
             case "c64":
                 self.transpiler.include("complex")
-                return ("f64", f"(cabs({expression}))")
+                return expression.new("(cabs(%s))").cast("f64")
             case "fmax"|"cmax":
                 self.transpiler.include("complex")
-                return ("fmax", f"(cabsl({expression}))")
+                return expression.new("(cabsl(%s))").cast("fmax")
 
-    def write_generic_func(self, e_type):
-        func = f"__sea_func_norm_{e_type}__"
+    def write_generic_func(self, expression):
+        func = f"__sea_func_norm_{expression.e_type}__"
 
         if func in type(self).wrote: return func
         type(self).wrote += [func]
 
-        e_type = self.transpiler.safe_type(e_type)
+        e_type = expression.c_type
 
         self.transpiler.header("\n".join((
             f"{e_type} {func}({e_type} num)", "{",
@@ -126,4 +123,4 @@ class NormExpression(ParenthesesExpression):
 
 class PrimaryKeyword(PrimaryNode):
     def transpile(self):
-        return ("bool", "1" if self.token.has("True") else "0")
+        return self.transpiler.expression("bool", "1" if self.token.has("True") else "0")

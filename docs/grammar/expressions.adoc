@@ -33,7 +33,7 @@
 {tab} `_exponential-expression_`
 {tab} `_unary-operator_` `_unary-expression_`
 `_unary-operator_`: one of
-{tab} `*+*` `*-*` `*!*` `*~*` `*<~*` `*~>*`
+{tab} `*+*` `*-*` `*!*` `*~*` `*<~*` `*~>*` `*&*`
 
 `_multiplicative-expression_`:
 {tab} `_unary-expression_`

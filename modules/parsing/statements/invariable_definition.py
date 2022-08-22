@@ -15,3 +15,6 @@ class InvariableDefinition(IdentifierDefinition):
     @classmethod
     def construct_declaration(cls):
         return InvariableDeclaration.construct()
+
+    def check_references(self, is_var):
+        pass

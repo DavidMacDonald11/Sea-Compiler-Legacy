@@ -25,8 +25,23 @@ class IdentifierDefinition(Node):
         raise NotImplementedError()
 
     def transpile(self):
-        _, declaration = self.declaration.transpile()
-        e_type, statement = self.statement.transpile()
-        var = self.transpiler.symbols[self.declaration.identifiers[0].string]
+        statement = self.statement.transpile()
+        c_type = ""
+        decl = ""
 
-        return var.assign(self, e_type, statement, declaration)
+        for c_type, identifier in self.declaration.transpile_generator():
+            expression = identifier.assign(self, statement)
+            is_ref = expression.is_reference
+
+            delcaration = f"{'*' if is_ref else ''}{identifier}"
+            decl = delcaration if decl == "" else f"{delcaration}, {decl}"
+
+        decl = f"{c_type} {decl}"
+
+        if is_ref:
+            self.check_references(not expression.is_invar)
+
+        return statement.new(f"{decl} = %s")
+
+    def check_references(self, is_var):
+        raise NotImplementedError(type(self).__name__)

@@ -24,21 +24,22 @@ class IdentifierDeclaration(Node):
         return cls(type_keyword, identifiers)
 
     def transpile(self):
-        sea_keyword = self.type_keyword.token.string
-        _, keyword = self.type_keyword.transpile()
-        identifiers = ""
+        c_type = ""
+        decl = None
 
-        for identifier in self.identifiers:
-            name = self.transpile_name(sea_keyword, identifier.string)
+        for c_type, identifier in self.transpile_generator():
+            decl = f"{identifier}" if decl == "" else f"{identifier}, {decl}"
 
-            if name is None:
-                message = f"Cannot declare identifier '{identifier.string}' twice."
-                self.transpiler.warnings.error(self, message)
-                return ("", f"{keyword} {identifiers}/*, {identifier}*/")
+        decl = f"{c_type} {decl}"
 
-            identifiers = name if identifiers == "" else f"{identifiers}, {name}"
+        return self.transpiler.expression("", decl)
 
-        return ("", f"{keyword} {identifiers}")
+    def transpile_generator(self):
+        keyword = self.type_keyword.token.string
+        _, c_type = self.type_keyword.transpile()
 
-    def transpile_name(self, sea_keyword, sea_name):
+        for name in self.identifiers[::-1]:
+            yield (c_type, self.transpile_name(keyword, name.string))
+
+    def transpile_name(self, keyword, name):
         raise NotImplementedError(f"Class {type(self).__name__} needs a 'transpile_name' method")

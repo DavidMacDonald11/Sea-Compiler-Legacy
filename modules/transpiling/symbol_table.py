@@ -1,25 +1,32 @@
+from .expression import Expression
+
 class SymbolTable:
     def __init__(self):
         self.symbols = {}
 
-    def __getitem__(self, key):
-        return self.symbols[key] if key in self.symbols else None
-
-    def new_variable(self, s_type, name):
-        if name in self.symbols:
+    def at(self, node, key):
+        if key not in self.symbols:
+            node.transpiler.warnings.error(node, f"Reference to undeclared identifier '{key}'")
             return None
 
-        self.symbols[name] = var = Variable(s_type, name)
-        return var.c_name
+        return self.symbols[key]
 
-    def new_invariable(self, s_type, name):
+    def _new_identifier(self, cls, node, s_type, name, is_ref):
         if name in self.symbols:
+            message = f"Cannot declare identifier '{name}' twice."
+            node.tranpsiler.warnings.error(node, message)
             return None
 
-        self.symbols[name] = invar = Invariable(s_type, name)
-        return invar.c_name
+        self.symbols[name] = identifier = cls(s_type, name, is_ref)
+        return identifier
 
-class Symbol:
+    def new_variable(self, node, s_type, name, is_ref = False):
+        return self._new_identifier(Variable, node, s_type, name, is_ref)
+
+    def new_invariable(self, node, s_type, name, is_ref = False):
+        return self._new_identifier(Invariable, node, s_type, name, is_ref)
+
+class Identifier:
     @property
     def c_name(self):
         raise NotImplementedError(f"{type(self).__name__} has no c_name property")
@@ -28,42 +35,64 @@ class Symbol:
         self.s_type = s_type
         self.name = name
 
-class Variable(Symbol):
-    def __init__(self, s_type, name):
-        self.initialized = False
-        super().__init__(s_type, name)
+    def __repr__(self):
+        return self.c_name
 
+class Variable(Identifier):
     @property
     def c_name(self):
         return f"__sea_var_{self.name}__"
 
+    @property
+    def declaration(self):
+        return f"*{self.c_name}" if self.is_ref else self.c_name
+
+    def __init__(self, s_type, name, is_ref):
+        self.initialized = False
+        self.is_transfered = False
+        self.is_ref = is_ref
+        super().__init__(s_type, name)
+
     def access(self, node):
-        if self.initialized: return self.c_name
+        c_name = f"(*{self.c_name})" if self.is_ref else self.c_name
 
-        node.transpiler.warnings.error(node, f"Accessing uninitialized variable '{self.name}'")
-        return f"/*{self.c_name}*/"
+        if self.is_transfered:
+            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownerhsip swap")
 
-    def assign(self, node, e_type, expression, identifier = None):
+        if self.initialized: return c_name
+
+        node.transpiler.warnings.error(node, f"Accessing uninitialized identifier '{self.name}'")
+        return f"/*{c_name}*/"
+
+    def assign(self, node, expression):
+        if self.is_transfered:
+            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
+
         self.initialized = True
-        identifier = identifier or self.c_name
+        self.is_ref = expression.is_reference
+        is_invar = expression.is_invar
 
-        if self.s_type == "bool" and e_type != "bool":
-            node.transpiler.warnings.error(node, "Cannot assign non-boolean value to bool variable")
+        if self.s_type == "bool" and expression.e_type not in "bool":
+            node.transpiler.warnings.error(node, "".join((
+                "Cannot assign non-bool value to bool identifier. ",
+                "(Consider using the '?' operator to get boolean value)"
+            )))
 
         if self.s_type not in ("imag32", "imag64", "imag"):
-            return (e_type, f"{identifier} = {expression}")
+            return Expression(expression.e_type, f"{expression}", self.is_ref, is_invar)
 
         suffix = "f" if self.s_type == "imag32" else ("l" if self.s_type == "imag" else "")
         node.transpiler.include("complex")
-        return (e_type, f"{identifier} = cimag{suffix}({expression})")
+
+        return Expression(expression.e_type, f"cimag{suffix}({expression})", self.is_ref, is_invar)
 
 class Invariable(Variable):
     @property
     def c_name(self):
         return f"__sea_invar_{self.name}__"
 
-    def assign(self, node, e_type, expression, identifier = None):
+    def assign(self, node, expression):
         if self.initialized:
             node.transpiler.warnings.error(node, f"Cannot reassign invariable '{self.name}'")
 
-        return super().assign(node, e_type, expression, identifier)
+        return super().assign(node, expression)

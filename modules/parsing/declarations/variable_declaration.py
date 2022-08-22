@@ -8,5 +8,5 @@ class VariableDeclaration(IdentifierDeclaration):
 
         return super().construct()
 
-    def transpile_name(self, sea_keyword, sea_name):
-        return self.transpiler.symbols.new_variable(sea_keyword, sea_name)
+    def transpile_name(self, keyword, name):
+        return self.transpiler.symbols.new_variable(self, keyword, name)

@@ -26,5 +26,5 @@ class Statement(Node):
         return cls(ExpressionStatement.construct())
 
     def transpile(self):
-        e_type, statement = self.statement.transpile()
-        self.transpiler.write(f"{statement}/*{e_type}*/;")
+        statement = self.statement.transpile().new("%s/*%e*/")
+        self.transpiler.write(f"{statement};")

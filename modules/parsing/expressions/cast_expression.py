@@ -22,17 +22,17 @@ class CastExpression(Node):
         return expression
 
     def transpile(self):
-        e_type, expression = self.expression.transpile()
+        expression = self.expression.transpile().operate(self)
+        keyword = self.type_keyword.token.string
 
-        if self.type_keyword.token.has("bool"):
-            return ("bool", expression if e_type == "bool" else f"({expression}) != 0")
+        if keyword == "bool":
+            return expression.new("%s" if expression.e_type == "bool" else "(%s != 0)").cast("bool")
 
-        casted_e_type, keyword = self.type_keyword.transpile()
-        sea_keyword =self.type_keyword.token.string
+        e_type, c_type = self.type_keyword.transpile()
 
-        if sea_keyword not in ("imag32", "imag64", "imag"):
-            return (casted_e_type, f"({keyword})({expression})")
+        if keyword not in ("imag32", "imag64", "imag"):
+            return expression.new(f"({c_type})(%s)").cast(e_type)
 
-        suffix = "f" if sea_keyword == "imag32" else ("l" if sea_keyword == "imag" else "")
+        suffix = "f" if keyword == "imag32" else ("l" if keyword == "imag" else "")
         self.transpiler.include("complex")
-        return (casted_e_type, f"(cimag{suffix}({expression}) * 1.0j)")
+        return expression.new(f"(cimag{suffix}(%s) * 1.0j)").cast(e_type)

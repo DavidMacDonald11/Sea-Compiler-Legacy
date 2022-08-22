@@ -7,8 +7,8 @@ class ThreeWayComparisonExpression(BinaryOperation):
         return cls.construct_binary(["<=>"], RemainderExpression)
 
     def transpile(self):
-        le_type, left = self.left.transpile()
-        re_type, right = self.right.transpile()
-        e_type = self.transpiler.resolve_type(le_type, re_type)
+        left = self.left.transpile().operate(self)
+        right = self.right.transpile().operate(self)
+        result = self.transpiler.resolve(left, right).cast_up()
 
-        return (e_type, f"(({left}) - ({right}))")
+        return result.new(f"(({left}) - ({right}))")

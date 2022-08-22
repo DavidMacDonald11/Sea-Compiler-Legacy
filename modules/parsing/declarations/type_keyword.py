@@ -7,8 +7,8 @@ class TypeKeyword(PrimaryNode):
         return cls(cls.parser.expecting_has(*TYPE_KEYWORDS))
 
     def transpile(self):
-        e_type, keyword = TYPE_MAP[self.token.string]
-        return e_type, f"__sea_type_{keyword}__"
+        e_type, c_type = TYPE_MAP[self.token.string]
+        return e_type, f"__sea_type_{c_type}__"
 
 INT_MAP = {f"int{2 ** x}": ("i64", f"i{2 ** x}") for x in range(3, 7)}
 UINT_MAP = {f"nat{2 ** x}": ("u64", f"u{2 ** x}") for x in range(3, 7)}

@@ -110,6 +110,9 @@ class Lexer:
         while self.file.next == "\n":
             self.file.take(1)
 
+            if self.file.next == "#":
+                self.make_comment()
+
         self.new_token("Punctuator", line)
 
     def make_line_continuation(self):

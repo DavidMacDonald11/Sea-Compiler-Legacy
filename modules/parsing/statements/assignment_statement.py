@@ -23,11 +23,13 @@ class AssignmentStatement(Node):
 
     def transpile(self):
         name = self.identifier.string
-        var = self.transpiler.symbols[name]
-        e_type, expression = self.expression.transpile()
+        identifier = self.transpiler.symbols.at(self, name)
+        expression = self.expression.transpile()
 
-        if var is None:
-            self.transpiler.warnings.error(self, f"Assigning undeclared variable '{name}'")
-            return (e_type, f"/*{name} = */{expression}")
+        if expression.is_reference:
+            self.transpiler.warnings.error(self, "Cannot borrow into existing identifier")
 
-        return var.assign(self, e_type, expression)
+        if identifier is None:
+            return expression.new(f"/*{name} = */%s")
+
+        return identifier.assign(self, expression).new(f"{identifier} = %s")

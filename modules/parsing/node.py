@@ -101,26 +101,26 @@ class BinaryOperation(Node):
         return self.transpile_binary(self.operator.string)
 
     def transpile_binary(self, operator, bitwise = False, boolean = False):
-        le_type, left = self.left.transpile()
-        re_type, right = self.right.transpile()
-        e_type = self.transpiler.resolve_type(le_type, re_type)
+        left = self.left.transpile().operate(self)
+        right = self.right.transpile().operate(self)
+        result = self.transpiler.expression.resolve(left, right).cast_up()
 
         if not boolean and not bitwise:
-            return (e_type, f"{left} {operator} {right}")
+            return result.new(f"{left} {operator} {right}")
 
         if bitwise:
-            if e_type not in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
-                return (e_type, f"{left} {operator} {right}")
+            if result.e_type not in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
+                return result.new(f"{left} {operator} {right}")
 
-            message = f"Cannot perform bitwise operation '{self.operator.string}' on "
-            message += "floating type."
+            message = "Cannot perform bitwise operation on floating type"
             self.transpiler.warnings.error(self, message)
-            return (e_type, f"{left} /*{self.operator.string} {right}*/")
+            return result.new(f"{left} /*{operator} {right}*/")
 
-        if not le_type == re_type == "bool":
-            message = f"Cannot perform boolean operation '{self.operator.string}' on "
-            message += "non-boolean type. (Consider using the '?' operator to get boolean value)"
-            self.transpiler.warnings.error(self, message)
-            return (e_type, f"{left} /*{self.operator.string} {right}*/")
+        if not left.e_type == right.e_type == "bool":
+            self.transpiler.warnings.error(self, "".join((
+                f"Cannot perform boolean operation '{self.operator.token}' on non-boolean type. ",
+                "(Consider using the '?' operator to get boolean value)")))
 
-        return ("bool", f"{left} {operator} {right}")
+            return result.new(f"{left} /*{self.operator.token} {right}*/")
+
+        return result.new(f"{left} {operator} {right}").cast("bool")

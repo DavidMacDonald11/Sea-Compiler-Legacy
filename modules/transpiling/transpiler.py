@@ -1,7 +1,11 @@
-from parsing.declarations.type_keyword import TYPE_MAP
 from .symbol_table import SymbolTable
+from .expression import Expression
 
 class Transpiler:
+    @property
+    def expression(self):
+        return Expression
+
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
@@ -62,25 +66,3 @@ class Transpiler:
 
     def write(self, string = "", end = "\n"):
         self.lines += f"{string}{end}"
-
-    def resolve_type(self, e_type1, e_type2):
-        if e_type1 == e_type2 == "bool": return "u64"
-        return e_type1 if POINTS[e_type1] > POINTS[e_type2] else e_type2
-
-    def safe_type(self, e_type):
-        return f"__sea_type_{e_type}__"
-
-    def c_type(self, s_type):
-        return TYPE_MAP[s_type]
-
-POINTS = {
-    "bool": 0,
-    "u64": 1,
-    "i64": 2,
-    "umax": 2.25,
-    "imax": 2.5,
-    "f64": 3,
-    "fmax": 3.5,
-    "c64": 4,
-    "cmax": 4.5
-}

@@ -39,12 +39,11 @@ class CompoundAssignmentStatement(Node):
     def transpile(self):
         name = self.identifier.string
         operator = self.operator.string
-        e_type, expression = self.expression.transpile()
-        var = self.transpiler.symbols[name]
+        expression = self.expression.transpile()
+        var = self.transpiler.symbols.at(self, name)
 
         if var is None:
-            self.transpiler.warnings.error(self, f"Assigning undeclared variable '{name}'")
-            return (e_type, f"/*{name} {operator}*/{expression}/*{e_type}*/")
+            return expression.new(f"/*{name} {operator}*/%s/*%e*/")
 
         op = operator[:-1]
 
