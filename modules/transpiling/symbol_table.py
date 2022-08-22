@@ -29,7 +29,7 @@ class SymbolTable:
 class Identifier:
     @property
     def c_name(self):
-        raise NotImplementedError(f"{type(self).__name__} has no c_name property")
+        raise NotImplementedError(type(self).__name__)
 
     def __init__(self, s_type, name):
         self.s_type = s_type
@@ -57,7 +57,7 @@ class Variable(Identifier):
         c_name = f"(*{self.c_name})" if self.is_ref else self.c_name
 
         if self.is_transfered:
-            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownerhsip swap")
+            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
         if self.initialized: return c_name
 
@@ -68,9 +68,11 @@ class Variable(Identifier):
         if self.is_transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
-        self.initialized = True
-        self.is_ref = expression.is_reference
+        ownership = expression.ownership
         is_invar = expression.is_invar
+
+        self.initialized = True
+        self.is_ref = ownership is not None
 
         if self.s_type == "bool" and expression.e_type not in "bool":
             node.transpiler.warnings.error(node, "".join((
@@ -79,12 +81,12 @@ class Variable(Identifier):
             )))
 
         if self.s_type not in ("imag32", "imag64", "imag"):
-            return Expression(expression.e_type, f"{expression}", self.is_ref, is_invar)
+            return Expression(expression.e_type, f"{expression}", ownership, is_invar)
 
         suffix = "f" if self.s_type == "imag32" else ("l" if self.s_type == "imag" else "")
         node.transpiler.include("complex")
 
-        return Expression(expression.e_type, f"cimag{suffix}({expression})", self.is_ref, is_invar)
+        return Expression(expression.e_type, f"cimag{suffix}({expression})", ownership, is_invar)
 
 class Invariable(Variable):
     @property

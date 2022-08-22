@@ -26,8 +26,8 @@ class AssignmentStatement(Node):
         identifier = self.transpiler.symbols.at(self, name)
         expression = self.expression.transpile()
 
-        if expression.is_reference:
-            self.transpiler.warnings.error(self, "Cannot borrow into existing identifier")
+        if expression.ownership is not None:
+            self.transpiler.warnings.error(self, "Must create new identifier to transfer ownership")
 
         if identifier is None:
             return expression.new(f"/*{name} = */%s")

@@ -29,8 +29,8 @@ class UnaryExpression(Node):
                 node_cls = BitwiseNotExpression
             case "~"|"<~"|"~>":
                 node_cls = RoundExpression
-            case "&":
-                node_cls = ReferenceExpression
+            case "&"|"$":
+                node_cls = OwnershipExpression
 
         return node_cls(operator, cls.construct())
 
@@ -107,21 +107,21 @@ class RoundExpression(UnaryExpression):
 
         return sea_func
 
-class ReferenceExpression(UnaryExpression):
+class OwnershipExpression(UnaryExpression):
     def transpile(self):
+        operator = self.operator.string
         expression = self.expression.transpile()
-        expression.is_reference = True
+        expression.ownership = operator
 
         if not isinstance(self.expression, Identifier):
-            self.transpiler.warnings.error(self, "Cannot make reference to non-identifier")
-            return expression.new("/*&*/%s")
+            message = "Cannot borrow/transfer ownership of non-identifier"
+            self.transpiler.warnings.error(self, message)
+            return expression.new(f"/*{operator}*/%s")
 
         name = self.expression.token.string
-        var = self.transpiler.symbols.at(self, name)
+        identifier = self.transpiler.symbols.at(self, name)
 
-        if not isinstance(var, Invariable):
-            var.is_transfered = True
-        else:
-            expression.is_invar = True
+        expression.is_invar = isinstance(identifier, Invariable)
+        identifier.is_transfered = operator == "$"
 
         return expression.new("&%s")

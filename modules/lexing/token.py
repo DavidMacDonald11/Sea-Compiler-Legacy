@@ -119,7 +119,7 @@ class Token(FakeToken):
         self.line += self
 
 POSTFIX_UNARY_OPERATORS = {"%", "!", "?"}
-PREFIX_UNARY_OPERATORS = {"+", "-", "!", "~", "<~", "~>", "&"}
+PREFIX_UNARY_OPERATORS = {"+", "-", "!", "~", "<~", "~>", "&", "$"}
 BINARY_OPERATORS = {"^", "*", "/", "+", "-", "<<", ">>", "&", "$", "|", "<=>"}
 COMPARATIVE_OPERATORS = {"<", ">", "<=", ">=", "==", "!="}
 ASSIGNMENT_OPERATORS = {"=", "^=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "$=", "|="}

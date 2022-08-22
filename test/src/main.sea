@@ -1,7 +1,7 @@
-var int64 num1, num2 = 15
-invar char c1, c2 = 'a'
+var nat one = 1
+invar nat TWO = 2
 
-int64 num = &num1
-invar char c3, c4 = &c1
+invar nat two3, two4 = &TWO
+invar nat one3, one4 = &one
 
-var real f1, f2 = 3.14
+nat two = $one

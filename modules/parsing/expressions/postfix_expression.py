@@ -43,7 +43,7 @@ class FactorialExpression(PostfixExpression):
         expression = self.expression.transpile().operate(self)
 
         if expression.e_type in ("f64", "fmax", "c64", "cmax"):
-            self.transpiler.warnings.error(self, "Cannot use factorial on floats")
+            self.transpiler.warnings.error(self, "Cannot use factorial on floating type")
             return expression.new("%s/*!*/")
 
         largest = expression.e_type in ("imax", "umax")

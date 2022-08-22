@@ -5,10 +5,10 @@ class Expression:
     def c_type(self):
         return f"__sea_type_{self.e_type}__"
 
-    def __init__(self, e_type, string, is_ref = False, is_invar = False):
+    def __init__(self, e_type, string, ownership = None, is_invar = False):
         self.string = string
         self.e_type = e_type
-        self.is_reference = is_ref
+        self.ownership = ownership
         self.is_invar = is_invar
 
     def __repr__(self):
@@ -27,8 +27,8 @@ class Expression:
         return self
 
     def operate(self, node):
-        if self.is_reference:
-            node.transpiler.warnings.error(node, "Cannot perform operations on reference rvalue")
+        if self.ownership is not None:
+            node.transpiler.warnings.error(node, "Cannot perform operations on ownership rvalue")
 
         return self
 

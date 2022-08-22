@@ -26,6 +26,6 @@ class LogicalNotExpression(Node):
                 "Cannot perform negation of non-boolean value. ",
                 "(Consider using the '?' operator to get boolean value)")))
 
-            return expression.new("/*not*/ (%s)")
+            return expression.new("/*not*/(%s)")
 
         return expression.new("!(%s)").cast("bool")

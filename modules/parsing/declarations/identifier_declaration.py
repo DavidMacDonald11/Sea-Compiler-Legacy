@@ -42,4 +42,4 @@ class IdentifierDeclaration(Node):
             yield (c_type, self.transpile_name(keyword, name.string))
 
     def transpile_name(self, keyword, name):
-        raise NotImplementedError(f"Class {type(self).__name__} needs a 'transpile_name' method")
+        raise NotImplementedError(type(self).__name__)

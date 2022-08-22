@@ -31,8 +31,8 @@ class ConditionalExpression(Node):
 
         if condition.e_type != "bool":
             self.transpiler.warnings.error(self, "".join((
-                "Cannot perform conditional statment with non-boolean condition.",
-                " (Consider using the '?' operator to get boolean value)"
+                "Cannot perform conditional statment with non-boolean condition. ",
+                "(Consider using the '?' operator to get boolean value)"
             )))
 
             return result.new(f"/*({condition}) ? {left} :*/ {right}")

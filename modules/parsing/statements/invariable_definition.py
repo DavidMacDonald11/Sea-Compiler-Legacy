@@ -16,5 +16,7 @@ class InvariableDefinition(IdentifierDefinition):
     def construct_declaration(cls):
         return InvariableDeclaration.construct()
 
-    def check_references(self, is_var):
-        pass
+    def check_references(self, expression):
+        if len(self.declaration.identifiers) > 1 and expression.ownership == "$":
+            message = "Cannot transfer ownership to multiple identifiers"
+            self.transpiler.warnings.error(self, message)
