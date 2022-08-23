@@ -13,6 +13,9 @@ class PrimaryExpression(Node):
         if cls.parser.next.of("Identifier"):
             return Identifier.construct()
 
+        if cls.parser.next.has("["):
+            return ExpressionList.construct()
+
         if cls.parser.next.has("("):
             return ParenthesesExpression.construct()
 
@@ -57,6 +60,35 @@ class Identifier(PrimaryNode):
 
         return self.transpiler.expression(None, f"{c_name}").cast(var.s_type)
 
+class ExpressionList(Node):
+    @property
+    def nodes(self) -> list:
+        return self.expressions
+
+    def __init__(self, expressions):
+        self.expressions = expressions
+
+    @classmethod
+    def construct(cls):
+        cls.parser.expecting_has("[")
+        expressions = [cls.parser.expression.construct()]
+
+        while cls.parser.next.has(","):
+            cls.parser.take()
+            if cls.parser.next.has("]"): break
+            expressions += [cls.parser.expression.construct()]
+
+        cls.parser.expecting_has("]")
+        return cls(expressions)
+
+    def transpile(self):
+        expression = self.transpiler.expression("list", f"{self.expressions[0].transpile()}")
+
+        for exp in self.expressions[1:]:
+            expression.new(f"%s, {exp.transpile()}")
+
+        return expression.new("/*{%s}*/")
+
 class ParenthesesExpression(Node):
     @property
     def nodes(self) -> list:
@@ -86,6 +118,9 @@ class NormExpression(ParenthesesExpression):
         return node
 
     def transpile(self):
+        if isinstance(self.expression, NormExpression):
+            return self.expression.transpile()
+
         expression = self.expression.transpile().operate(self)
 
         match expression.e_type:

@@ -1,7 +1,7 @@
 from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .expression_statement import ExpressionStatement
 from .identifier_statement import IdentifierStatement
-from .compound_assignment_statement import CompoundAssignmentStatement
+from .augmented_assignment_statement import AugmentedAssignmentStatement
 from ..node import Node
 
 class Statement(Node):
@@ -21,7 +21,7 @@ class Statement(Node):
             return IdentifierStatement.construct()
 
         if cls.parser.next.of("Identifier"):
-            return cls(CompoundAssignmentStatement.construct())
+            return cls(AugmentedAssignmentStatement.construct())
 
         return cls(ExpressionStatement.construct())
 

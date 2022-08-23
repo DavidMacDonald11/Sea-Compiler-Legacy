@@ -12,7 +12,7 @@ from ..expressions.bitwise_xor_expression import BitwiseXorExpression
 from ..expressions.bitwise_or_expression import BitwiseOrExpression
 from ..node import Node
 
-class CompoundAssignmentStatement(Node):
+class AugmentedAssignmentStatement(Node):
     @property
     def nodes(self) -> list:
         return [self.identifier, self.operator, self.expression]

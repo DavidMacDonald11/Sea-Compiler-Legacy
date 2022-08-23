@@ -21,11 +21,13 @@ class Transpiler:
     def close(self):
         if self.file.closed: return
 
+        self.include("complex")
+        self.include("stdio")
+
         self.file.write("\n".join((
-            "#include <stdio.h>",
             "int main()", "{",
             f"{self.lines}",
-            'printf("Success!\\n");',
+            'printf("Value: %Lf + %Lfi\\n", creall(__sea_var_main__), cimagl(__sea_var_main__));',
             "return 0;", "}"
         )))
 

@@ -18,10 +18,6 @@
 {tab} `*imag32*` `*imag64*` `*imag*`
 {tab} `*cplex32*` `*cplex64*` `*cplex*`
 
-`_type_`:
-{tab} `_type-keyword_`
-{tab} `_type_` `*[*` `*]*`
-
 `_identifier-declaration_`:
 {tab} `_type-keyword_` `_identifier-list_`
 `_identifier-list_`:

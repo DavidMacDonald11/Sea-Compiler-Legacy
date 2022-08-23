@@ -27,16 +27,16 @@
 {tab} `_variable-definition_`
 {tab} `_invariable-definition_`
 
-`_compound-assignment-statement_`:
+`_augmented-assignment-statement_`:
 {tab} `_assignment-statement_`
-{tab} `_identifier_` `_compound_assignment-operator_` `_expression-statement_`
-`_compound_assignment-operator_`: one of
+{tab} `_identifier_` `_augmented-assignment-operator_` `_expression-statement_`
+`_augmented-assignment-operator_`: one of
 {tab} `*^=*`, `*{star}=*`, `*/=*`, `*%=*`, `*+=*`, `*-=*`
 {tab} `*<\<=*`, `*>>=*`, `*&=*`, `*$=*`, `*|=*`
 
 `_statement_`:
 {tab} `_identifier-statement_`
-{tab} `_compound-assignment-statement_`
+{tab} `_augmented-assignment-statement_`
 
 `_file-statement_`:
 {tab} `_statement_`
