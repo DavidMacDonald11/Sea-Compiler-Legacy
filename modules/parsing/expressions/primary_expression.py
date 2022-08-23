@@ -36,10 +36,66 @@ class NumericConstant(PrimaryNode):
         return cls(num, cls.parser.take()) if cls.parser.next.has("i") else cls(num)
 
     def transpile(self):
-        if len(self.nodes) == 1:
-            return self.transpiler.expression(f"{self.token.specifier}64", self.token.string)
+        specifier = self.token.specifier
+        string = self.convert_base(self.token.string)
 
-        return self.transpiler.expression("c64", f"{self.token.string}j")
+        if len(self.nodes) == 1:
+            return self.transpiler.expression(f"{specifier}64", string)
+
+        return self.transpiler.expression("c64", f"{string}j")
+
+    def convert_base(self, string):
+        if "e" not in string:
+            if "b" not in string:
+                return str(int(string))
+
+            return self.convert_to_base(*string.split("b"))
+
+        digits, power = string.split("e")
+
+        if "b" in power:
+            power = self.convert_to_base(*power.split("b"), decimal = True)
+
+        if "b" in digits:
+            base, digits = digits.split("b")
+            digits = self.convert_to_base(base, digits, decimal = True)
+            digits = str(float(digits) * int(base) ** float(power))
+
+        return digits
+
+    def convert_to_base(self, base, digits, decimal = False):
+        print(base, digits)
+
+        if digits[0] in "+-":
+            sign = digits[0]
+            digits = digits[1:]
+        else:
+            sign = ""
+
+        if "." in digits:
+            return sign + self.convert_float_to_base(int(base), digits)
+
+        return sign + self.convert_int_to_base(int(base), digits, decimal)
+
+    def convert_int_to_base(self, base, digits, decimal = False):
+        try:
+            if base < 2: raise ValueError()
+
+            if decimal:
+                return str(int(digits, base))
+
+            return f"0x{hex(int(digits, base))[2:].upper()}"
+        except ValueError:
+            self.transpiler.warnings.error(self, "Numeric base must be between 2 and 36")
+            return digits
+
+    def convert_float_to_base(self, base, digits):
+        integer, floats = f"0{digits}".split(".")
+
+        value = sum(int(digit, base) * base ** -(i + 1) for i, digit in enumerate(floats))
+        value += int(self.convert_int_to_base(base, integer, decimal = True))
+
+        return str(value)
 
 class CharacterConstant(PrimaryNode):
     def transpile(self):

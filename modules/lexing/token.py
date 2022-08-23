@@ -1,6 +1,6 @@
 import re
 from functools import cached_property
-from string import ascii_letters
+from string import ascii_letters, ascii_uppercase
 from util.misc import escape_whitespace, MatchRe
 
 class FakeToken:
@@ -52,25 +52,30 @@ class FakeToken:
 
     def _validate_numeric_constant(self):
         d_int = re.compile(r"^\d+$")
-        d_float = re.compile(r"^\d*.\d*$")
+        n_int = re.compile(r"^\d+b[A-Z0-9]+$")
 
-        if d_int.match(self.string):
+        if d_int.match(self.string) or n_int.match(self.string):
             self.specifier = "i"
             return
 
-        if "." not in self.string:
+        if "." not in self.string and "e" not in self.string:
             type(self).warnings.error(self, "Incorrect integer constant")
             return
 
-        if d_float.match(self.string):
-            self.specifier = "f"
-            return
+        patterns = [re.compile(r"^\d*.?\d*(e[+-]?\d+)?$")]
+        patterns += [re.compile(r"^\d*.?\d*(e[+-]?\d+b[A-Z0-9]+)?$")]
+        patterns += [re.compile(r"^\d+b[A-Z0-9]*.?[A-Z0-9]*(e[+-]?\d+)?$")]
+        patterns += [re.compile(r"^\d+b[A-Z0-9]*.?[A-Z0-9]*(e[+-]?\d+b[A-Z0-9]+)?$")]
+
+        for pattern in patterns:
+            if pattern.match(self.string):
+                self.specifier = "f"
+                return
 
         type(self).warnings.error(self, "Incorrect float constant")
 
     def _validate_character_constant(self):
-        patterns = []
-        patterns += [re.compile(r"^'[^\\]'$")]
+        patterns = [re.compile(r"^'[^\\]'$")]
         patterns += [re.compile(r"^'\\[abfnrtv'\"\\?]'$")]
         patterns += [re.compile(r"^'\\[0-7]{1, 3}'$")]
         patterns += [re.compile(r"^'\\x[0-9A-F]+'$")]
@@ -143,7 +148,7 @@ KEYWORDS = PRIMARY_KEYWORDS | TYPE_KEYWORDS | TYPE_MODIFIER_KEYWORDS | {
 
 PUNCTUATOR_SYMBOLS = "(),[]"
 NUMERIC_START_SYMBOLS = "0123456789."
-NUMERIC_SYMBOLS = NUMERIC_START_SYMBOLS
+NUMERIC_SYMBOLS = NUMERIC_START_SYMBOLS + ascii_uppercase + "be+-"
 IDENTIFIER_START_SYMBOLS = f"{ascii_letters}_"
 IDENTIFIER_SYMBOLS = f"{IDENTIFIER_START_SYMBOLS}0123456789"
 

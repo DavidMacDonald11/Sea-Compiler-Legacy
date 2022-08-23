@@ -5,4 +5,8 @@ imag im = 6i
 
 [1, 2, 3]
 
+0010b0016.15e-002
+000000 # = 0 without padding (octal)
+im = 32b10e+1i
+
 main = re + im
