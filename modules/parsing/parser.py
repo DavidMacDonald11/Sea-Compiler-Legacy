@@ -25,6 +25,10 @@ class Parser:
         self.i += 1
         return token
 
+    def ignore_spaces(self):
+        while self.next.has(r"\n", r"\t"):
+            self.take()
+
     def expecting_of(self, *kinds):
         if self.next.of(*kinds):
             return self.take()

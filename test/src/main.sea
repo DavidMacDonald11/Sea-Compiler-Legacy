@@ -1,12 +1,9 @@
 # Ouput var
 cplex main = 0
 
-invar cplex cm = 5 + 0i
-real re = cm
-imag im = cm
+real a, b, c = 1, 2, 3
 
-main = re + im
-
-var nat count1, count2 = 0, 5
-
-main += count1 + count2 * 1i
+var nat count1, count2 = [
+    0,
+    5
+]

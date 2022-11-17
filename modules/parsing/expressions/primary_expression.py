@@ -127,13 +127,18 @@ class ExpressionList(Node):
     @classmethod
     def construct(cls):
         cls.parser.expecting_has("[")
+        cls.parser.ignore_spaces()
+
         expressions = [cls.parser.expression.construct()]
 
         while cls.parser.next.has(","):
             cls.parser.take()
+            cls.parser.ignore_spaces()
+
             if cls.parser.next.has("]"): break
             expressions += [cls.parser.expression.construct()]
 
+        cls.parser.ignore_spaces()
         cls.parser.expecting_has("]")
         return cls(expressions)
 

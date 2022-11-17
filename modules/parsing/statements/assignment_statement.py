@@ -1,6 +1,7 @@
 from .expression_statement import ExpressionStatement
 from ..expressions.expression import Expression
 from ..expressions.primary_expression import Identifier
+from ..expressions.primary_expression import ExpressionList as PExpressionList
 from ..node import Node
 
 class AssignmentStatement(Node):
@@ -13,9 +14,9 @@ class AssignmentStatement(Node):
 
     @classmethod
     def construct(cls):
-        cls.parser.take()
+        taken = cls.parser.take()
 
-        if not cls.parser.next.has("=", ","):
+        if not cls.parser.next.has("=", ",") and not taken.has("["):
             cls.parser.i -= 1
             return ExpressionStatement.construct()
 
@@ -92,7 +93,10 @@ class ExpressionList(Node):
         return self.expressions
 
     def __init__(self, expressions):
-        self.expressions = expressions
+        if isinstance(expressions[0], PExpressionList):
+            self.expressions = expressions[0].expressions
+        else:
+            self.expressions = expressions
 
     def __len__(self):
         return len(self.expressions)
