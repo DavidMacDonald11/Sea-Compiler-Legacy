@@ -5,11 +5,11 @@ class Expression:
     def c_type(self):
         return f"__sea_type_{self.e_type}__"
 
-    def __init__(self, e_type, string, ownership = None, is_invar = False):
+    def __init__(self, e_type, string):
         self.string = string
         self.e_type = e_type
-        self.ownership = ownership
-        self.is_invar = is_invar
+        self.ownership = None
+        self.is_invar = False
 
     def __repr__(self):
         return self.string

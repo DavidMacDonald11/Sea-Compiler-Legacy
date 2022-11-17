@@ -13,8 +13,11 @@
 {tab} `_expression_` `_line-end_`
 
 `_assignment-statement_`:
-{tab} `_expression-statement_`
-{tab} `_identifier_` `*=*` `_assignment-statement_`
+{tab} `_expression-list_` `_line-end_`
+{tab} `_identifier-list_` `*=*` `_assignment-statement_`
+`_expression-list_`:
+{tab} `_expression_`
+{tab} `_expression-list_` `*,*` `_expression_`
 
 `_variable-definition_`:
 {tab} `_variable-declaration_` `*=*` `_assignment-statement_`

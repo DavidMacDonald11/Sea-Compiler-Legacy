@@ -25,6 +25,16 @@ class IdentifierDefinition(Node):
         raise NotImplementedError()
 
     def transpile(self):
+        if self.statement.of(AssignmentStatement):
+            statement = None
+            pairs = self.statement.create_pairs(self.declaration)
+
+            for pair in pairs:
+                result = pair.transpile()
+                statement = result if statement is None else statement.new(f"%s;\n{result}")
+
+            return statement
+
         statement = self.statement.transpile()
         c_type = ""
         decl = ""

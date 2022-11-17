@@ -1,5 +1,3 @@
-from .expression import Expression
-
 class SymbolTable:
     def __init__(self):
         self.symbols = {}
@@ -14,7 +12,7 @@ class SymbolTable:
     def _new_identifier(self, cls, node, s_type, name, is_ref):
         if name in self.symbols:
             message = f"Cannot declare identifier '{name}' twice."
-            node.tranpsiler.warnings.error(node, message)
+            node.transpiler.warnings.error(node, message)
             return None
 
         self.symbols[name] = identifier = cls(s_type, name, is_ref)
@@ -68,11 +66,8 @@ class Variable(Identifier):
         if self.is_transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
-        ownership = expression.ownership
-        is_invar = expression.is_invar
-
         self.initialized = True
-        self.is_ref = ownership is not None
+        self.is_ref = expression.ownership is not None
 
         if self.s_type == "bool" and expression.e_type not in "bool":
             node.transpiler.warnings.error(node, "".join((
@@ -81,12 +76,12 @@ class Variable(Identifier):
             )))
 
         if self.s_type not in ("imag32", "imag64", "imag"):
-            return Expression(expression.e_type, f"{expression}", ownership, is_invar)
+            return expression
 
         suffix = "f" if self.s_type == "imag32" else ("l" if self.s_type == "imag" else "")
         node.transpiler.include("complex")
 
-        return Expression(expression.e_type, f"cimag{suffix}({expression})", ownership, is_invar)
+        return expression.new(f"cimag{suffix}(%s)")
 
 class Invariable(Variable):
     @property

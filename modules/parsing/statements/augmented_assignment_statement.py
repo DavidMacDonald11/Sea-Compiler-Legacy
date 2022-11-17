@@ -1,5 +1,5 @@
 from lexing.token import ASSIGNMENT_OPERATORS, FakeToken
-from .assignment_statement import AssignmentStatement
+from .assignment_statement import AssignmentStatement, ExpressionList
 from .expression_statement import ExpressionStatement
 from ..expressions.primary_expression import Identifier
 from ..expressions.exponential_expression import ExponentialExpression
@@ -69,5 +69,7 @@ class AugmentedAssignmentStatement(Node):
             case "|":
                 cls = BitwiseOrExpression
 
-        expression = ExpressionStatement(cls(left, operator, right))
-        return AssignmentStatement(self.identifier, expression).transpile()
+        identifier = ExpressionList([left])
+        expression = ExpressionList([ExpressionStatement(cls(left, operator, right))])
+
+        return AssignmentStatement([identifier, expression]).transpile()

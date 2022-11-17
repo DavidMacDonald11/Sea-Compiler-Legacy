@@ -13,9 +13,7 @@ class IdentifierDeclaration(Node):
     @classmethod
     def construct(cls):
         type_keyword = TypeKeyword.construct()
-        identifiers = []
-
-        identifiers += [cls.parser.expecting_of("Identifier")]
+        identifiers = [cls.parser.expecting_of("Identifier")]
 
         while cls.parser.next.has(","):
             cls.parser.take()
@@ -25,7 +23,7 @@ class IdentifierDeclaration(Node):
 
     def transpile(self):
         c_type = ""
-        decl = None
+        decl = ""
 
         for c_type, identifier in self.transpile_generator():
             decl = f"{identifier}" if decl == "" else f"{identifier}, {decl}"

@@ -17,6 +17,9 @@ class Statement(Node):
 
     @classmethod
     def construct(cls):
+        if cls.parser.next.has(r"\n"):
+            cls.parser.take()
+
         if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS, *TYPE_KEYWORDS):
             return IdentifierStatement.construct()
 

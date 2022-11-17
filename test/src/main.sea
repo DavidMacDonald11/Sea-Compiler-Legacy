@@ -1,12 +1,12 @@
-cplex main = 0 # output variable
+# Ouput var
+cplex main = 0
 
-real re = 5
-imag im = 6i
-
-[1, 2, 3]
-
-0010b0016.15e-002
-000000 # = 0 without padding (octal)
-im = 32b10e+1i
+invar cplex cm = 5 + 0i
+real re = cm
+imag im = cm
 
 main = re + im
+
+var nat count1, count2 = 0, 5
+
+main += count1 + count2 * 1i
