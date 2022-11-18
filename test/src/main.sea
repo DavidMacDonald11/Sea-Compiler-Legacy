@@ -1,9 +1,7 @@
 # Ouput var
 cplex main = 0
 
-real a, b, c = 1, 2, 3
+real a, b, c = [1, 2, 3]
 
-var nat count1, count2 = [
-    0,
-    5
-]
+a = b = c = 1 if c > 1 else 0
+b = 5

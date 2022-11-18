@@ -25,33 +25,14 @@ class IdentifierDefinition(Node):
         raise NotImplementedError()
 
     def transpile(self):
-        if self.statement.of(AssignmentStatement):
-            statement = None
-            pairs = self.statement.create_pairs(self.declaration)
+        statement = None
+        pairs = self.statement.create_pairs(self.declaration)
 
-            for pair in pairs:
-                result = pair.transpile()
-                statement = result if statement is None else statement.new(f"%s;\n{result}")
+        for pair in pairs:
+            result = pair.transpile()
+            statement = result if statement is None else statement.new(f"%s;\n{result}")
 
-            return statement
-
-        statement = self.statement.transpile()
-        c_type = ""
-        decl = ""
-
-        for c_type, identifier in self.declaration.transpile_generator():
-            expression = identifier.assign(self, statement)
-            is_ref = expression.ownership is not None
-
-            declaration = f"{'*' if is_ref else ''}{identifier}"
-            decl = declaration if decl == "" else f"{declaration}, {decl}"
-
-        decl = f"{c_type} {decl}"
-
-        if is_ref:
-            self.check_references(expression)
-
-        return expression.new(f"{decl} = %s")
+        return statement
 
     def check_references(self, expression):
         raise NotImplementedError(type(self).__name__)

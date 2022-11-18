@@ -1,4 +1,3 @@
-from .expression_statement import ExpressionStatement
 from ..expressions.expression import Expression
 from ..expressions.primary_expression import Identifier
 from ..expressions.primary_expression import ExpressionList as PExpressionList
@@ -18,7 +17,10 @@ class AssignmentStatement(Node):
 
         if not cls.parser.next.has("=", ",") and not taken.has("["):
             cls.parser.i -= 1
-            return ExpressionStatement.construct()
+            expression = Expression.construct()
+            cls.parser.expecting_has(r"\n", "EOF")
+
+            return cls([ExpressionList([expression])])
 
         cls.parser.i -= 1
         expression_lists = [ExpressionList.construct()]
@@ -41,7 +43,6 @@ class AssignmentStatement(Node):
         return statement
 
     def create_pairs(self, declaration = None):
-        pairs = []
         gen = None
 
         identifier_lists = self.expression_lists[:-1]
@@ -51,11 +52,10 @@ class AssignmentStatement(Node):
             identifier_lists = [ExpressionList(declaration.identifiers), *identifier_lists]
             gen = declaration.transpile_generator()
 
-        self.verify_expressions(identifier_lists, expressions, pairs, gen)
+        return self.verify_expressions(identifier_lists, expressions, gen)
 
-        return pairs
-
-    def verify_expressions(self, identifier_lists, expressions, pairs, gen):
+    def verify_expressions(self, identifier_lists, expressions, gen):
+        pairs = []
         mismatched = False
 
         for expression in expressions:
@@ -68,9 +68,13 @@ class AssignmentStatement(Node):
                 self.transpiler.warnings.error(self, "Mismatched number of values")
                 mismatched = True
 
-            self.verify_identifiers(identifiers, expressions, pairs, gen)
+            pairs += self.verify_identifiers(identifiers, expressions, gen)
 
-    def verify_identifiers(self, identifiers, expressions, pairs, gen):
+        return pairs
+
+    def verify_identifiers(self, identifiers, expressions, gen):
+        pairs = []
+
         for i, identifier in enumerate(identifiers.expressions):
             is_token = not isinstance(identifier, Node) and identifier.of("Identifier")
 
@@ -86,6 +90,12 @@ class AssignmentStatement(Node):
                 decl_info = gen = None
 
             pairs += [AssignmentPair(identifier, expressions[i], decl_info)]
+
+        return pairs
+
+# TODO clean code
+# TODO allow x,y = y,x
+# TODO allow a,b = c,d = 5 if True else 6
 
 class ExpressionList(Node):
     @property
@@ -145,3 +155,17 @@ class AssignmentPair(Node):
             expression = expression.new(f"{self.decl_info} %s")
 
         return expression
+
+class AssignmentList(Node):
+    @property
+    def node(self) -> list:
+        return [*self.identifiers, self.expression]
+
+    def __init__(self, identifiers, expression, decl_info = None):
+        self.identifiers = identifiers
+        self.expression = expression
+        self.decl_info = decl_info
+
+    @classmethod
+    def construct(cls):
+        raise NotImplementedError(cls.__name__)

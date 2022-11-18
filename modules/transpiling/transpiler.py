@@ -12,6 +12,7 @@ class Transpiler:
         self.symbols = SymbolTable()
         self.includes = []
         self.lines = ""
+        self.temps = 0
 
         self.standard()
 
@@ -68,3 +69,14 @@ class Transpiler:
 
     def write(self, string = "", end = "\n"):
         self.lines += f"{string}{end}"
+
+    def new_temp(self, expression):
+        expression.cast_up()
+
+        c_type = expression.c_type
+        c_name = f"__sea_temp_value_{self.temps}__"
+        self.temps += 1
+
+        self.write(expression.new(f"{c_type} {c_name} = %s;"))
+
+        return expression.new(c_name)
