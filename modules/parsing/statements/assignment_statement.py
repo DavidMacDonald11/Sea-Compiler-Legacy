@@ -36,66 +36,47 @@ class AssignmentStatement(Node):
     def transpile(self):
         statement = None
 
-        for pair in self.create_pairs():
-            result = pair.transpile()
+        for a_list in self.make_lists():
+            result = a_list.transpile()
             statement = result if statement is None else statement.new(f"%s;\n{result}")
 
         return statement
 
-    def create_pairs(self, declaration = None):
-        gen = None
-
+    def make_lists(self, definition = None, declaration = None):
         identifier_lists = self.expression_lists[:-1]
         expressions = self.expression_lists[-1]
 
         if declaration is not None:
             identifier_lists = [ExpressionList(declaration.identifiers), *identifier_lists]
-            gen = declaration.transpile_generator()
-
-        return self.verify_expressions(identifier_lists, expressions, gen)
-
-    def verify_expressions(self, identifier_lists, expressions, gen):
-        pairs = []
-        mismatched = False
-
-        for expression in expressions:
-            if expression.transpile().ownership is not None:
-                message = "Cannot transfer ownership to multiple identifiers"
-                self.transpiler.warnings.error(self, message)
+            decl_gen = declaration.transpile_generator()
 
         for identifiers in identifier_lists:
-            if not mismatched and len(identifiers) != len(expressions):
-                self.transpiler.warnings.error(self, "Mismatched number of values")
-                mismatched = True
+            if len(identifiers) != len(expressions):
+                self.transpiler.warnings.fail(self, "Mismatched number of values")
 
-            pairs += self.verify_identifiers(identifiers, expressions, gen)
+        lists = [AssignmentList([], x) for x in expressions]
 
-        return pairs
+        for i, identifiers in enumerate(identifier_lists):
+            c_types = [x[0] for x in decl_gen] if i == 0 and declaration is not None else None
 
-    def verify_identifiers(self, identifiers, expressions, gen):
-        pairs = []
+            for j, identifier in enumerate(identifiers):
+                is_token = not isinstance(identifier, Node) and identifier.of("Identifier")
 
-        for i, identifier in enumerate(identifiers.expressions):
-            is_token = not isinstance(identifier, Node) and identifier.of("Identifier")
+                if not identifier.of(Identifier) and not is_token:
+                    message = f"Cannot assign value to {type(identifier).__name__}"
+                    self.transpiler.warnings.error(self, message)
 
-            if not identifier.of(Identifier) and not is_token:
-                message = f"Cannot assign value to {type(identifier).__name__}"
-                self.transpiler.warnings.error(self, message)
+                lists[j] += identifier
 
-            self.transpiler.warnings.check()
+                if c_types is not None:
+                    lists[j].c_type = c_types[j]
+                    lists[j].check = definition.check_references
 
-            try:
-                decl_info = next(gen)[0]
-            except (StopIteration, TypeError):
-                decl_info = gen = None
+        return lists
 
-            pairs += [AssignmentPair(identifier, expressions[i], decl_info)]
-
-        return pairs
-
-# TODO clean code
 # TODO allow x,y = y,x
 # TODO allow a,b = c,d = 5 if True else 6
+# TODO refactor
 
 class ExpressionList(Node):
     @property
@@ -127,45 +108,56 @@ class ExpressionList(Node):
     def transpile(self):
         raise NotImplementedError(type(self).__name__)
 
-class AssignmentPair(Node):
+class AssignmentList(Node):
     @property
     def nodes(self) -> list:
-        return [self.identifier, self.expression]
+        return [*self.identifiers, self.expression]
 
-    def __init__(self, identifier, expression, decl_info = None):
-        self.identifier = identifier
+    def __init__(self, identifiers, expression, c_type = None, check = None):
+        self.identifiers = identifiers
         self.expression = expression
-        self.decl_info = decl_info
+        self.c_type = c_type
+        self.check = check
+
+    def __iadd__(self, other):
+        self.identifiers += [other]
+        return self
 
     @classmethod
     def construct(cls):
         raise NotImplementedError(cls.__name__)
 
     def transpile(self):
-        name = self.identifier.token.string
-        identifier = self.transpiler.symbols.at(self, name)
+        count = len(self.identifiers)
         expression = self.expression.transpile()
 
-        if identifier is None:
-            return expression.new(f"/*{name} = */%s")
+        if count > 1:
+            expression = self.transpiler.new_temp(expression)
 
-        expression = identifier.assign(self, expression).new(f"{identifier} = %s")
+            if expression.ownership is not None:
+                message = "Cannot transfer ownership to multiple identifiers"
+                self.transpiler.warnings.warn(self, message)
 
-        if self.decl_info is not None:
-            expression = expression.new(f"{self.decl_info} %s")
+        if count == 1 and self.c_type is None and expression.ownership is not None:
+            message = "Must create new identifier to transfer ownership"
+            self.transpiler.warnings.warn(self, message)
+
+        return self.transpile_identifiers(expression)
+
+    def transpile_identifiers(self, expression):
+        for i, identifier in enumerate(self.identifiers[::-1]):
+            name = identifier.token.string
+            identifier = self.transpiler.symbols.at(self, name)
+
+            if identifier is None:
+                return expression.new(f"/*{name} = */%s")
+
+            expression = identifier.assign(self, expression).new(f"{identifier} = %s")
+
+            if self.c_type is not None and i == len(self.identifiers) - 1:
+                is_ref = expression.ownership is not None
+                if is_ref: self.check(expression)
+
+                expression = expression.new(f"{self.c_type}{'*' if is_ref else ''} %s")
 
         return expression
-
-class AssignmentList(Node):
-    @property
-    def node(self) -> list:
-        return [*self.identifiers, self.expression]
-
-    def __init__(self, identifiers, expression, decl_info = None):
-        self.identifiers = identifiers
-        self.expression = expression
-        self.decl_info = decl_info
-
-    @classmethod
-    def construct(cls):
-        raise NotImplementedError(cls.__name__)

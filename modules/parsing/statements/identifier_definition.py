@@ -26,10 +26,9 @@ class IdentifierDefinition(Node):
 
     def transpile(self):
         statement = None
-        pairs = self.statement.create_pairs(self.declaration)
 
-        for pair in pairs:
-            result = pair.transpile()
+        for a_list in self.statement.make_lists(self, self.declaration):
+            result = a_list.transpile()
             statement = result if statement is None else statement.new(f"%s;\n{result}")
 
         return statement

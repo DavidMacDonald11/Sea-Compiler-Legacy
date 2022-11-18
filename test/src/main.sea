@@ -1,7 +1,10 @@
 # Ouput var
 cplex main = 0
 
-real a, b, c = [1, 2, 3]
+int c, d, e, f
 
-a = b = c = 1 if c > 1 else 0
-b = 5
+int a, b = c, d = e, f = 2, 13
+
+invar int a2 = $a
+
+main = a2 + f * 5i
