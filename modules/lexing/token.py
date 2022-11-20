@@ -143,10 +143,10 @@ FLOAT_TYPE_KEYWORDS |= {f"{t}{2 ** x}" for x in range(5, 7) for t in FLOAT_TYPE_
 TYPE_KEYWORDS = INT_TYPE_KEYWORDS | NAT_TYPE_KEYWORDS | FLOAT_TYPE_KEYWORDS
 TYPE_MODIFIER_KEYWORDS = {"var", "invar"}
 KEYWORDS = PRIMARY_KEYWORDS | TYPE_KEYWORDS | TYPE_MODIFIER_KEYWORDS | {
-    "mod", "not", "and", "or", "as", "if", "else"
+    "mod", "not", "and", "or", "as", "if", "else", "pass"
 }
 
-PUNCTUATOR_SYMBOLS = "(),[]"
+PUNCTUATOR_SYMBOLS = "(),[]:"
 NUMERIC_START_SYMBOLS = "0123456789."
 NUMERIC_SYMBOLS = NUMERIC_START_SYMBOLS + ascii_uppercase + "be+-"
 IDENTIFIER_START_SYMBOLS = f"{ascii_letters}_"

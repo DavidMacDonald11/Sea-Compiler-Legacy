@@ -1,6 +1,7 @@
 from util.misc import repr_expand
 from .expressions.unary_expression import UnaryExpression
 from .expressions.expression import Expression
+from .statements.statement import Statement
 from .statements.file_statement import FileStatement
 
 class Parser:
@@ -41,9 +42,26 @@ class Parser:
 
         raise self.warnings.fail(self.take(), f"Expecting {repr_expand(strings)}")
 
+    def verify_indent(self):
+        tab_next = self.next.has(r"\t")
+
+        if not tab_next and self.indents == 0:
+            return None
+
+        indent = self.take()
+
+        if tab_next and indent.depth == self.indents:
+            return indent
+
+        self.warnings.warn(indent, f"Expecting {self.indents} indents")
+
     @property
     def expression(self):
         return Expression
+
+    @property
+    def statement(self):
+        return Statement
 
     @property
     def unary_expression(self):

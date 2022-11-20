@@ -32,7 +32,7 @@ def escape_whitespace(string):
     if string == "":
         return "EOF"
 
-    return string.replace("\n", r"\n").replace("    ", r"\t")
+    return re.sub(" +", r"\\t", string.replace("\n", r"\n"))
 
 def set_add(items, new_items):
     for item in new_items:

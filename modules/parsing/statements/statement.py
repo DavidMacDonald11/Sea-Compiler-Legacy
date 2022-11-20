@@ -1,8 +1,5 @@
-from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
-from .expression_statement import ExpressionStatement
-from .identifier_statement import IdentifierStatement
-from .assignment_statement import AssignmentStatement
-from .augmented_assignment_statement import AugmentedAssignmentStatement
+from .line_statement import LineStatement
+from .if_statement import IfStatement
 from ..node import Node
 
 class Statement(Node):
@@ -18,22 +15,13 @@ class Statement(Node):
 
     @classmethod
     def construct(cls):
-        if cls.parser.next.has(r"\n"):
-            cls.parser.take()
+        statement = IfStatement.construct() or LineStatement.construct()
 
-        if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS, *TYPE_KEYWORDS):
-            return IdentifierStatement.construct()
-
-        if cls.parser.next.of("Identifier"):
-            statement = AugmentedAssignmentStatement.construct()
-
-            if isinstance(statement, AssignmentStatement) and len(statement.expression_lists) == 1:
-                statement = statement.expression_lists[0].to_expression_statement()
-
+        if isinstance(statement, (IfStatement, LineStatement)):
             return cls(statement)
 
-        return cls(ExpressionStatement.construct())
+        return statement
 
     def transpile(self):
-        statement = self.statement.transpile().new("%s;/*%e*/")
+        statement = self.statement.transpile()
         self.transpiler.write(statement)

@@ -37,9 +37,34 @@
 {tab} `*^=*`, `*{star}=*`, `*/=*`, `*%=*`, `*+=*`, `*-=*`
 {tab} `*<\<=*`, `*>>=*`, `*&=*`, `*$=*`, `*|=*`
 
-`_statement_`:
-{tab} `_identifier-statement_`
+`_line-statement_`:
+{tab} `_expression-statement_`
 {tab} `_augmented-assignment-statement_`
+{tab} `_identifier-statement_`
+
+`_block-statement_`:
+{tab} `_blockable-statement_`
+{tab} `_newline-block-statement_`
+`_newline-block-statement_`:
+{tab} `*\n*` `_block-indent_` `_statement_` `_newline-block-statement_`~opt~
+{tab} `*\n*` `_block-indent_` `_blockable-statement_` `_newline-block-statement_`~opt~
+`_block-indent_`:
+{tab} one `indent` per line of the next statement per number of nested blocks
+`_blockable-statement_`:
+{tab} `_line-statement_`
+{tab} `*pass*`
+
+`_if-statement_`:
+{tab} `*if*` `_expression_` `*:*` `_block-statement_` `_else-if-statement_`~opt~ `_else-statement_`~opt~
+`_else-if-statement_`:
+{tab} `*else*` `*if*` `_expression_` `*:*` `_block-statement_`
+{tab} `_else-if-statement_` `*else*` `*if*` `_expression_` `*:*` `_block-statement_`
+`_else-statement_`:
+{tab} `*else*` `*:*` `_block-statement_`
+
+`_statement_`:
+{tab} `_line-statement_`
+{tab} `_if-statement_`
 
 `_file-statement_`:
 {tab} `_statement_`
