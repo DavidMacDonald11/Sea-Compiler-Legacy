@@ -1,6 +1,7 @@
 from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .expression_statement import ExpressionStatement
 from .identifier_statement import IdentifierStatement
+from .assignment_statement import AssignmentStatement
 from .augmented_assignment_statement import AugmentedAssignmentStatement
 from ..node import Node
 
@@ -24,7 +25,12 @@ class Statement(Node):
             return IdentifierStatement.construct()
 
         if cls.parser.next.of("Identifier"):
-            return cls(AugmentedAssignmentStatement.construct())
+            statement = AugmentedAssignmentStatement.construct()
+
+            if isinstance(statement, AssignmentStatement) and len(statement.expression_lists) == 1:
+                statement = statement.expression_lists[0].to_expression_statement()
+
+            return cls(statement)
 
         return cls(ExpressionStatement.construct())
 

@@ -1,3 +1,4 @@
+from .expression_statement import ExpressionStatement
 from ..expressions.expression import Expression
 from ..expressions.primary_expression import Identifier
 from ..expressions.primary_expression import ExpressionList as PExpressionList
@@ -43,40 +44,47 @@ class AssignmentStatement(Node):
         return statement
 
     def make_lists(self, definition = None, declaration = None):
+        identifier_lists, lists, decl_gen = self.initalize_lists(declaration)
+
+        for i, identifiers in enumerate(identifier_lists):
+            c_types = [x[0] for x in decl_gen] if i == 0 and declaration is not None else None
+            self.move_identifiers_into_lists(identifiers, lists, c_types, definition)
+
+        return lists
+
+    def initalize_lists(self, declaration):
         identifier_lists = self.expression_lists[:-1]
         expressions = self.expression_lists[-1]
 
         if declaration is not None:
             identifier_lists = [ExpressionList(declaration.identifiers), *identifier_lists]
             decl_gen = declaration.transpile_generator()
+        else:
+            decl_gen = None
 
         for identifiers in identifier_lists:
             if len(identifiers) != len(expressions):
-                self.transpiler.warnings.fail(self, "Mismatched number of values")
+                raise self.transpiler.warnings.fail(self, "Mismatched number of values")
 
         lists = [AssignmentList([], x) for x in expressions]
+        return identifier_lists, lists, decl_gen
 
-        for i, identifiers in enumerate(identifier_lists):
-            c_types = [x[0] for x in decl_gen] if i == 0 and declaration is not None else None
+    def move_identifiers_into_lists(self, identifiers, lists, c_types, definition):
+        for j, identifier in enumerate(identifiers):
+            is_token = not isinstance(identifier, Node) and identifier.of("Identifier")
 
-            for j, identifier in enumerate(identifiers):
-                is_token = not isinstance(identifier, Node) and identifier.of("Identifier")
+            if not identifier.of(Identifier) and not is_token:
+                message = f"Cannot assign value to {type(identifier).__name__}"
+                self.transpiler.warnings.error(self, message)
 
-                if not identifier.of(Identifier) and not is_token:
-                    message = f"Cannot assign value to {type(identifier).__name__}"
-                    self.transpiler.warnings.error(self, message)
+            lists[j] += identifier
 
-                lists[j] += identifier
-
-                if c_types is not None:
-                    lists[j].c_type = c_types[j]
-                    lists[j].check = definition.check_references
-
-        return lists
+            if c_types is not None:
+                lists[j].c_type = c_types[j]
+                lists[j].check = definition.check_references
 
 # TODO allow x,y = y,x
-# TODO allow a,b = c,d = 5 if True else 6
-# TODO refactor
+# TODO allow x,y = [1,2] if True else [3,4]
 
 class ExpressionList(Node):
     @property
@@ -84,10 +92,8 @@ class ExpressionList(Node):
         return self.expressions
 
     def __init__(self, expressions):
-        if isinstance(expressions[0], PExpressionList):
-            self.expressions = expressions[0].expressions
-        else:
-            self.expressions = expressions
+        self.was_primary = len(expressions) == 1 and isinstance(expressions[0], PExpressionList)
+        self.expressions = expressions[0].expressions if self.was_primary else expressions
 
     def __len__(self):
         return len(self.expressions)
@@ -107,6 +113,12 @@ class ExpressionList(Node):
 
     def transpile(self):
         raise NotImplementedError(type(self).__name__)
+
+    def to_expression_statement(self):
+        if self.was_primary:
+            return ExpressionStatement(PExpressionList(self.expressions[0]))
+
+        return ExpressionStatement(self.expressions[0])
 
 class AssignmentList(Node):
     @property

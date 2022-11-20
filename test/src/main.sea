@@ -1,11 +1,6 @@
 # Ouput var
 cplex main = 0
 
-int a = 5
-int a2 = $a
+int a = 8
 
-a2 += 2
-
-invar int a3 = $a2
-
-main = a3
+main = a
