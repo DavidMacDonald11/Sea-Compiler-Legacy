@@ -29,7 +29,7 @@ class IdentifierDefinition(Node):
 
         for a_list in self.statement.make_lists(self, self.declaration):
             result = a_list.transpile()
-            statement = result if statement is None else statement.new(f"%s;\n{result}")
+            statement = result if statement is None else statement.new(f"%s;/*%e*/\n{result}")
 
         return statement
 

@@ -9,20 +9,20 @@ class SymbolTable:
 
         return self.symbols[key]
 
-    def _new_identifier(self, cls, node, s_type, name, is_ref):
+    def _new_identifier(self, cls, node, s_type, name):
         if name in self.symbols:
             message = f"Cannot declare identifier '{name}' twice."
             node.transpiler.warnings.error(node, message)
             return None
 
-        self.symbols[name] = identifier = cls(s_type, name, is_ref)
+        self.symbols[name] = identifier = cls(s_type, name)
         return identifier
 
-    def new_variable(self, node, s_type, name, is_ref = False):
-        return self._new_identifier(Variable, node, s_type, name, is_ref)
+    def new_variable(self, node, s_type, name):
+        return self._new_identifier(Variable, node, s_type, name)
 
-    def new_invariable(self, node, s_type, name, is_ref = False):
-        return self._new_identifier(Invariable, node, s_type, name, is_ref)
+    def new_invariable(self, node, s_type, name):
+        return self._new_identifier(Invariable, node, s_type, name)
 
 class Identifier:
     @property
@@ -42,32 +42,35 @@ class Variable(Identifier):
         return f"__sea_var_{self.name}__"
 
     @property
-    def declaration(self):
-        return f"*{self.c_name}" if self.is_ref else self.c_name
+    def c_access(self):
+        return f"(*{self.c_name})" if self.ownership is not None else self.c_name
 
-    def __init__(self, s_type, name, is_ref):
+    def __init__(self, s_type, name):
         self.initialized = False
         self.is_transfered = False
-        self.is_ref = is_ref
+        self.ownership = None
         super().__init__(s_type, name)
 
-    def access(self, node):
-        c_name = f"(*{self.c_name})" if self.is_ref else self.c_name
-
+    def access(self, node, expression):
         if self.is_transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
-        if self.initialized: return c_name
+        expression = expression.new(self.c_access).cast(self.s_type)
+        expression.is_invar = isinstance(self, Invariable)
+
+        if self.initialized:
+            return expression
 
         node.transpiler.warnings.error(node, f"Accessing uninitialized identifier '{self.name}'")
-        return f"/*{c_name}*/"
+        return expression.new("/*%s*/")
 
     def assign(self, node, expression):
         if self.is_transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
-        self.initialized = True
-        self.is_ref = expression.ownership is not None
+        if not self.initialized:
+            self.initialized = True
+            self.ownership = expression.ownership
 
         if self.s_type == "bool" and expression.e_type not in "bool":
             node.transpiler.warnings.error(node, "".join((

@@ -38,7 +38,7 @@ class AssignmentStatement(Node):
 
         for a_list in self.make_lists():
             result = a_list.transpile()
-            statement = result if statement is None else statement.new(f"%s;\n{result}")
+            statement = result if statement is None else statement.new(f"%s;/*%e*/\n{result}")
 
         return statement
 
@@ -131,16 +131,13 @@ class AssignmentList(Node):
         count = len(self.identifiers)
         expression = self.expression.transpile()
 
-        if count > 1:
-            expression = self.transpiler.new_temp(expression)
-
-            if expression.ownership is not None:
+        if expression.ownership is not None:
+            if count > 1:
                 message = "Cannot transfer ownership to multiple identifiers"
                 self.transpiler.warnings.warn(self, message)
-
-        if count == 1 and self.c_type is None and expression.ownership is not None:
-            message = "Must create new identifier to transfer ownership"
-            self.transpiler.warnings.warn(self, message)
+            elif count == 1 and self.c_type is None:
+                message = "Must create new identifier to transfer ownership"
+                self.transpiler.warnings.warn(self, message)
 
         return self.transpile_identifiers(expression)
 
@@ -152,7 +149,8 @@ class AssignmentList(Node):
             if identifier is None:
                 return expression.new(f"/*{name} = */%s")
 
-            expression = identifier.assign(self, expression).new(f"{identifier} = %s")
+            access = identifier.c_access if identifier.ownership is not None else repr(identifier)
+            expression = identifier.assign(self, expression).new(f"{access} = %s")
 
             if self.c_type is not None and i == len(self.identifiers) - 1:
                 is_ref = expression.ownership is not None

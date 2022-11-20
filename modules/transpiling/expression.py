@@ -5,7 +5,7 @@ class Expression:
     def c_type(self):
         return f"__sea_type_{self.e_type}__"
 
-    def __init__(self, e_type, string):
+    def __init__(self, e_type = "", string = ""):
         self.string = string
         self.e_type = e_type
         self.ownership = None

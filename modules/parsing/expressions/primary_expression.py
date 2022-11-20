@@ -109,12 +109,12 @@ class Identifier(PrimaryNode):
         if var is None:
             return self.transpiler.expression("cmax", f"/*{name}*/")
 
-        c_name = var.access(self)
+        expression = var.access(self, self.transpiler.expression())
 
         if var.s_type in ("imag32", "imag64", "imag"):
-            return self.transpiler.expression(None, f"({c_name} * 1.0j)").cast(var.s_type)
+            return expression.new("(%s * 1.0j)")
 
-        return self.transpiler.expression(None, f"{c_name}").cast(var.s_type)
+        return expression
 
 class ExpressionList(Node):
     @property

@@ -27,4 +27,4 @@ class IdentifierStatement(Node):
     def transpile(self):
         statement = self.statement.transpile()
         e_type = "/*%e*/" if statement.e_type != "" else ""
-        self.transpiler.write(f"{statement.new(f'%s{e_type}')};")
+        self.transpiler.write(f"{statement.new(f'%s;{e_type}')}")
