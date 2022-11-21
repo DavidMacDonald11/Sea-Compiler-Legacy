@@ -71,7 +71,7 @@ class Transpiler:
         self.lines += f"{string}{end}"
 
     def new_temp(self, expression):
-        expression.cast_up()
+        expression = expression.copy().cast_up()
 
         c_type = expression.c_type
         c_name = f"__sea_temp_value_{self.temps}__"

@@ -108,6 +108,7 @@ class Identifier(PrimaryNode):
             return self.transpiler.expression("cmax", f"/*{name}*/")
 
         expression = var.access(self, self.transpiler.expression())
+        expression.identifiers += [name]
 
         if var.s_type in ("imag32", "imag64", "imag"):
             return expression.new("(%s * 1.0j)")
@@ -140,6 +141,7 @@ class ExpressionList(Node):
         cls.parser.expecting_has("]")
         return cls(expressions)
 
+    # TODO allow x,y = [1,2] if True else [3,4] or x, y = [1, 2] + [3, 4]
     def transpile(self):
         expression = self.transpiler.expression("list", f"{self.expressions[0].transpile()}")
 

@@ -10,10 +10,20 @@ class Expression:
         self.e_type = e_type
         self.ownership = None
         self.owners = [None, None]
+        self.identifiers = []
         self.is_invar = False
 
     def __repr__(self):
         return self.string
+
+    def copy(self):
+        expression = Expression(self.e_type, self.string)
+        expression.ownership = self.ownership
+        expression.owners = self.owners.copy()
+        expression.identifiers = self.identifiers.copy()
+        expression.is_invar = self.is_invar
+
+        return expression
 
     def new(self, string):
         self.string = string.replace("%s", self.string).replace("%e", self.e_type)
@@ -46,7 +56,11 @@ class Expression:
     def resolve(cls, left, right):
         e_type1, e_type2 = left.e_type, right.e_type
         e_type = e_type1 if POINTS[e_type1] > POINTS[e_type2] else e_type2
-        return cls(e_type)
+
+        expression = cls(e_type)
+        expression.identifiers = left.identifiers + right.identifiers
+
+        return expression
 
 POINTS = {
     "bool": 0,
