@@ -24,7 +24,7 @@ class BlockStatement(Node):
         cls.parser.indents += 1
 
         empty = True
-        passed = False
+        exited = False
         statements = []
 
         while cls.parser.next.depth >= cls.parser.indents:
@@ -36,11 +36,11 @@ class BlockStatement(Node):
             statement = statement or cls.parser.statement.construct().statement
             statements += [statement]
 
-            if passed:
-                message = "Cannot have code following the pass keyword in a block"
+            if exited:
+                message = "Cannot have unreacahble code following a block exit or pass keyword"
                 cls.parser.warnings.warn(statements[-1], message)
 
-            passed = isinstance(statements[-1], PassStatement)
+            exited = isinstance(statements[-1], (PassStatement, BreakContinueStatement))
 
         if empty:
             message = "Block cannot be empty; use the pass keyword"
@@ -64,14 +64,51 @@ class BlockStatement(Node):
 class BlockableStatement(Node):
     @classmethod
     def construct(cls):
-        if cls.parser.next.has("pass"):
-            keyword = cls.parser.take()
-            cls.parser.expecting_has(r"\n", "EOF")
-
-            return PassStatement(keyword)
-
-        return None
+        return PassStatement.construct() or BreakContinueStatement.construct()
 
 class PassStatement(PrimaryNode):
+    @classmethod
+    def construct(cls):
+        if not cls.parser.next.has("pass"):
+            return None
+
+        keyword = cls.parser.take()
+        cls.parser.expecting_has(r"\n", "EOF")
+
+        return cls(keyword)
+
     def transpile(self):
         return self.transpiler.expression("", "/*pass*/")
+
+class BreakContinueStatement(Node):
+    @property
+    def nodes(self) -> list:
+        return [self.keyword] if self.label is None else [self.keyword, self.label]
+
+    def __init__(self, keyword, label):
+        self.keyword = keyword
+        self.label = label
+
+    @classmethod
+    def construct(cls):
+        if not cls.parser.next.has("break", "continue"):
+            return None
+
+        keyword = cls.parser.take()
+        label = cls.parser.take() if cls.parser.next.of("Identifier") else None
+        cls.parser.expecting_has(r"\n", "EOF")
+
+        return cls(keyword, label)
+
+    def transpile(self):
+        statement = self.transpiler.expression()
+
+        if self.label is None:
+            return statement.new(self.keyword.string)
+
+        label = self.transpiler.symbols.at(self, self.label.string)
+
+        if label is None:
+            return statement.new(f"/*{self.keyword.string} {self.label.string}*/")
+
+        return statement.new(f"goto {label.c_name}_{self.keyword.string}__")

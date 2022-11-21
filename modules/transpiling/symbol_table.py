@@ -27,6 +27,9 @@ class SymbolTable:
         self.symbols[name] = identifier = cls(s_type, name, self.number)
         return identifier
 
+    def new_label(self, node, name):
+        return self._new_identifier(Label, node, None, name)
+
     def new_variable(self, node, s_type, name):
         return self._new_identifier(Variable, node, s_type, name)
 
@@ -45,6 +48,14 @@ class Identifier:
 
     def __repr__(self):
         return self.c_name
+
+class Label(Identifier):
+    @property
+    def c_name(self):
+        return f"__sea_label_{self.name}"
+
+    def surround(self, expression):
+        return expression.new(f"{self.c_name}_continue__: %s {self.c_name}_break__:")
 
 class Variable(Identifier):
     @property

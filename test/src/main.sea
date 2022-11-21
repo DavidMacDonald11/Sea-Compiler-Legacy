@@ -1,6 +1,14 @@
 # Ouput var
 cplex main = 0
 
-invar char c = 'c'
+int i, j = [1, 1]
+int count = 0
 
-if ||main|| > 2b.1: invar char c2 = &c
+while count < 5:
+    count += 1
+
+    int last_j = j
+    j = i + j
+    i = last_j
+
+main = i

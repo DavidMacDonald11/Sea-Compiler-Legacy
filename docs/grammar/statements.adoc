@@ -52,7 +52,9 @@
 {tab} one `indent` per line of the next statement per number of nested blocks
 `_blockable-statement_`:
 {tab} `_line-statement_`
-{tab} `*pass*`
+{tab} `*pass*` `_line-end_`
+{tab} `*break*` `_label_`~opt~ `_line-end_`
+{tab} `*continue*` `_label_`~opt~ `_line-end_`
 
 `_if-statement_`:
 {tab} `*if*` `_expression_` `*:*` `_block-statement_` `_else-if-statement_`~opt~ `_else-statement_`~opt~
@@ -62,9 +64,22 @@
 `_else-statement_`:
 {tab} `*else*` `*:*` `_block-statement_`
 
+`_while-statement_`:
+{tab} `_label_`~opt~ `*while*` `_expression_` `*:*` `_block-statement_`
+`_label_`:
+{tab} `_identifier_`
+
+`_do-while-statement_`:
+{tab}  `_label_`~opt~ `*do*` `*:*` `_block-statement?_` `*while*` `_expression_` `_line-end_`
+{tab} `*do*` `_label_`~opt~ `*:*` `_block-statement?_` `*while*` `_expression_` `_line-end_`
+`_block-statement?_`:
+{tab} A `_block-statement_` with or without a closing `_line-end_`
+
 `_statement_`:
 {tab} `_line-statement_`
 {tab} `_if-statement_`
+{tab} `_while-statement_`
+{tab} `_do-while-statement_`
 
 `_file-statement_`:
 {tab} `_statement_`
