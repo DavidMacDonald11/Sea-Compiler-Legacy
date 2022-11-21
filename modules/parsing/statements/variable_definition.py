@@ -15,3 +15,14 @@ class VariableDefinition(IdentifierDefinition):
             verb = "transfer" if expression.ownership == "$" else "borrow"
             message = f"Cannot {verb} invariable ownership into variable"
             self.transpiler.warnings.error(self, message)
+
+        owner1 = expression.owners[0]
+        owner2 = expression.owners[1]
+
+        if owner1.table_number != owner2.table_number:
+            message = "Cannot transfer ownership into lower-scope identifier"
+            self.transpiler.warnings.error(self, message)
+
+        if owner1.ownership == "&" and expression.ownership == "$":
+            message = "Cannot take ownership from a borrowed identifier"
+            self.transpiler.warnings.error(self, message)

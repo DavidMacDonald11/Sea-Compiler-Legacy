@@ -85,4 +85,5 @@ class Transpiler:
         self.symbols = SymbolTable(self.symbols)
 
     def pop_symbol_table(self):
+        type(self.symbols).count -= 1
         self.symbols = self.symbols.parent

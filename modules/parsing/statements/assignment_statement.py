@@ -166,7 +166,10 @@ class AssignmentList(Node):
 
             if self.c_type is not None and i == len(self.identifiers) - 1:
                 is_ref = expression.ownership is not None
-                if is_ref: self.check(expression)
+
+                if is_ref:
+                    expression.owners[1] = identifier
+                    self.check(expression)
 
                 expression = expression.new(f"{self.c_type}{'*' if is_ref else ''} %s")
 

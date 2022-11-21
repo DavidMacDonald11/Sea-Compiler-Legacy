@@ -17,4 +17,13 @@ class InvariableDefinition(IdentifierDefinition):
         return InvariableDeclaration.construct()
 
     def check_references(self, expression):
-        pass
+        owner1 = expression.owners[0]
+        owner2 = expression.owners[1]
+
+        if owner1.table_number != owner2.table_number and expression.ownership == "$":
+            message = "Cannot transfer ownership into lower-scope identifier"
+            self.transpiler.warnings.error(self, message)
+
+        if owner1.ownership == "&" and expression.ownership == "$":
+            message = "Cannot take ownership from a borrowed identifier"
+            self.transpiler.warnings.error(self, message)

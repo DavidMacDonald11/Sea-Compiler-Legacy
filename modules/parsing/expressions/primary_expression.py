@@ -64,8 +64,6 @@ class NumericConstant(PrimaryNode):
         return digits
 
     def convert_to_base(self, base, digits, decimal = False):
-        print(base, digits)
-
         if digits[0] in "+-":
             sign = digits[0]
             digits = digits[1:]

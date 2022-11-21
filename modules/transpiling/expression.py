@@ -9,6 +9,7 @@ class Expression:
         self.string = string
         self.e_type = e_type
         self.ownership = None
+        self.owners = [None, None]
         self.is_invar = False
 
     def __repr__(self):

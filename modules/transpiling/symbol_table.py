@@ -1,7 +1,12 @@
 class SymbolTable:
+    count = 0
+
     def __init__(self, parent = None):
+        type(self).count += 1
+
         self.symbols = {}
         self.parent = parent
+        self.number = type(self).count
 
     def at(self, node, key):
         if key in self.symbols:
@@ -19,7 +24,7 @@ class SymbolTable:
             node.transpiler.warnings.error(node, message)
             return None
 
-        self.symbols[name] = identifier = cls(s_type, name)
+        self.symbols[name] = identifier = cls(s_type, name, self.number)
         return identifier
 
     def new_variable(self, node, s_type, name):
@@ -33,9 +38,10 @@ class Identifier:
     def c_name(self):
         raise NotImplementedError(type(self).__name__)
 
-    def __init__(self, s_type, name):
+    def __init__(self, s_type, name, table_number):
         self.s_type = s_type
         self.name = name
+        self.table_number = table_number
 
     def __repr__(self):
         return self.c_name
@@ -49,11 +55,11 @@ class Variable(Identifier):
     def c_access(self):
         return f"(*{self.c_name})" if self.ownership is not None else self.c_name
 
-    def __init__(self, s_type, name):
+    def __init__(self, s_type, name, table_number):
         self.initialized = False
         self.is_transfered = False
         self.ownership = None
-        super().__init__(s_type, name)
+        super().__init__(s_type, name, table_number)
 
     def access(self, node, expression):
         if self.is_transfered:

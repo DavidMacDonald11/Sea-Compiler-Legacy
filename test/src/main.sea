@@ -1,14 +1,6 @@
 # Ouput var
 cplex main = 0
 
-if ||main|| > 0:
-    pass
-else if main?:
-    pass
-else:
-    int a = 5
+invar char c = 'c'
 
-    if a == 5:
-        main += a
-        a = 6
-        main += a * 1i
+if ||main|| > 2b.1: invar char c2 = &c

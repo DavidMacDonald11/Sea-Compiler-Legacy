@@ -16,11 +16,7 @@ class Statement(Node):
     @classmethod
     def construct(cls):
         statement = IfStatement.construct() or LineStatement.construct()
-
-        if isinstance(statement, (IfStatement, LineStatement)):
-            return cls(statement)
-
-        return statement
+        return cls(statement)
 
     def transpile(self):
         statement = self.statement.transpile()

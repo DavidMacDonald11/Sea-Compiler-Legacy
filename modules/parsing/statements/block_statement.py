@@ -13,8 +13,12 @@ class BlockStatement(Node):
     @classmethod
     def construct(cls):
         if not cls.parser.next.has(r"\n"):
-            statements = [BlockableStatement.construct() or LineStatement.construct()]
-            return cls(statements, cls.parser.indents)
+            statement = BlockableStatement.construct() or LineStatement.construct()
+
+            if isinstance(statement, cls.parser.statement):
+                statement = statement.statement
+
+            return cls([statement], cls.parser.indents)
 
         cls.parser.take()
         cls.parser.indents += 1
@@ -56,9 +60,6 @@ class BlockStatement(Node):
 
         self.transpiler.pop_symbol_table()
         return block.new(f"%s;\n{indents}}}")
-
-# TODO consider conditional ownership changes
-# TODO maybe no ownership changes in lower scopes
 
 class BlockableStatement(Node):
     @classmethod
