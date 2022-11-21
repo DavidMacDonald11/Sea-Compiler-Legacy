@@ -80,3 +80,9 @@ class Transpiler:
         self.write(expression.new(f"{c_type} {c_name} = %s;"))
 
         return expression.new(c_name)
+
+    def push_symbol_table(self):
+        self.symbols = SymbolTable(self.symbols)
+
+    def pop_symbol_table(self):
+        self.symbols = self.symbols.parent

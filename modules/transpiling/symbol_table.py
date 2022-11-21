@@ -1,13 +1,17 @@
 class SymbolTable:
-    def __init__(self):
+    def __init__(self, parent = None):
         self.symbols = {}
+        self.parent = parent
 
     def at(self, node, key):
-        if key not in self.symbols:
-            node.transpiler.warnings.error(node, f"Reference to undeclared identifier '{key}'")
-            return None
+        if key in self.symbols:
+            return self.symbols[key]
 
-        return self.symbols[key]
+        if self.parent is not None:
+            return self.parent.at(node, key)
+
+        node.transpiler.warnings.error(node, f"Reference to undeclared identifier '{key}'")
+        return None
 
     def _new_identifier(self, cls, node, s_type, name):
         if name in self.symbols:

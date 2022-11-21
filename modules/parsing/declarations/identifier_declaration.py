@@ -28,9 +28,7 @@ class IdentifierDeclaration(Node):
         for c_type, identifier in self.transpile_generator():
             decl = f"{identifier}" if decl == "" else f"{identifier}, {decl}"
 
-        decl = f"{c_type} {decl}"
-
-        return self.transpiler.expression("", decl)
+        return self.transpiler.expression("", f"{c_type} {decl}")
 
     def transpile_generator(self):
         keyword = self.type_keyword.token.string

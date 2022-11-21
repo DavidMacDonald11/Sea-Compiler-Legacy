@@ -52,7 +52,7 @@ class IfStatement(Node):
         return False if cls.parser.next.depth < cls.parser.indents else cls.parser.verify_indent()
 
     def transpile(self):
-        condition = self.condition.transpile()
+        condition = self.condition.transpile().boolean(self.condition)
         block = self.block.transpile()
         statement = self.transpiler.expression("", f"if ({condition}) {block}")
 

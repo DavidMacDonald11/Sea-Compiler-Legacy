@@ -30,7 +30,7 @@ class BlockStatement(Node):
             empty = False
             statement = BlockableStatement.construct()
             statement = statement or cls.parser.statement.construct().statement
-            statements = [statement]
+            statements += [statement]
 
             if passed:
                 message = "Cannot have code following the pass keyword in a block"
@@ -46,15 +46,17 @@ class BlockStatement(Node):
         return cls(statements, cls.parser.indents + 1)
 
     def transpile(self):
+        self.transpiler.push_symbol_table()
+
         indents = "\t" * (self.indents - 1)
         block = self.statements[0].transpile().new(f"{{\n\t{indents}%s")
 
         for statement in self.statements[1:]:
-            block = block.new(f"%s\n{indents}{statement.transpile()}")
+            block = block.new(f"%s;\n\t{indents}{statement.transpile()}")
 
-        return block.new(f"%s\n{indents}}}")
+        self.transpiler.pop_symbol_table()
+        return block.new(f"%s;\n{indents}}}")
 
-# TODO create nested symbol table
 # TODO consider conditional ownership changes
 # TODO maybe no ownership changes in lower scopes
 

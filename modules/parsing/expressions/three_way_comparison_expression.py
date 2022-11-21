@@ -9,6 +9,6 @@ class ThreeWayComparisonExpression(BinaryOperation):
     def transpile(self):
         left = self.left.transpile().operate(self)
         right = self.right.transpile().operate(self)
-        result = self.transpiler.resolve(left, right).cast_up()
+        result = self.transpiler.expression.resolve(left, right).cast_up()
 
         return result.new(f"(({left}) - ({right}))")

@@ -25,16 +25,8 @@ class ConditionalExpression(Node):
 
     def transpile(self):
         left = self.left.transpile().operate(self)
-        condition = self.condition.transpile()
+        condition = self.condition.transpile().boolean(self.condition)
         right = self.right.transpile().operate(self)
         result = self.transpiler.expression.resolve(left, right).cast_up()
-
-        if condition.e_type != "bool":
-            self.transpiler.warnings.error(self, "".join((
-                "Cannot perform conditional statment with non-boolean condition. ",
-                "(Consider using the '?' operator to get boolean value)"
-            )))
-
-            return result.new(f"/*({condition}) ? {left} :*/ {right}")
 
         return result.new(f"({condition}) ? {left} : {right}")

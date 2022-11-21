@@ -32,11 +32,20 @@ class Expression:
 
         return self
 
+    def boolean(self, node):
+        if self.e_type != "bool":
+            node.transpiler.warnings.error(node, "".join((
+                "Conditional value must be of type bool. ",
+                "(Consider using the '?' operator to get boolean value)"
+            )))
+
+        return self
+
     @classmethod
     def resolve(cls, left, right):
         e_type1, e_type2 = left.e_type, right.e_type
         e_type = e_type1 if POINTS[e_type1] > POINTS[e_type2] else e_type2
-        return cls(e_type, "")
+        return cls(e_type)
 
 POINTS = {
     "bool": 0,

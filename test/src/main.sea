@@ -1,14 +1,14 @@
 # Ouput var
 cplex main = 0
 
-int a = 8
-
-if a == 5:
+if ||main|| > 0:
     pass
-else if a > 5:
-    if a? and 1 < 2 < 3:
-        pass
+else if main?:
+    pass
 else:
-    pass
+    int a = 5
 
-main = a
+    if a == 5:
+        main += a
+        a = 6
+        main += a * 1i
