@@ -20,7 +20,6 @@ class AssignmentStatement(Node):
         if not cls.parser.next.has("=", ",") and not taken.has("["):
             cls.parser.i -= 1
             expression = Expression.construct()
-            cls.parser.expecting_has(r"\n", "EOF")
 
             return cls([ExpressionList([expression])])
 
@@ -30,8 +29,6 @@ class AssignmentStatement(Node):
         while cls.parser.next.has("="):
             cls.parser.take()
             expression_lists += [ExpressionList.construct()]
-
-        cls.parser.expecting_has(r"\n", "EOF")
 
         return cls(expression_lists)
 

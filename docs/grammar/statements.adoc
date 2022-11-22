@@ -10,10 +10,10 @@
 :star: *
 
 `_expression-statement_`:
-{tab} `_expression_` `_line-end_`
+{tab} `_expression_`
 
 `_assignment-statement_`:
-{tab} `_expression-list_` `_line-end_`
+{tab} `_expression-list_`
 {tab} `_identifier-list_` `*=*` `_assignment-statement_`
 `_expression-list_`:
 {tab} `_expression_`
@@ -26,7 +26,7 @@
 {tab} `_invariable-declaration_` `*=*` `_assignment-statement_`
 
 `_identifier-statement_`:
-{tab} `_variable-declaration_` `_line-end_`
+{tab} `_variable-declaration_`
 {tab} `_variable-definition_`
 {tab} `_invariable-definition_`
 
@@ -37,10 +37,22 @@
 {tab} `*^=*`, `*{star}=*`, `*/=*`, `*%=*`, `*+=*`, `*-=*`
 {tab} `*<\<=*`, `*>>=*`, `*&=*`, `*$=*`, `*|=*`
 
-`_line-statement_`:
-{tab} `_expression-statement_`
+`_line-statement-component_`:
+{tab} `_expression_`
 {tab} `_augmented-assignment-statement_`
 {tab} `_identifier-statement_`
+
+`_line-statement_`:
+{tab} `_line-statement-component_` `_line-end_`
+
+`_blockable-statement-component_`:
+{tab} `_line-statement-component_`
+{tab} `*pass*`
+{tab} `*break*` `_label_`~opt~
+{tab} `*continue*` `_label_`~opt~
+
+`_blockable-statement_`:
+{tab} `_blockable-statement-component_` `_line-end_`
 
 `_block-statement_`:
 {tab} `_blockable-statement_`
@@ -50,11 +62,6 @@
 {tab} `*\n*` `_block-indent_` `_blockable-statement_` `_newline-block-statement_`~opt~
 `_block-indent_`:
 {tab} one `indent` per line of the next statement per number of nested blocks
-`_blockable-statement_`:
-{tab} `_line-statement_`
-{tab} `*pass*` `_line-end_`
-{tab} `*break*` `_label_`~opt~ `_line-end_`
-{tab} `*continue*` `_label_`~opt~ `_line-end_`
 
 `_if-statement_`:
 {tab} `*if*` `_expression_` `*:*` `_block-statement_` `_else-if-statement_`~opt~ `_else-statement_`~opt~
@@ -70,10 +77,11 @@
 {tab} `_identifier_`
 
 `_do-while-statement_`:
-{tab}  `_label_`~opt~ `*do*` `*:*` `_block-statement?_` `*while*` `_expression_` `_line-end_`
-{tab} `*do*` `_label_`~opt~ `*:*` `_block-statement?_` `*while*` `_expression_` `_line-end_`
-`_block-statement?_`:
-{tab} A `_block-statement_` with or without a closing `_line-end_`
+{tab}  `_label_`~opt~ `*do*` `*:*` `_do-while-block-statement_` `*while*` `_expression_` `_line-end_`
+{tab} `*do*` `_label_`~opt~ `*:*` `_do-while-block-statement_` `*while*` `_expression_` `_line-end_`
+`_do-while-block-statement_`:
+{tab} `_blockable-statement-component_`
+{tab} `_block-statement_`
 
 `_statement_`:
 {tab} `_line-statement_`

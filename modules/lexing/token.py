@@ -144,7 +144,8 @@ TYPE_KEYWORDS = INT_TYPE_KEYWORDS | NAT_TYPE_KEYWORDS | FLOAT_TYPE_KEYWORDS
 TYPE_MODIFIER_KEYWORDS = {"var", "invar"}
 KEYWORDS = PRIMARY_KEYWORDS | TYPE_KEYWORDS | TYPE_MODIFIER_KEYWORDS | {
     "mod", "not", "and", "or", "as",
-    "if", "else", "pass", "break", "continue"
+    "if", "else", "do", "while",
+    "pass", "break", "continue"
 }
 
 PUNCTUATOR_SYMBOLS = "(),[]:"

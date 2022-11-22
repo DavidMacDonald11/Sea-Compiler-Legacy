@@ -1,6 +1,5 @@
 from .variable_definition import VariableDefinition
 from .invariable_definition import InvariableDefinition
-from ..declarations.variable_declaration import VariableDeclaration
 from ..node import Node
 
 class IdentifierStatement(Node):
@@ -18,9 +17,6 @@ class IdentifierStatement(Node):
     def construct(cls):
         definition = InvariableDefinition if cls.parser.next.has("invar") else VariableDefinition
         statement = definition.construct()
-
-        if isinstance(statement, VariableDeclaration):
-            cls.parser.expecting_has(r"\n", "EOF")
 
         return cls(statement)
 

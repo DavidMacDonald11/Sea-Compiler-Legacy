@@ -64,18 +64,19 @@ class BlockStatement(Node):
 class BlockableStatement(Node):
     @classmethod
     def construct(cls):
+        statement = BlockableStatementComponent.construct()
+        cls.parser.expecting_has(r"\n", "EOF")
+        return statement
+
+class BlockableStatementComponent(Node):
+    @classmethod
+    def construct(cls):
         return PassStatement.construct() or BreakContinueStatement.construct()
 
 class PassStatement(PrimaryNode):
     @classmethod
     def construct(cls):
-        if not cls.parser.next.has("pass"):
-            return None
-
-        keyword = cls.parser.take()
-        cls.parser.expecting_has(r"\n", "EOF")
-
-        return cls(keyword)
+        return cls(cls.parser.take()) if cls.parser.next.has("pass") else None
 
     def transpile(self):
         return self.transpiler.expression("", "/*pass*/")
@@ -96,7 +97,6 @@ class BreakContinueStatement(Node):
 
         keyword = cls.parser.take()
         label = cls.parser.take() if cls.parser.next.of("Identifier") else None
-        cls.parser.expecting_has(r"\n", "EOF")
 
         return cls(keyword, label)
 

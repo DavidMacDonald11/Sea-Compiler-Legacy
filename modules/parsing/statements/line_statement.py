@@ -18,6 +18,16 @@ class LineStatement(Node):
 
     @classmethod
     def construct(cls):
+        statement = LineStatementComponent.construct()
+        cls.parser.expecting_has(r"\n", "EOF")
+        return statement if isinstance(statement, IdentifierStatement) else cls(statement)
+
+    def transpile(self):
+        return self.statement.transpile().new("%s;/*%e*/")
+
+class LineStatementComponent(Node):
+    @classmethod
+    def construct(cls):
         taken = cls.parser.take() if cls.parser.next.has(r"\t") else None
 
         if cls.parser.next.has(r"\n"):
@@ -34,9 +44,6 @@ class LineStatement(Node):
             if isinstance(statement, AssignmentStatement) and len(statement.expression_lists) == 1:
                 statement = statement.expression_lists[0].to_expression_statement()
 
-            return cls(statement)
+            return statement
 
-        return cls(ExpressionStatement.construct())
-
-    def transpile(self):
-        return self.statement.transpile().new("%s;/*%e*/")
+        return ExpressionStatement.construct()

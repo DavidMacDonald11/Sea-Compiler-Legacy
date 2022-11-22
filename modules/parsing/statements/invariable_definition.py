@@ -8,7 +8,6 @@ class InvariableDefinition(IdentifierDefinition):
 
         if isinstance(declaration, InvariableDeclaration):
             cls.parser.warnings.error(declaration, "Cannot declare an invariable without a value")
-            cls.parser.expecting_has(r"\n", "EOF")
 
         return declaration
 
