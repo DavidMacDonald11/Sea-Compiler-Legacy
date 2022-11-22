@@ -1,6 +1,7 @@
 from .line_statement import LineStatement
 from .if_statement import IfStatement
 from .while_statement import WhileStatement
+from .do_while_statement import DoWhileStatement
 from ..node import Node
 
 class Statement(Node):
@@ -17,6 +18,7 @@ class Statement(Node):
     @classmethod
     def construct(cls):
         statement = IfStatement.construct() or WhileStatement.construct()
+        statement = statement or DoWhileStatement.construct()
         statement = statement or LineStatement.construct()
 
         return cls(statement)

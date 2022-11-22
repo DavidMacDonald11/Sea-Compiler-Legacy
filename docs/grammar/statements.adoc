@@ -38,7 +38,7 @@
 {tab} `*<\<=*`, `*>>=*`, `*&=*`, `*$=*`, `*|=*`
 
 `_line-statement-component_`:
-{tab} `_expression_`
+{tab} `_expression-statement_`
 {tab} `_augmented-assignment-statement_`
 {tab} `_identifier-statement_`
 

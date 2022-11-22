@@ -65,7 +65,10 @@ class BlockableStatement(Node):
     @classmethod
     def construct(cls):
         statement = BlockableStatementComponent.construct()
-        cls.parser.expecting_has(r"\n", "EOF")
+
+        if statement is not None:
+            cls.parser.expecting_has(r"\n", "EOF")
+
         return statement
 
 class BlockableStatementComponent(Node):
