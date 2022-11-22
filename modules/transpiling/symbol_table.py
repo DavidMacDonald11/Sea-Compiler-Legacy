@@ -8,6 +8,12 @@ class SymbolTable:
         self.parent = parent
         self.number = type(self).count
 
+    def __repr__(self):
+        if self.parent is None:
+            return f"{self.number} {self.symbols}"
+
+        return f"{self.parent},\n    {self.number} {self.symbols}"
+
     def at(self, node, key):
         if key in self.symbols:
             return self.symbols[key]
@@ -35,6 +41,9 @@ class SymbolTable:
 
     def new_invariable(self, node, s_type, name):
         return self._new_identifier(Invariable, node, s_type, name)
+
+    def new_function(self, node, s_type, name):
+        return self._new_identifier(Function, node, s_type, name)
 
 class Identifier:
     @property
@@ -117,3 +126,12 @@ class Invariable(Variable):
             node.transpiler.warnings.error(node, f"Cannot reassign invariable '{self.name}'")
 
         return super().assign(node, expression)
+
+class Function(Identifier):
+    @property
+    def c_name(self):
+        return f"__sea_fun_{self.name}__"
+
+    def __init__(self, s_type, name, table_number):
+        self.parameters = None
+        super().__init__(s_type, name, table_number)

@@ -40,16 +40,17 @@ def compile_file(options, file_pair):
         if transpiler is not None:
             transpiler.close()
 
-        output_debug(options, file_pair[0], lexer, parser)
+        output_debug(options, file_pair[0], lexer, parser, transpiler)
         print(warnings)
 
-def output_debug(options, name, lexer, parser):
+def output_debug(options, name, lexer, parser, transpiler):
     if "d" not in options:
         return
 
     print(f"{name}:")
     print(f"  Tokens:\n    {None if lexer is None else lexer.tokens}")
     print(f"  Abstract Syntax Tree:\n    {None if parser is None else parser.tree}")
+    print(f"  Partial Symbol Table:\n    {None if transpiler is None else transpiler.symbols}\n")
 
 if __name__ == "__main__":
     main()

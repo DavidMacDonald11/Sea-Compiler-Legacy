@@ -26,9 +26,10 @@ class Transpiler:
         self.include("stdio")
 
         self.file.write("\n".join((
-            "int main()", "{",
             f"{self.lines}",
-            'printf("Value: %Lf + %Lfi\\n", creall(__sea_var_main__), cimagl(__sea_var_main__));',
+            "int main()", "{",
+            "\t__sea_type_cmax__  __sea_var_main__ = __sea_fun_main__();",
+            '\tprintf("Value: %Lf + %Lfi\\n", creall(__sea_var_main__), cimagl(__sea_var_main__));',
             "return 0;", "}"
         )))
 

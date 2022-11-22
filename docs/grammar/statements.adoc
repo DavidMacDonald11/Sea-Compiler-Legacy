@@ -50,6 +50,7 @@
 {tab} `*pass*`
 {tab} `*break*` `_label_`~opt~
 {tab} `*continue*` `_label_`~opt~
+{tab} `*return*` `_expression_`~opt~
 
 `_blockable-statement_`:
 {tab} `_blockable-statement-component_` `_line-end_`
@@ -83,11 +84,19 @@
 {tab} `_blockable-statement-component_`
 {tab} `_block-statement_`
 
+`_function-definition_`:
+{tab} `_function-declaration_` `*:*` `_block-statement_`
+
+`_function-statement_`:
+{tab} `_function-declaration_` `_line-end_`
+{tab} `_function-definition_`
+
 `_statement_`:
 {tab} `_line-statement_`
 {tab} `_if-statement_`
 {tab} `_while-statement_`
 {tab} `_do-while-statement_`
+{tab} `_function-statement_`
 
 `_file-statement_`:
 {tab} `_statement_`

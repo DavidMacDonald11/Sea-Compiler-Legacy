@@ -1,11 +1,5 @@
-# Ouput var
-cplex main = 0
+fun compose(real a, real b) -> cplex:
+    return a + b * 1i
 
-int i = 0
-
-fake do:
-    i += 1
-    continue fake
-while False
-
-main = i
+fun main() -> cplex:
+    return compose(6, 9)

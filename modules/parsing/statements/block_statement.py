@@ -1,4 +1,5 @@
 from .line_statement import LineStatement
+from ..expressions.expression import Expression
 from ..node import Node, PrimaryNode
 
 class BlockStatement(Node):
@@ -40,7 +41,10 @@ class BlockStatement(Node):
                 message = "Cannot have unreacahble code following a block exit or pass keyword"
                 cls.parser.warnings.warn(statements[-1], message)
 
-            exited = isinstance(statements[-1], (PassStatement, BreakContinueStatement))
+            exited = isinstance(statements[-1], (
+                PassStatement,
+                BreakContinueStatement,
+                ReturnStatement))
 
         if empty:
             message = "Block cannot be empty; use the pass keyword"
@@ -51,7 +55,9 @@ class BlockStatement(Node):
 
     def transpile(self):
         self.transpiler.push_symbol_table()
+        return self.transpile_for_function()
 
+    def transpile_for_function(self):
         indents = "\t" * (self.indents - 1)
         block = self.statements[0].transpile().new(f"{{\n\t{indents}%s")
 
@@ -74,7 +80,8 @@ class BlockableStatement(Node):
 class BlockableStatementComponent(Node):
     @classmethod
     def construct(cls):
-        return PassStatement.construct() or BreakContinueStatement.construct()
+        statement = PassStatement.construct() or BreakContinueStatement.construct()
+        return statement or ReturnStatement.construct()
 
 class PassStatement(PrimaryNode):
     @classmethod
@@ -115,3 +122,31 @@ class BreakContinueStatement(Node):
             return statement.new(f"/*{self.keyword.string} {self.label.string}*/")
 
         return statement.new(f"goto {label.c_name}_{self.keyword.string}__")
+
+class ReturnStatement(Node):
+    @property
+    def nodes(self) -> list:
+        return [] if self.expression is None else [self.expression]
+
+    def __init__(self, expression):
+        self.expression = expression
+
+    @classmethod
+    def construct(cls):
+        if not cls.parser.next.has("return"):
+            return None
+
+        cls.parser.take()
+
+        if cls.parser.next.has(r"\n", "EOF"):
+            return cls(None)
+
+        return cls(Expression.construct())
+
+    def transpile(self):
+        statement = self.transpiler.expression("", "return")
+
+        if self.expression is not None:
+            statement = statement.new(f"%s {self.expression.transpile()}")
+
+        return statement

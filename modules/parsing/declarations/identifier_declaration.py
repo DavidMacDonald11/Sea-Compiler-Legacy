@@ -32,7 +32,7 @@ class IdentifierDeclaration(Node):
 
     def transpile_generator(self):
         keyword = self.type_keyword.token.string
-        _, c_type = self.type_keyword.transpile()
+        c_type = self.type_keyword.transpile().string
 
         for name in self.identifiers[::-1]:
             yield (c_type, self.transpile_name(keyword, name.string))

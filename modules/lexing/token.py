@@ -136,7 +136,7 @@ ASSIGNMENT_OPERATORS = {"=", "^=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "
 POSTFIX_OPERATORS = POSTFIX_UNARY_OPERATORS | BINARY_OPERATORS | COMPARATIVE_OPERATORS
 POSTFIX_OPERATORS |= ASSIGNMENT_OPERATORS
 
-OPERATORS = PREFIX_UNARY_OPERATORS | POSTFIX_OPERATORS | {"||"}
+OPERATORS = PREFIX_UNARY_OPERATORS | POSTFIX_OPERATORS | {"||", "->"}
 OPERATOR_SYMBOLS = {c for op in OPERATORS for c in op}
 
 PRIMARY_KEYWORDS = {"True", "False"}
@@ -148,8 +148,8 @@ TYPE_KEYWORDS = INT_TYPE_KEYWORDS | NAT_TYPE_KEYWORDS | FLOAT_TYPE_KEYWORDS
 TYPE_MODIFIER_KEYWORDS = {"var", "invar"}
 KEYWORDS = PRIMARY_KEYWORDS | TYPE_KEYWORDS | TYPE_MODIFIER_KEYWORDS | {
     "mod", "not", "and", "or", "as",
-    "if", "else", "do", "while",
-    "pass", "break", "continue"
+    "if", "else", "do", "while", "fun",
+    "pass", "break", "continue", "return"
 }
 
 PUNCTUATOR_SYMBOLS = "(),[]:"
