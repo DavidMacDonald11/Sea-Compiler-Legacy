@@ -62,10 +62,12 @@ class FakeToken:
             type(self).warnings.error(self, "Incorrect integer constant")
             return
 
-        patterns = [re.compile(r"^\d*.?\d*(e[+-]?\d+)?$")]
-        patterns += [re.compile(r"^\d*.?\d*(e[+-]?\d+b[A-Z0-9]+)?$")]
-        patterns += [re.compile(r"^\d+b[A-Z0-9]*.?[A-Z0-9]*(e[+-]?\d+)?$")]
-        patterns += [re.compile(r"^\d+b[A-Z0-9]*.?[A-Z0-9]*(e[+-]?\d+b[A-Z0-9]+)?$")]
+        patterns = [
+            re.compile(r"^\d*.?\d*(e[+-]?\d+)?$"),
+            re.compile(r"^\d*.?\d*(e[+-]?\d+b[A-Z0-9]+)?$"),
+            re.compile(r"^\d+b[A-Z0-9]*.?[A-Z0-9]*(e[+-]?\d+)?$"),
+            re.compile(r"^\d+b[A-Z0-9]*.?[A-Z0-9]*(e[+-]?\d+b[A-Z0-9]+)?$")
+        ]
 
         for pattern in patterns:
             if pattern.match(self.string):
@@ -75,12 +77,14 @@ class FakeToken:
         type(self).warnings.error(self, "Incorrect float constant")
 
     def _validate_character_constant(self):
-        patterns = [re.compile(r"^'[^\\]'$")]
-        patterns += [re.compile(r"^'\\[abfnrtv'\"\\?]'$")]
-        patterns += [re.compile(r"^'\\[0-7]{1, 3}'$")]
-        patterns += [re.compile(r"^'\\x[0-9A-F]+'$")]
-        patterns += [re.compile(r"^'\\u[0-9A-F]{4}'$")]
-        patterns += [re.compile(r"^'\\U[0-9A-F]{8}'$")]
+        patterns = [
+            re.compile(r"^'[^\\]'$"),
+            re.compile(r"^'\\[abfnrtv'\"\\?]'$"),
+            re.compile(r"^'\\[0-7]{1, 3}'$"),
+            re.compile(r"^'\\x[0-9A-F]+'$"),
+            re.compile(r"^'\\u[0-9A-F]{4}'$"),
+            re.compile(r"^'\\U[0-9A-F]{8}'$")
+        ]
 
         for pattern in patterns:
             if pattern.match(self.string):
