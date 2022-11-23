@@ -1,13 +1,13 @@
-from lexing.token import TYPE_KEYWORDS
+from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .type_keyword import TypeKeyword
 from ..node import Node
 
 # TODO verify return types
-# TODO verify argument types/number in call expression
-# TODO imag args should drop j suffix
-# TODO allow var parameters
-# TODO allow borrowing/ownership transfer
 # TODO consider functions in blocks
+# TODO imag args should drop j suffix
+# TODO create contexts to solve above
+
+# TODO verify argument types/number in call expression
 
 class FunctionDeclaration(Node):
     @property
@@ -80,7 +80,7 @@ class FunctionParameterList(Node):
     def construct(cls):
         parameters = []
 
-        while cls.parser.next.has(*TYPE_KEYWORDS):
+        while cls.parser.next.has(*TYPE_KEYWORDS, *TYPE_MODIFIER_KEYWORDS):
             parameters += [FunctionParameter.construct()]
 
             if cls.parser.next.has(","):
@@ -101,34 +101,65 @@ class FunctionParameterList(Node):
 class FunctionParameter(Node):
     @property
     def nodes(self) -> list:
-        if self.identifier is None:
-            return [self.type_keyword]
+        nodes = [self.type_keyword]
 
-        return [self.type_keyword, self.identifier]
+        if self.type_qualifier is not None:
+            nodes = [self.type_qualifier, *nodes]
 
-    def __init__(self, type_keyword, identifier):
+        if self.borrow_qualifier is not None:
+            nodes += [self.borrow_qualifier]
+
+        if self.identifier is not None:
+            nodes += [self.identifier]
+
+        return nodes
+
+    def __init__(self, type_qualifier, type_keyword, borrow_qualifier, identifier):
+        self.type_qualifier = type_qualifier
         self.type_keyword = type_keyword
+        self.borrow_qualifier = borrow_qualifier
         self.identifier = identifier
 
     @classmethod
     def construct(cls):
+        type_qualifier = cls.parser.take() if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS) else None
         type_keyword = TypeKeyword.construct()
+        borrow_qualifier = cls.parser.take() if cls.parser.next.has("&", "$") else None
         identifier = cls.parser.take() if cls.parser.next.of("Identifier") else None
 
-        return cls(type_keyword, identifier)
+        return cls(type_qualifier, type_keyword, borrow_qualifier, identifier)
 
     def transpile(self):
-        return self.type_keyword.transpile().new(f"%s {self.identifier.string}")
+        keyword = self.type_keyword.transpile()
+
+        if self.borrow_qualifier is not None:
+            keyword = keyword.new("%s*")
+
+        return keyword.new(f"%s {self.identifier.string}")
 
     def transpile_def(self):
         keyword = self.type_keyword.token.string
         name = self.identifier.string
-        parameter = self.transpiler.symbols.new_invariable(self, keyword, name)
+
+        qualifier = self.type_qualifier
+        borrow = self.borrow_qualifier
+
+        has_qualifier = qualifier is not None
+        has_borrow = borrow is not None
+
+        if not has_borrow and not has_qualifier or has_qualifier and qualifier.string == "var":
+            parameter = self.transpiler.symbols.new_variable(self, keyword, name)
+        else:
+            parameter = self.transpiler.symbols.new_invariable(self, keyword, name)
 
         if parameter is None:
             return self.transpiler.expression("", f"/*{keyword} {name}*/")
 
         parameter.initialized = True
+        parameter.ownership = borrow.string if has_borrow else None
         keyword = self.type_keyword.transpile()
+
+        if parameter.ownership is not None:
+            keyword = keyword.new("%s*")
 
         return self.transpiler.expression("", f"{keyword} {parameter.c_name}")

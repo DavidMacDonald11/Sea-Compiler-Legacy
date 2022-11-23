@@ -18,6 +18,12 @@
 {tab} `*imag32*` `*imag64*` `*imag*`
 {tab} `*cplex32*` `*cplex64*` `*cplex*`
 
+`_type-qualifier_`: one of
+{tab} `*var*` `*invar*`
+
+`_borrow-qualifier_`: one of
+{tab} `*&*` `*$*`
+
 `_identifier-declaration_`:
 {tab} `_type-keyword_` `_identifier-list_`
 `_identifier-list_`:
@@ -36,8 +42,6 @@
 {tab} `_function-parameter_`
 {tab} `_function-parameter-list_` `*,*` `_function-parameter_`
 `_function-parameter_`:
-{tab} `_function-parameter-qualifier_`~opt~ `_type-keyword_` `_identifier_`~opt~
-`_function-parameter-qualifier_`: one of
-{tab} `*var*` `*invar*`
+{tab} `_type-qualifier_`~opt~ `_type-keyword_` `_borrow-qualifier_`~opt~ `_identifier_`~opt~
 `_function-return-type_`:
 {tab} `*\->*` `_type-keyword_`
