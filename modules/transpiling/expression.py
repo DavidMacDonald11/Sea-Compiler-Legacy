@@ -38,6 +38,9 @@ class Expression:
         return self
 
     def operate(self, node):
+        if self.e_type == "":
+            node.transpiler.warnings.error(node, "Function call has no return value")
+
         if self.ownership is not None:
             node.transpiler.warnings.error(node, "Cannot perform operations on ownership rvalue")
 
@@ -63,6 +66,7 @@ class Expression:
         return expression
 
 POINTS = {
+    "": -1,
     "bool": 0,
     "u64": 1,
     "i64": 2,

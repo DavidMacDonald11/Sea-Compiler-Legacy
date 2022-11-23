@@ -56,7 +56,10 @@ class Transpiler:
         self.alias("uintmax_t", "__sea_type_umax__")
 
         self.header()
-        self.symbols.new_function(None, "void", "cprint")
+
+        cprint = self.symbols.new_function(None, "void", "cprint")
+        cprint.parameters = [("invar", "cplex", None)]
+        cprint.declared = cprint.defined = True
 
     def include(self, header):
         if header not in self.includes:
