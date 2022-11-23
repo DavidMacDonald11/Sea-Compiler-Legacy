@@ -23,7 +23,7 @@ class LineStatement(Node):
         return statement if isinstance(statement, IdentifierStatement) else cls(statement)
 
     def transpile(self):
-        return self.statement.transpile().new("%s;/*%e*/")
+        return self.statement.transpile().new(f"{self.indent}%s;/*%e*/")
 
 class LineStatementComponent(Node):
     @classmethod

@@ -57,7 +57,7 @@ class IfStatement(Node):
         statement = self.transpiler.expression("", f"if ({condition}) {block}")
 
         for else_if in self.elses:
-            statement = statement.new(f"%s else {else_if.transpile()}")
+            statement = statement.new(f"{self.indent}%s else {else_if.transpile()}")
 
         return statement
 

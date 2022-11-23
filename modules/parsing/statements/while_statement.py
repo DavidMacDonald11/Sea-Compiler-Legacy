@@ -40,9 +40,9 @@ class WhileStatement(Node):
         statement = condition.new("while (%s)")
 
         if self.label is None:
-            return statement.new(f"%s {self.block.transpile()}")
+            return statement.new(f"{self.indent}%s {self.block.transpile()}")
 
         label = self.transpiler.symbols.new_label(self, self.label.string)
-        statement = statement.new(f"%s {self.block.transpile()}")
+        statement = statement.new(f"{self.indent}%s {self.block.transpile()}")
 
-        return statement if self.label is None else label.surround(statement)
+        return statement if self.label is None else label.surround(self, statement)

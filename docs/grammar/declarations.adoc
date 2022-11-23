@@ -36,6 +36,8 @@
 {tab} `_function-parameter_`
 {tab} `_function-parameter-list_` `*,*` `_function-parameter_`
 `_function-parameter_`:
-{tab} `_type-keyword_` `_identifier_`~opt~
+{tab} `_function-parameter-qualifier_`~opt~ `_type-keyword_` `_identifier_`~opt~
+`_function-parameter-qualifier_`: one of
+{tab} `*var*` `*invar*`
 `_function-return-type_`:
 {tab} `*\->*` `_type-keyword_`

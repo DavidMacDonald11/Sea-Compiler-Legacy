@@ -14,6 +14,10 @@ class Node(ABC):
     def transpiler(self):
         return type(self).c_transpiler
 
+    @property
+    def indent(self):
+        return "\t" * self.transpiler.indents
+
     def __repr__(self):
         return self.tree_repr("     ")
 

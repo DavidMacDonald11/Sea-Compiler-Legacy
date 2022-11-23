@@ -68,12 +68,12 @@ class DoWhileStatement(Node):
 
     def transpile(self):
         condition = self.condition.transpile().boolean(self.condition)
-        statement = condition.new("while(%s);")
+        statement = condition.new("while(%s)")
 
         if self.label is None:
             block = self.block.transpile()
             block = block if isinstance(self.block, BlockStatement) else block.new("{ %s; }")
-            return statement.new(f"do {block} %s")
+            return statement.new(f"{self.indent}do {block} %s")
 
         label = self.transpiler.symbols.new_label(self, self.label.string)
         block = self.block.transpile()
@@ -83,9 +83,9 @@ class DoWhileStatement(Node):
         else:
             block.string = block.string[:-1]
 
-        statement = statement.new("} %s")
+        statement = statement.new(f"{self.indent}}} %s")
 
         if label is not None:
-            statement = label.surround(statement)
+            statement = label.surround(self, statement)
 
-        return statement.new(f"do {block} %s")
+        return statement.new(f"{self.indent}do {block} %s")

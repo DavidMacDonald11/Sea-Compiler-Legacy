@@ -13,6 +13,7 @@ class Transpiler:
         self.includes = []
         self.lines = ""
         self.temps = 0
+        self.indents = 0
 
         self.standard()
 

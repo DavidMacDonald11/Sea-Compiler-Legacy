@@ -7,9 +7,8 @@ class BlockStatement(Node):
     def nodes(self) -> list:
         return self.statements
 
-    def __init__(self, statements, indents):
+    def __init__(self, statements):
         self.statements = statements
-        self.indents = indents
 
     @classmethod
     def construct(cls):
@@ -19,7 +18,7 @@ class BlockStatement(Node):
             if isinstance(statement, cls.parser.statement):
                 statement = statement.statement
 
-            return cls([statement], cls.parser.indents)
+            return cls([statement])
 
         cls.parser.take()
         cls.parser.indents += 1
@@ -41,41 +40,54 @@ class BlockStatement(Node):
                 message = "Cannot have unreacahble code following a block exit or pass keyword"
                 cls.parser.warnings.warn(statements[-1], message)
 
-            exited = isinstance(statements[-1], (
-                PassStatement,
-                BreakContinueStatement,
-                ReturnStatement))
+            exited = isinstance(statements[-1], BlockableStatement)
 
         if empty:
             message = "Block cannot be empty; use the pass keyword"
             cls.parser.warnings.warn(cls.parser.take(), message)
 
         cls.parser.indents -= 1
-        return cls(statements, cls.parser.indents + 1)
+        return cls(statements)
 
     def transpile(self):
         self.transpiler.push_symbol_table()
         return self.transpile_for_function()
 
     def transpile_for_function(self):
-        indents = "\t" * (self.indents - 1)
-        block = self.statements[0].transpile().new(f"{{\n\t{indents}%s")
+        self.transpiler.indents += 1
+        block = self.statements[0].transpile().new(f"\n{self.indent[:-1]}{{\n%s")
 
         for statement in self.statements[1:]:
-            block = block.new(f"%s;\n\t{indents}{statement.transpile()}")
+            block = block.new(f"%s;\n{statement.transpile()}")
 
         self.transpiler.pop_symbol_table()
-        return block.new(f"%s;\n{indents}}}")
+        self.transpiler.indents -= 1
+
+        return block.new(f"%s;\n{self.indent}}}")
 
 class BlockableStatement(Node):
+    @property
+    def nodes(self) -> list:
+        return [self.statement]
+
+    def __init__(self, statement):
+        self.statement = statement
+
+    def tree_repr(self, prefix):
+        return self.statement.tree_repr(prefix)
+
     @classmethod
     def construct(cls):
         statement = BlockableStatementComponent.construct()
 
         if statement is not None:
             cls.parser.expecting_has(r"\n", "EOF")
+            return cls(statement)
 
-        return statement
+        return None
+
+    def transpile(self):
+        return self.statement.transpile().new(f"{self.indent}%s")
 
 class BlockableStatementComponent(Node):
     @classmethod
