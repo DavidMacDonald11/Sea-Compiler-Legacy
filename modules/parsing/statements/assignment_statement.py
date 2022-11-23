@@ -33,13 +33,7 @@ class AssignmentStatement(Node):
         return cls(expression_lists)
 
     def transpile(self):
-        statement = None
-
-        for a_list in self.make_lists():
-            result = a_list.transpile()
-            statement = result if statement is None else statement.new(f"%s;/*%e*/\n{result}")
-
-        return statement
+        return AssignmentList.transpile_lists(self.make_lists())
 
     def make_lists(self, definition = None, declaration = None):
         identifier_lists, lists, decl_gen = self.initalize_lists(declaration)
@@ -135,6 +129,18 @@ class AssignmentList(Node):
     def construct(cls):
         raise NotImplementedError(cls.__name__)
 
+    @classmethod
+    def transpile_lists(cls, a_lists):
+        statement = None
+        prefix = None
+
+        for a_list in a_lists:
+            new_prefix, result = a_list.transpile()
+            prefix = new_prefix if prefix is None else prefix.new(f"%s\n{new_prefix}")
+            statement = result if statement is None else statement.new(f"%s;/*%e*/\n{result}")
+
+        return statement if prefix is None else prefix.new(f"%s\n{statement}")
+
     def transpile(self):
         count = len(self.identifiers)
         expression = self.expression.transpile()
@@ -150,7 +156,8 @@ class AssignmentList(Node):
         return self.transpile_identifiers(expression)
 
     def transpile_identifiers(self, expression):
-        temped = False
+        temped = len(self.others) == 0
+        prefix = None
 
         for i, identifier in enumerate(self.identifiers[::-1]):
             name = identifier.token.string
@@ -159,7 +166,11 @@ class AssignmentList(Node):
             self.others += [name]
 
             if not temped:
-                temped, expression = self.handle_temporaries(expression)
+                old_prefix = prefix
+                temped, prefix, expression = self.handle_temporaries(expression)
+
+                if old_prefix is not None:
+                    prefix = old_prefix if prefix is None else old_prefix.new(f"%s\n{prefix}")
 
             if identifier is None:
                 return expression.new(f"/*{name} = */%s")
@@ -176,11 +187,11 @@ class AssignmentList(Node):
 
                 expression = expression.new(f"{self.c_type}{'*' if is_ref else ''} %s")
 
-        return expression
+        return prefix, expression
 
     def handle_temporaries(self, expression):  # sourcery skip: use-next
         for identifier in self.others:
             if identifier in expression.identifiers:
-                return True, self.transpiler.new_temp(expression)
+                return True, *self.transpiler.new_temp(expression)
 
-        return False, expression
+        return False, None, expression

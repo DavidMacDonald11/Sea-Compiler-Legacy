@@ -28,13 +28,6 @@ class LineStatement(Node):
 class LineStatementComponent(Node):
     @classmethod
     def construct(cls):
-        taken = cls.parser.take() if cls.parser.next.has(r"\t") else None
-
-        if cls.parser.next.has(r"\n"):
-            cls.parser.take()
-        elif taken is not None:
-            cls.parser.i -= 1
-
         if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS, *TYPE_KEYWORDS):
             return IdentifierStatement.construct()
 

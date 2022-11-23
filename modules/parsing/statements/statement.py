@@ -18,6 +18,9 @@ class Statement(Node):
 
     @classmethod
     def construct(cls):
+        if cls.parser.next.has(r"\n"):
+            cls.parser.take()
+
         statement = IfStatement.construct() or WhileStatement.construct()
         statement = statement or DoWhileStatement.construct()
         statement = statement or FunctionStatement.construct()

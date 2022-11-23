@@ -1,4 +1,4 @@
-from .assignment_statement import AssignmentStatement
+from .assignment_statement import AssignmentStatement, AssignmentList
 from ..node import Node
 
 class IdentifierDefinition(Node):
@@ -25,13 +25,7 @@ class IdentifierDefinition(Node):
         raise NotImplementedError()
 
     def transpile(self):
-        statement = None
-
-        for a_list in self.statement.make_lists(self, self.declaration):
-            result = a_list.transpile()
-            statement = result if statement is None else statement.new(f"%s;/*%e*/\n{result}")
-
-        return statement
+        return AssignmentList.transpile_lists(self.statement.make_lists(self, self.declaration))
 
     def check_references(self, expression):
         raise NotImplementedError(type(self).__name__)

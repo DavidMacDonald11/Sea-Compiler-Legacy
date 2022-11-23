@@ -26,11 +26,10 @@ class Transpiler:
         self.include("stdio")
 
         self.file.write("\n".join((
+            "void __sea_fun_cprint__(__sea_type_cmax__ c)", "{",
+            '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}",
             f"{self.lines}",
-            "int main()", "{",
-            "\t__sea_type_cmax__  __sea_var_main__ = __sea_fun_main__();",
-            '\tprintf("Value: %Lf + %Lfi\\n", creall(__sea_var_main__), cimagl(__sea_var_main__));',
-            "return 0;", "}"
+            "int main() { return __sea_fun_main__(); }"
         )))
 
         self.file.close()
@@ -56,6 +55,7 @@ class Transpiler:
         self.alias("uintmax_t", "__sea_type_umax__")
 
         self.header()
+        self.symbols.new_function(None, "void", "cprint")
 
     def include(self, header):
         if header not in self.includes:
@@ -78,9 +78,7 @@ class Transpiler:
         c_name = f"__sea_temp_value_{self.temps}__"
         self.temps += 1
 
-        self.write(expression.new(f"{c_type} {c_name} = %s;"))
-
-        return expression.new(c_name)
+        return expression.copy().new(f"{c_type} {c_name} = %s;"), expression.new(c_name)
 
     def push_symbol_table(self):
         self.symbols = SymbolTable(self.symbols)

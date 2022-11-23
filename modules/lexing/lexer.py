@@ -42,6 +42,19 @@ class Lexer:
         else:
             self.warnings.error(None, "Empty file")
 
+        tokens = []
+        i = 0
+
+        while i < len(self.tokens):
+            if self.tokens[i].has(r"\t") and self.tokens[i + 1].has(r"\n"):
+                i += 2
+            else:
+                tokens += [self.tokens[i]]
+                i += 1
+
+        self.tokens = tokens
+
+
     def make_token(self):
         self.check_spaces()
 
