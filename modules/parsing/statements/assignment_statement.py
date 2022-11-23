@@ -139,9 +139,9 @@ class AssignmentList(Node):
             prefix = new_prefix if prefix is None else prefix.new(f"%s\n{new_prefix}")
 
             if statement is None:
-                statement = result
+                statement = result.new(f"{a_list.indent}%s")
             else:
-                statement = statement.new(f"{a_list.indent}%s;/*%e*/\n{a_list.indent}{result}")
+                statement = statement.new(f"%s;/*%e*/\n{a_list.indent}{result}")
 
         return statement if prefix is None else prefix.new(f"%s\n{statement}")
 
