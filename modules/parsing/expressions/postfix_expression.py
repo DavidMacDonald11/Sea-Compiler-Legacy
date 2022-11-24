@@ -1,5 +1,5 @@
 from lexing.token import POSTFIX_UNARY_OPERATORS
-from transpiling.symbol_table import Function
+from transpiling.symbols.function import Function
 from .primary_expression import PrimaryExpression, Identifier
 from ..declarations.type_keyword import TYPE_MAP
 from ..node import Node

@@ -1,5 +1,5 @@
 from lexing.token import PREFIX_UNARY_OPERATORS
-from transpiling.symbol_table import Invariable
+from transpiling.symbols.invariable import Invariable
 from .primary_expression import Identifier
 from .exponential_expression import ExponentialExpression
 from ..node import Node, PrimaryNode
