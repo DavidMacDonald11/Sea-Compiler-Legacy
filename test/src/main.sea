@@ -1,10 +1,7 @@
-fun add(int &, int &) -> int
+fun set(real re) -> imag:
+    return re * 1i
 
 fun main() -> int:
-    invar int a, b, c, d = [2, 4, 6, 3]
-    cprint(add(&a, &b) + add(&c, &d) * 1i)
+    imag im = set(5)
 
     return 0
-
-fun add(int &a, int &b) -> int:
-    return a + b

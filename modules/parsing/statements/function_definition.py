@@ -28,5 +28,12 @@ class FunctionDefinition(Node):
     def transpile(self):
         statement = self.declaration.transpile_definition(True)
         statement.string = statement.string[:-1]
+        block = self.block.transpile_for_function()
 
-        return statement.new(f"%s {self.block.transpile_for_function()}")
+        function = self.transpiler.context.function
+
+        if function is not None and function.e_type != "" and not function.returned:
+            self.transpiler.warnings.error(self.declaration, "Function must return a value")
+
+        self.transpiler.context.function = None
+        return statement.new(f"%s {block}")

@@ -36,6 +36,7 @@ class WhileStatement(Node):
         return cls(label, condition, block)
 
     def transpile(self):
+        self.transpiler.context.loops += 1
         condition = self.condition.transpile().boolean(self.condition)
         statement = condition.new("while (%s)")
 
@@ -45,4 +46,5 @@ class WhileStatement(Node):
         label = self.transpiler.symbols.new_label(self, self.label.string)
         statement = statement.new(f"{self.indent}%s {self.block.transpile()}")
 
+        self.transpiler.context.loops -= 1
         return statement if self.label is None else label.surround(self, statement)

@@ -1,3 +1,4 @@
+from .context import Context
 from .symbol_table import SymbolTable
 from .expression import Expression
 
@@ -9,11 +10,11 @@ class Transpiler:
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
+        self.context = Context()
         self.symbols = SymbolTable()
         self.includes = []
         self.lines = ""
         self.temps = 0
-        self.indents = 0
 
         self.standard()
 

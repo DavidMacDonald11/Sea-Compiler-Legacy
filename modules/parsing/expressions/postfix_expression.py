@@ -87,15 +87,18 @@ class CallExpression(PostfixExpression):
         name = self.expression.token.string
         function = self.transpiler.symbols.at(self, name)
 
-        if isinstance(function, Function):
-            arguments = function.call(self, self.nodes[1])
-            e_type = TYPE_MAP[function.return_type][0] if function.return_type is not None else ""
-            return self.transpiler.expression("", f"{function.c_name}({arguments})").cast(e_type)
+        if not isinstance(function, Function):
+            if function is not None:
+                self.transpiler.warnings.error(self, "Cannot call a non-function")
 
-        if function is not None:
-            self.transpiler.warnings.error(self, "Cannot call a non-function")
+            return self.transpiler.expression("", f"/*{self.expression.transpile()}(...)*/")
 
-        return self.transpiler.expression("", f"/*{self.expression.transpile()}(...)*/")
+        self.transpiler.context.calls += 1
+        arguments = function.call(self, self.nodes[1])
+        c_name, e_type = function.c_name, function.e_type
+        self.transpiler.context.calls -= 1
+
+        return self.transpiler.expression("", f"{c_name}({arguments})").cast(e_type)
 
 class ArgumentExpressionList(Node):
     @property

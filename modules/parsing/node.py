@@ -16,7 +16,7 @@ class Node(ABC):
 
     @property
     def indent(self):
-        return "\t" * self.transpiler.indents
+        return "\t" * self.transpiler.context.blocks
 
     def __repr__(self):
         return self.tree_repr("     ")

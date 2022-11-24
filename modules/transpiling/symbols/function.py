@@ -1,3 +1,4 @@
+from parsing.declarations.type_keyword import TYPE_MAP
 from .identifier import Identifier
 
 class Function(Identifier):
@@ -5,9 +6,14 @@ class Function(Identifier):
     def c_name(self):
         return f"__sea_fun_{self.name}__"
 
+    @property
+    def e_type(self):
+        return TYPE_MAP[self.return_type][0] if self.return_type is not None else ""
+
     def __init__(self, s_type, name, table_number):
         self.declared = False
         self.defined = False
+        self.returned = False
         self.caller = None
         self.parameters = []
         self.return_type = None

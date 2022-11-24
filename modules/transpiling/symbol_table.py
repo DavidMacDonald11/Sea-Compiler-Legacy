@@ -35,8 +35,6 @@ class SymbolTable:
 
     def verify_called_functions(self):
         for name, symbol in self.symbols.items():
-            print(symbol.caller if isinstance(symbol, Function) else "")
-
             if isinstance(symbol, Function) and symbol.caller is not None and not symbol.defined:
                 message = f"Called function '{name}' has no definition"
                 symbol.caller.transpiler.warnings.error(symbol.caller, message)

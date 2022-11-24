@@ -1,5 +1,6 @@
 from .line_statement import LineStatementComponent
-from .block_statement import BlockStatement, BlockableStatementComponent
+from .blockable_statement import BlockableStatementComponent
+from .block_statement import BlockStatement
 from ..expressions.expression import Expression
 from ..node import Node
 
@@ -67,6 +68,7 @@ class DoWhileStatement(Node):
         return label
 
     def transpile(self):
+        self.transpiler.context.loops += 1
         condition = self.condition.transpile().boolean(self.condition)
         statement = condition.new("while(%s)")
 
@@ -88,4 +90,5 @@ class DoWhileStatement(Node):
         if label is not None:
             statement = label.surround(self, statement)
 
+        self.transpiler.context.loops -= 1
         return statement.new(f"{self.indent}do {block} %s")

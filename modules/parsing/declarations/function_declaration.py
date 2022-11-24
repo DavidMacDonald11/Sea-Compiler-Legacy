@@ -2,14 +2,13 @@ from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .type_keyword import TypeKeyword
 from ..node import Node
 
-# TODO verify return types
-# TODO allow ownership return value/type
-# TODO consider functions in blocks
 # TODO imag args should drop j suffix
-# TODO create contexts to solve above
 
-# TODO implement function overloading
+# TODO allow ownership return value/type
+# TODO implement function overloading or default args
 # TODO improve mismatching type error
+# TODO verify returns from all branches
+# TODO verify imag expressions (if return imag, change call)
 
 class FunctionDeclaration(Node):
     @property
@@ -52,6 +51,9 @@ class FunctionDeclaration(Node):
         return self.transpile_definition()
 
     def transpile_definition(self, is_definition = False):
+        if self.transpiler.context.in_block:
+            self.transpiler.warnings.error(self, "Cannot declare function outside of global scope")
+
         return_type = self.return_type.transpile() if self.return_type is not None else "void"
         function = self.transpiler.symbols.new_function(self, return_type, self.identifier.string)
 
@@ -67,6 +69,8 @@ class FunctionDeclaration(Node):
         if function is None:
             return statement.new(f"/*%s {self.identifier.string}({parameters})*/")
 
+        self.transpiler.context.function = function
+
         if not is_definition and function.declared:
             self.transpiler.warnings.error(self, "Cannot declare function twice")
 
@@ -76,6 +80,8 @@ class FunctionDeclaration(Node):
 
         if is_definition:
             function.define()
+        else:
+            self.transpiler.context.function = None
 
         return statement.new(f"%s {function.c_name}({parameters});")
 

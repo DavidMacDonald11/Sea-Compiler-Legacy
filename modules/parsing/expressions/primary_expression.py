@@ -39,7 +39,7 @@ class NumericConstant(PrimaryNode):
         specifier = self.token.specifier
         string = self.convert_base(self.token.string)
 
-        if len(self.nodes) == 1:
+        if len(self.nodes) == 1 or self.transpiler.context.hide_imag:
             return self.transpiler.expression(f"{specifier}64", string)
 
         return self.transpiler.expression("c64", f"{string}j")
@@ -110,7 +110,7 @@ class Identifier(PrimaryNode):
         expression = var.access(self, self.transpiler.expression())
         expression.identifiers += [name]
 
-        if var.s_type in ("imag32", "imag64", "imag"):
+        if var.s_type in ("imag32", "imag64", "imag") and not self.transpiler.context.hide_imag:
             return expression.new("(%s * 1.0j)")
 
         return expression
