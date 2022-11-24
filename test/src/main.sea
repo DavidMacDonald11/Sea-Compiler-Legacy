@@ -1,11 +1,10 @@
-fun add(invar int &, invar int &) -> int
+fun add(int &, int &) -> int
 
 fun main() -> int:
-    int a, b, c, d = [2, 4, 6, 3]
-
+    invar int a, b, c, d = [2, 4, 6, 3]
     cprint(add(&a, &b) + add(&c, &d) * 1i)
 
     return 0
 
-fun add(invar int &a, invar int &b) -> int:
+fun add(int &a, int &b) -> int:
     return a + b

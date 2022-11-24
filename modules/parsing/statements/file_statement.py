@@ -20,3 +20,5 @@ class FileStatement(Node):
     def transpile(self):
         for statement in self.statements:
             statement.transpile()
+
+        self.transpiler.symbols.verify_called_functions()

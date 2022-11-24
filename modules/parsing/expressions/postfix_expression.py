@@ -88,7 +88,7 @@ class CallExpression(PostfixExpression):
         function = self.transpiler.symbols.at(self, name)
 
         if isinstance(function, Function):
-            arguments = function.compare_parameters(self, self.nodes[1])
+            arguments = function.call(self, self.nodes[1])
             e_type = TYPE_MAP[function.return_type][0] if function.return_type is not None else ""
             return self.transpiler.expression("", f"{function.c_name}({arguments})").cast(e_type)
 

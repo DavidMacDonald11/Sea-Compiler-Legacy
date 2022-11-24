@@ -10,7 +10,6 @@ from ..node import Node
 
 # TODO implement function overloading
 # TODO improve mismatching type error
-# TODO verify called function is defined eventually
 
 class FunctionDeclaration(Node):
     @property

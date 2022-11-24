@@ -28,6 +28,14 @@ class SymbolTable:
 
         return self.parent.safe_at(node, key) if self.parent is not None else None
 
+    def verify_called_functions(self):
+        for name, symbol in self.symbols.items():
+            print(symbol.caller if isinstance(symbol, Function) else "")
+
+            if isinstance(symbol, Function) and symbol.caller is not None and not symbol.defined:
+                message = f"Called function '{name}' has no definition"
+                symbol.caller.transpiler.warnings.error(symbol.caller, message)
+
     def _new_identifier(self, cls, node, s_type, name):
         if name in self.symbols:
             message = f"Cannot declare identifier '{name}' twice."
@@ -148,6 +156,7 @@ class Function(Identifier):
     def __init__(self, s_type, name, table_number):
         self.declared = False
         self.defined = False
+        self.caller = None
         self.parameters = []
         self.return_type = None
         super().__init__(s_type, name, table_number)
@@ -177,7 +186,9 @@ class Function(Identifier):
                 node.transpiler.warnings.error(node, message)
                 return
 
-    def compare_parameters(self, node, arguments):
+    def call(self, node, arguments):
+        self.caller = self.caller or node
+
         arg_count = 0 if arguments is None else len(arguments.arguments)
         param_count = len(self.parameters)
 
