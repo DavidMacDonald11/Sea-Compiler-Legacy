@@ -139,11 +139,20 @@ class AssignmentList(Node):
             prefix = new_prefix if prefix is None else prefix.new(f"%s\n{new_prefix}")
 
             if statement is None:
-                statement = result.new(f"{a_list.indent}%s")
-            else:
-                statement = statement.new(f"%s;/*%e*/\n{a_list.indent}{result}")
+                if a_list.c_type is not None:
+                    result.new(f"{a_list.indent}%s")
 
-        return statement if prefix is None else prefix.new(f"%s\n{statement}")
+                statement = result
+            else:
+                if prefix is not None:
+                    statement.new(f"{a_list.indent}%s")
+
+                statement.new(f"%s;/*%e*/\n{a_list.indent}{result}")
+
+        statement = statement if prefix is None else prefix.new(f"%s\n{statement}")
+        statement.newline = True
+
+        return statement
 
     def transpile(self):
         count = len(self.identifiers)
@@ -189,7 +198,7 @@ class AssignmentList(Node):
                     expression.owners[1] = identifier
                     self.check(expression)
 
-                expression = expression.new(f"{self.c_type}{'*' if is_ref else ''} %s")
+                expression.new(f"{self.c_type}{'*' if is_ref else ''} %s")
 
         return prefix, expression
 

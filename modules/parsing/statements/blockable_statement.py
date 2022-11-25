@@ -23,7 +23,12 @@ class BlockableStatement(Node):
         return None
 
     def transpile(self):
-        return self.statement.transpile().new(f"{self.indent}%s")
+        statement = self.statement.transpile().new(f"{self.indent}%s;")
+
+        if isinstance(self.statement, ReturnStatement):
+            statement.new("%s/*%e*/")
+
+        return statement
 
 class BlockableStatementComponent(Node):
     @classmethod
@@ -105,7 +110,9 @@ class ReturnStatement(Node):
 
         function = self.transpiler.context.function
         function.returned = True
+
         func = self.transpiler.expression(function.e_type)
+        statement.cast(func.e_type)
 
         if self.expression is None:
             if func.e_type == "":

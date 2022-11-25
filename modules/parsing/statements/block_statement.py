@@ -58,9 +58,9 @@ class BlockStatement(Node):
         block = self.statements[0].transpile().new(f"\n{self.indent[:-1]}{{\n%s")
 
         for statement in self.statements[1:]:
-            block = block.new(f"%s;\n{statement.transpile()}")
+            block = block.new(f"%s\n{statement.transpile()}")
 
         self.transpiler.pop_symbol_table()
         self.transpiler.context.blocks -= 1
 
-        return block.new(f"%s;\n{self.indent}}}")
+        return block.new(f"%s\n{self.indent}}}\n")

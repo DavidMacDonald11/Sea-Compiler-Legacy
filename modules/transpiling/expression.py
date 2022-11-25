@@ -12,9 +12,10 @@ class Expression:
         self.owners = [None, None]
         self.identifiers = []
         self.is_invar = False
+        self.newline = False
 
     def __repr__(self):
-        return self.string
+        return self.string + ("\n" if self.newline else "")
 
     def copy(self):
         expression = Expression(self.e_type, self.string)
