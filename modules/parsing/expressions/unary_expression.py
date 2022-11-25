@@ -122,6 +122,9 @@ class OwnershipExpression(UnaryExpression):
         name = self.expression.token.string
         identifier = self.transpiler.symbols.at(self, name)
 
+        if identifier is None:
+            return expression.new("/*%s*/")
+
         expression.is_invar = isinstance(identifier, Invariable)
         expression.owners[0] = identifier
         identifier.is_transfered = operator == "$"

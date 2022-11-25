@@ -1,5 +1,4 @@
 from ..expressions.expression import Expression
-from ..expressions.unary_expression import OwnershipExpression
 from ..node import Node
 
 class ExpressionStatement(Node):
@@ -19,8 +18,10 @@ class ExpressionStatement(Node):
         return cls(expression)
 
     def transpile(self):
-        if isinstance(self.expression, OwnershipExpression):
-            message = "Must assign identifier to result of ownership expression"
+        expression = self.expression.transpile()
+
+        if expression.ownership is not None:
+            message = "Must assign result of ownership expression to an identifier"
             self.transpiler.warnings.error(self, message)
 
-        return self.expression.transpile()
+        return expression

@@ -19,6 +19,9 @@ class InvariableDefinition(IdentifierDefinition):
         owner1 = expression.owners[0]
         owner2 = expression.owners[1]
 
+        if None in (owner1, owner2):
+            return
+
         if owner1.table_number != owner2.table_number and expression.ownership == "$":
             message = "Cannot transfer ownership into lower-scope identifier"
             self.transpiler.warnings.error(self, message)

@@ -8,7 +8,7 @@ class Function(Identifier):
 
     @property
     def e_type(self):
-        return TYPE_MAP[self.return_type][0] if self.return_type is not None else ""
+        return TYPE_MAP[self.return_type[1]][0] if self.return_type is not None else ""
 
     def __init__(self, s_type, name, table_number):
         self.declared = False
@@ -57,10 +57,14 @@ class Function(Identifier):
         if arguments is None or arg_count != param_count:
             return ""
 
-        return arguments.transpile_parameters(self.parameters)
+        args = arguments.transpile_parameters(self.parameters)
+        expression = node.transpiler.expression(self.e_type, f"{self.c_name}({args})")
+
+        return self.set_expression(expression, called = True)
 
     def set_return_type(self, node, return_type):
-        return_type = return_type.token.string if return_type is not None else None
+        if return_type is not None:
+            return_type = return_type.components
 
         if not self.declared:
             self.return_type = return_type
@@ -69,3 +73,27 @@ class Function(Identifier):
         if self.return_type != return_type:
             message = "Function definition return type conflicts with previous function declaration"
             node.transpiler.warnings.error(node, message)
+
+    def return_expression(self, node):
+        self.returned = True
+        return self.set_expression(node.transpiler.expression(self.e_type))
+
+    def set_expression(self, expression, called = False):
+        if self.return_type is None:
+            if self.e_type in ("g64", "gmax"):
+                expression.new("(%s * 1.0j)")
+
+            return expression
+
+        qualifier, _, borrow = self.return_type
+        expression.ownership = borrow
+
+        if called:
+            expression.is_invar = qualifier != "var" and borrow is not None
+        else:
+            expression.is_invar = qualifier == "invar" or qualifier is None and borrow is not None
+
+        if self.e_type in ("g64", "gmax") and borrow is None:
+            expression.new("(%s * 1.0j)")
+
+        return expression

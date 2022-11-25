@@ -7,6 +7,7 @@ from ..node import Node
 # TODO improve mismatching type errors
 # TODO verify returns from all branches
 # TODO add varargs
+# TODO check local var ownership return
 
 class FunctionDeclaration(Node):
     @property
@@ -37,13 +38,7 @@ class FunctionDeclaration(Node):
         parameters = FunctionParameterList.construct()
         cls.parser.expecting_has(")")
 
-        if cls.parser.next.has("->"):
-            cls.parser.take().kind = "Punctuator"
-            return_type = TypeKeyword.construct()
-        else:
-            return_type = None
-
-        return cls(identifier, parameters, return_type)
+        return cls(identifier, parameters, FunctionReturnType.construct())
 
     def transpile(self):
         return self.transpile_definition()
@@ -193,3 +188,50 @@ class FunctionParameter(Node):
         keyword = self.type_keyword.token.string
 
         return qualifier, keyword, borrow
+
+class FunctionReturnType(Node):
+    @property
+    def nodes(self) -> list:
+        nodes = [self.keyword]
+
+        if self.qualifier is not None:
+            nodes = [self.qualifier, *nodes]
+
+        if self.borrow is not None:
+            nodes += [self.borrow]
+
+        return nodes
+
+    @property
+    def components(self):
+        components = [self.keyword.token.string]
+        components = [self.qualifier.string if self.qualifier is not None else None, *components]
+        components += [self.borrow.string] if self.borrow is not None else [None]
+
+        return tuple(components)
+
+    def __init__(self, qualifier, keyword, borrow):
+        self.qualifier = qualifier
+        self.keyword = keyword
+        self.borrow = borrow
+
+    @classmethod
+    def construct(cls):
+        if not cls.parser.next.has("->"):
+            return None
+
+        cls.parser.take().kind = "Punctuator"
+
+        qualifier = cls.parser.take() if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS) else None
+        keyword = TypeKeyword.construct()
+        borrow = cls.parser.take() if cls.parser.next.has("$") else None
+
+        return cls(qualifier, keyword, borrow)
+
+    def transpile(self):
+        statement = self.keyword.transpile()
+
+        if self.borrow is not None:
+            statement.new("%s*")
+
+        return statement

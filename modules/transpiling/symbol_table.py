@@ -64,4 +64,7 @@ class SymbolTable:
             if not function.defined:
                 return function
 
+            node.transpiler.warnings.error(node, f"Cannot redefine function '{name}'")
+            return None
+
         return self._new_identifier(Function, node, s_type, name)

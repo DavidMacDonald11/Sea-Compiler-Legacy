@@ -109,36 +109,54 @@ class ReturnStatement(Node):
             return statement.new(f"/*%s {self.expression.transpile()}*/")
 
         function = self.transpiler.context.function
-        function.returned = True
+        func = function.return_expression(self)
+        f_kind = self.expression_kind(func)
 
-        func = self.transpiler.expression(function.e_type)
-        statement.cast(func.e_type)
+        return self.check_return_kinds(statement.cast(func.e_type), func, f_kind)
 
-        if self.expression is None:
-            if func.e_type == "":
-                return statement
-
-            self.transpiler.warnings.error(self, f"Function must return {func.e_type}")
-            return statement.new("/*%s*/")
-
-        self.transpiler.context.in_return = True
-        expression = self.expression.transpile()
-
-        if function.e_type not in ("c64", "cmax"):
-            expression.drop_imaginary(self)
-
-        self.transpiler.context.in_return = False
-
-        statement = statement.new(f"%s {expression}")
+    def check_return_kinds(self, statement, func, f_kind):
+        statement = self.check_missing_return(statement, func, f_kind)
+        statement, expression = self.transpile_expression(statement, func)
 
         if func.e_type == "":
             self.transpiler.warnings.error(self, "Function should not return anything")
             return statement.new("/*%s*/")
 
         e_type = self.transpiler.expression.resolve(expression, func).e_type
+        matches_ownership = expression.ownership == func.ownership
+        matches_invar = not expression.is_invar or func.is_invar
 
-        if e_type == func.e_type:
+        if e_type == func.e_type and matches_ownership and matches_invar:
             return statement
 
-        self.transpiler.warnings.error(self, f"Function returns {func.e_type}; found {e_type}")
+        e_kind = self.expression_kind(expression.cast(e_type))
+        message = f"Function returns {f_kind}; found {e_kind}"
+        self.transpiler.warnings.error(self, message)
+
         return statement.new("/*%s*/")
+
+    def check_missing_return(self, statement, func, f_kind):
+        if self.expression is not None or func.e_type == "":
+            return statement
+
+        self.transpiler.warnings.error(self, f"Function must return {f_kind}")
+        return statement.new("/*%s*/")
+
+    def transpile_expression(self, statement, func):
+        self.transpiler.context.in_return = True
+        expression = self.expression.transpile()
+
+        if func.e_type not in ("c64", "cmax"):
+            expression.drop_imaginary(self)
+
+        self.transpiler.context.in_return = False
+
+        statement.new(f"%s {expression}")
+        return statement, expression
+
+    def expression_kind(self, expression):
+        e_qualifier = "invar" if expression.is_invar else "var"
+        e_borrow = expression.ownership
+        e_borrow = "ownership" if e_borrow == "$" else "borrow" if e_borrow == "&" else "value"
+
+        return f"{e_qualifier} {expression.e_type} {e_borrow}"

@@ -101,15 +101,7 @@ class CallExpression(PostfixExpression):
 
             return self.transpiler.expression("", f"/*{self.expression.transpile()}(...)*/")
 
-        arguments = function.call(self, self.arguments)
-        c_name, e_type = function.c_name, function.e_type
-
-        expression = self.transpiler.expression("", f"{c_name}({arguments})").cast(e_type)
-
-        if e_type in ("g64", "gmax"):
-            expression.new("(%s * 1.0j)")
-
-        return expression
+        return function.call(self, self.arguments)
 
 class ArgumentExpressionList(Node):
     @property

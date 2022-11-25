@@ -1,24 +1,10 @@
-fun compose(real &a, imag &b) -> cplex:
-    return a + b
-
-fun Im(cplex &c) -> imag:
-    return c as imag
-
-fun Re(cplex &c) -> real:
-    return c as real
+fun inc(var imag &a):
+    a += 2b.1i
 
 fun main() -> int:
-    real a = 1
-    imag a2 = 2i
-    imag b = $a2
+    var imag num = 5i
 
-    cplex c = compose(&a, &b)
-
-    cprint(c)
-    cprint(Im(&c))
-    cprint(Re(&c))
-
-    nat n1, n2 = 5, 6
-    n1, n2 = n2, n1
+    inc(&num)
+    cprint(num)
 
     return 0
