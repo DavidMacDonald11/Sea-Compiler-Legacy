@@ -42,6 +42,7 @@ def compile_file(options, file_pair):
 
         output_debug(options, file_pair[0], lexer, parser, transpiler)
         print(warnings)
+        sys.exit(len(warnings))
 
 def output_debug(options, name, lexer, parser, transpiler):
     if "d" not in options:

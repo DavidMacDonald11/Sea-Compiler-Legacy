@@ -184,7 +184,10 @@ fi
 source venv/bin/activate
 eval cd "$working"
 
-eval "$python" "$main" "$options" "$mode" "$out_dir" "${files[*]@Q}"
+if ! eval "$python" "$main" "$options" "$mode" "$out_dir" "${files[*]@Q}"
+then
+    exit "$?"
+fi
 
 if [[ "$callback" != "" || "$mode" == "t" ]]
 then
