@@ -16,9 +16,9 @@ FLOAT_MAP = {
     "real32": ("f64", "f32"),
     "real64": ("f64", "f64"),
     "real": ("fmax", "fmax"),
-    "imag32": ("c64", "f32"),
-    "imag64": ("c64", "f64"),
-    "imag": ("cmax", "fmax"),
+    "imag32": ("g64", "f32"),
+    "imag64": ("g64", "g64"),
+    "imag": ("gmax", "gmax"),
     "cplex32": ("c64", "c32"),
     "cplex64": ("c64", "c64"),
     "cplex": ("cmax", "cmax")

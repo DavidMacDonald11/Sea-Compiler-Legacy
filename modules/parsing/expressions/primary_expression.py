@@ -39,10 +39,10 @@ class NumericConstant(PrimaryNode):
         specifier = self.token.specifier
         string = self.convert_base(self.token.string)
 
-        if len(self.nodes) == 1 or self.transpiler.context.hide_imag:
+        if len(self.nodes) == 1:
             return self.transpiler.expression(f"{specifier}64", string)
 
-        return self.transpiler.expression("c64", f"{string}j")
+        return self.transpiler.expression("g64", f"{string}j")
 
     def convert_base(self, string):
         if "e" not in string:
@@ -110,7 +110,12 @@ class Identifier(PrimaryNode):
         expression = var.access(self, self.transpiler.expression())
         expression.identifiers += [name]
 
-        if var.s_type in ("imag32", "imag64", "imag") and not self.transpiler.context.hide_imag:
+        if var.s_type in ("imag32", "imag64", "imag"):
+            expression.cast("g64" if var.s_type in ("imag32", "imag64") else "gmax")
+
+            if self.transpiler.context.in_ownership:
+                return expression
+
             return expression.new("(%s * 1.0j)")
 
         return expression
@@ -195,10 +200,10 @@ class NormExpression(ParenthesesExpression):
             case "f64":
                 self.transpiler.include("math")
                 return expression.new("(fabs(%s))")
-            case "c64":
+            case "g64"|"c64":
                 self.transpiler.include("complex")
                 return expression.new("(cabs(%s))").cast("f64")
-            case "fmax"|"cmax":
+            case "fmax"|"gmax"|"cmax":
                 self.transpiler.include("complex")
                 return expression.new("(cabsl(%s))").cast("fmax")
 

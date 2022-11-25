@@ -22,11 +22,14 @@ class ExponentialExpression(BinaryOperation):
                 self.transpiler.include("math")
                 func = "powl"
                 cast = "" if result.e_type == "fmax" else f"({result.c_type})"
-            case "c64":
+            case "g64"|"c64":
                 self.transpiler.include("complex")
                 func = "cpow"
-            case "cmax":
+            case "gmax"|"cmax":
                 self.transpiler.include("tgmath")
                 func = "cpowl"
+
+        if result.e_type[0] == "g":
+            result.cast(f"c{result.e_type[1:]}")
 
         return result.new(f"({cast}{func}({left}, {right}))")

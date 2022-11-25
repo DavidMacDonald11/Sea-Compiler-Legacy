@@ -59,7 +59,7 @@ class BitwiseNotExpression(UnaryExpression):
     def transpile(self):
         expression = self.expression.transpile().operate(self).cast_up()
 
-        if expression.e_type not in ("f64", "fmax", "c64", "cmax"):
+        if expression.e_type not in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
             return expression.new("~%s")
 
         message = "Cannot perform bitwise operation on floating type"
@@ -78,10 +78,10 @@ class RoundExpression(UnaryExpression):
         self.transpiler.include("math")
         func = {"~": "round", "~>": "ceil", "<~": "floor"}[self.operator.string]
 
-        if expression.e_type not in ("f64", "c64", "cmax"):
+        if expression.e_type not in ("f64", "g64", "gmax", "c64", "cmax"):
             func += "l"
 
-        if expression.e_type in ("c64", "cmax"):
+        if expression.e_type in ("g64", "gmax", "c64", "cmax"):
             self.transpiler.include("complex")
             func = type(self).write_func(self.transpiler, func, expression)
 
@@ -94,21 +94,22 @@ class RoundExpression(UnaryExpression):
         if sea_func in cls.wrote: return sea_func
         cls.wrote += [sea_func]
 
-        long = "l" if expression.e_type == "cmax" else ""
-        num_re = f"creal{long}(num)"
-        num_im = f"cimag{long}(num)"
+        e_type, c_type = expression.e_type, expression.c_type
 
-        e_type = expression.c_type
+        long = "l" if e_type in ("gmax", "cmax") else ""
+        real_comp = "" if e_type in ("g64", "gmax") else f"{func}{long}(creal{long}(num)) + "
 
         transpiler.header("\n".join((
-            f"{e_type} {sea_func}({e_type} num)", "{",
-            f"\treturn {func}{long}({num_re}) + {func}{long}({num_im}) * 1.0j;", "}\n"
+            f"{c_type} {sea_func}({c_type} num)", "{",
+            f"\treturn {real_comp}{func}{long}(cimag{long}(num)) * 1.0j;", "}\n"
         )))
 
         return sea_func
 
 class OwnershipExpression(UnaryExpression):
     def transpile(self):
+        self.transpiler.context.in_ownership = True
+
         operator = self.operator.string
         expression = self.expression.transpile()
         expression.ownership = operator
@@ -125,4 +126,5 @@ class OwnershipExpression(UnaryExpression):
         expression.owners[0] = identifier
         identifier.is_transfered = operator == "$"
 
+        self.transpiler.context.in_ownership = False
         return expression.new("&%s")

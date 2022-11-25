@@ -44,6 +44,8 @@ class Transpiler:
         self.alias("float", "__sea_type_f32__")
         self.alias("double", "__sea_type_f64__")
         self.alias("long double", "__sea_type_fmax__")
+        self.alias("double", "__sea_type_g64__")
+        self.alias("long double", "__sea_type_gmax__")
         self.alias("_Complex float", "__sea_type_c32__")
         self.alias("_Complex double", "__sea_type_c64__")
         self.alias("_Complex long double", "__sea_type_cmax__")

@@ -28,7 +28,8 @@ class CastExpression(Node):
         if keyword == "bool":
             return expression.new("%s" if expression.e_type == "bool" else "(%s != 0)").cast("bool")
 
-        e_type, c_type = self.type_keyword.transpile()
+        type_keyword = self.type_keyword.transpile()
+        e_type, c_type = type_keyword.e_type, type_keyword.c_type
 
         if keyword not in ("imag32", "imag64", "imag"):
             return expression.new(f"({c_type})(%s)").cast(e_type)

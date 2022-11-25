@@ -48,7 +48,7 @@ class FactorialExpression(PostfixExpression):
     def transpile(self):
         expression = self.expression.transpile().operate(self)
 
-        if expression.e_type in ("f64", "fmax", "c64", "cmax"):
+        if expression.e_type in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
             self.transpiler.warnings.error(self, "Cannot use factorial on floating type")
             return expression.new("%s/*!*/")
 
@@ -79,6 +79,14 @@ class TestExpression(PostfixExpression):
         return expression.new("%s" if expression.e_type == "bool" else "(%s != 0)").cast("bool")
 
 class CallExpression(PostfixExpression):
+    @property
+    def nodes(self) -> list:
+        return [self.expression] if self.arguments is None else [self.expression, self.arguments]
+
+    def __init__(self, expression, arguments):
+        self.arguments = arguments
+        super().__init__(expression, arguments)
+
     def transpile(self):
         if not isinstance(self.expression, Identifier):
             self.transpiler.warnings.error(self, "Cannot call a non-function")
@@ -93,12 +101,15 @@ class CallExpression(PostfixExpression):
 
             return self.transpiler.expression("", f"/*{self.expression.transpile()}(...)*/")
 
-        self.transpiler.context.calls += 1
-        arguments = function.call(self, self.nodes[1])
+        arguments = function.call(self, self.arguments)
         c_name, e_type = function.c_name, function.e_type
-        self.transpiler.context.calls -= 1
 
-        return self.transpiler.expression("", f"{c_name}({arguments})").cast(e_type)
+        expression = self.transpiler.expression("", f"{c_name}({arguments})").cast(e_type)
+
+        if e_type in ("g64", "gmax"):
+            expression.new("(%s * 1.0j)")
+
+        return expression
 
 class ArgumentExpressionList(Node):
     @property
@@ -137,6 +148,9 @@ class ArgumentExpressionList(Node):
             self.compare_borrow(i, p_borrow, a_borrow)
             self.check_var_borrow(i, a_borrow, p_borrow, a_qualifier, p_qualifier)
             self.compare_types(i, arg, p_keyword)
+
+            if p_keyword not in ("c64", "cmax"):
+                arg.drop_imaginary(self)
 
             statement = arg if statement is None else statement.new(f"%s, {arg}")
         return statement

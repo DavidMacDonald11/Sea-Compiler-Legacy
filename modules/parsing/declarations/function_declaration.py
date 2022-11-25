@@ -2,13 +2,11 @@ from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .type_keyword import TypeKeyword
 from ..node import Node
 
-# TODO imag args should drop j suffix
-
 # TODO allow ownership return value/type
 # TODO implement function overloading or default args
-# TODO improve mismatching type error
+# TODO improve mismatching type errors
 # TODO verify returns from all branches
-# TODO verify imag expressions (if return imag, change call)
+# TODO add varargs
 
 class FunctionDeclaration(Node):
     @property

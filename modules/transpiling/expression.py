@@ -55,15 +55,26 @@ class Expression:
 
         return self
 
+    def drop_imaginary(self, node):
+        if self.e_type[0] != "g" or self.ownership is not None:
+            return self
+
+        node.transpiler.include("complex")
+        return self.new(f"cimag{'' if self.e_type == 'g64' else 'l'}(%s)")
+
     @classmethod
     def resolve(cls, left, right):
         e_type1, e_type2 = left.e_type, right.e_type
         e_type = e_type1 if POINTS[e_type1] > POINTS[e_type2] else e_type2
 
+        if e_type1[0] != e_type2[0] == "g" or e_type2[0] != e_type2[0] == "g":
+            e_type = f"c{e_type[1:]}"
+
         expression = cls(e_type)
         expression.identifiers = left.identifiers + right.identifiers
 
         return expression
+
 
 POINTS = {
     "": -1,
@@ -74,6 +85,8 @@ POINTS = {
     "imax": 2.5,
     "f64": 3,
     "fmax": 3.5,
+    "g64": 3,
+    "gmax": 3.5,
     "c64": 4,
     "cmax": 4.5
 }

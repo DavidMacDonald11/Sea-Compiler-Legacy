@@ -19,9 +19,12 @@ class RemainderExpression(BinaryOperation):
             func = "fmod" if result.e_type else "fmodl"
             return result.new(f"{func}({left}, {right})")
 
-        if result.e_type in ("c64", "cmax"):
+        if result.e_type in ("g64", "gmax", "c64", "cmax"):
             self.transpiler.include("complex")
             self.transpiler.include("math")
+
+            if result.e_type[0] == "g":
+                result.e_type = f"c{result.e_type[1:]}"
 
             func = self.write_func(result)
             return result.new(f"{func}({left}, {right})")
@@ -34,7 +37,7 @@ class RemainderExpression(BinaryOperation):
         if func in type(self).wrote: return func
         type(self).wrote += [func]
 
-        round_func = RoundExpression.write_func(self.transpiler, "floor", expression.e_type)
+        round_func = RoundExpression.write_func(self.transpiler, "floor", expression)
         e_type = expression.c_type
 
         self.transpiler.header("\n".join((

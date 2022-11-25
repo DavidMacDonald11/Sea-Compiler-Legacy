@@ -116,6 +116,10 @@ class ReturnStatement(Node):
 
         self.transpiler.context.in_return = True
         expression = self.expression.transpile()
+
+        if function.e_type not in ("c64", "cmax"):
+            expression.drop_imaginary(self)
+
         self.transpiler.context.in_return = False
 
         statement = statement.new(f"%s {expression}")

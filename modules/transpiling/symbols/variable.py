@@ -44,7 +44,4 @@ class Variable(Identifier):
         if self.s_type not in ("imag32", "imag64", "imag"):
             return expression
 
-        suffix = "f" if self.s_type == "imag32" else ("l" if self.s_type == "imag" else "")
-        node.transpiler.include("complex")
-
-        return expression.new(f"cimag{suffix}(%s)")
+        return expression.drop_imaginary(node)
