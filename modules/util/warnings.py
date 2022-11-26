@@ -11,7 +11,7 @@ class Warnings:
         return "\n".join(self.warnings + self.errors) + self.failure
 
     def __len__(self):
-        return len(self.errors) + (int(self.failure == ""))
+        return len(self.errors) + (int(self.failure != ""))
 
     def _add(self, component, message, label):
         string = ""
