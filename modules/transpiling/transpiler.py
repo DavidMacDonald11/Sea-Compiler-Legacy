@@ -28,8 +28,10 @@ class Transpiler:
         self.include("stdio")
 
         self.file.write("\n".join((
-            "\nvoid __sea_fun_cprint__(__sea_type_cmax__ c)", "{",
-            '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}",
+            "\nvoid __sea_fun_print__(__sea_type_str__ s)", "{",
+            '\tprintf("%s", s);', "}\n",
+            "void __sea_fun_cprint__(__sea_type_cmax__ c)", "{",
+            '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}\n",
             f"{self.lines}int main() {{ return __sea_fun_main__(); }}\n"
         )))
 
@@ -56,12 +58,17 @@ class Transpiler:
 
         self.alias("intmax_t", "__sea_type_imax__")
         self.alias("uintmax_t", "__sea_type_umax__")
+        self.alias("char *", "__sea_type_str__")
 
         self.header()
 
         cprint = self.symbols.new_function(None, "void", "cprint")
         cprint.parameters = [("invar", "cplex", None)]
         cprint.declared = cprint.defined = True
+
+        sprint = self.symbols.new_function(None, "void", "print")
+        sprint.parameters = [("invar", "str", None)]
+        sprint.declared = sprint.defined = True
 
     def include(self, header):
         if header not in self.includes:

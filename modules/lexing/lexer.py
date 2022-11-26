@@ -54,7 +54,6 @@ class Lexer:
 
         self.tokens = tokens
 
-
     def make_token(self):
         self.check_spaces()
 
@@ -70,6 +69,8 @@ class Lexer:
                 self.make_numeric_constant()
             case "'":
                 self.make_character_constant()
+            case '"':
+                self.make_string_constant()
             case token.IDENTIFIER_START_SYMBOLS:
                 self.make_identifier()
             case token.OPERATOR_SYMBOLS:
@@ -184,6 +185,10 @@ class Lexer:
     def make_identifier(self):
         string = self.file.take(these = token.IDENTIFIER_SYMBOLS)
 
+        if string in list(token.STRING_PREFIXES) and self.file.next == '"':
+            self.make_string_constant()
+            return
+
         if string == "__operator":
             self.file.take(these = token.OPERATOR_SYMBOLS)
             self.file.take(these = "_")
@@ -204,3 +209,58 @@ class Lexer:
             string += self.file.take(1)
 
         self.new_token("Operator")
+
+    def make_string_constant(self):
+        quotes = self.file.take(3, these = '"')
+
+        if quotes == '"""':
+            self.make_multiline_string_constant()
+            return
+
+        if quotes == '""':
+            self.new_token("StringConstant")
+            return
+
+        while True:
+            self.file.take(until = '"\n')
+
+            if self.file.next in "\n":
+                string = self.new_token("StringConstant")
+                self.warnings.error(string, "Unterminated string")
+                return
+
+            if not self.file.line.last_was_slash():
+                break
+
+            self.file.take(1)
+
+        self.file.take(1)
+        self.new_token("StringConstant")
+
+    def make_multiline_string_constant(self):
+        while True:
+            self.file.take(until = '"\n')
+
+            if self.file.next == "":
+                string = self.new_token("StringConstant")
+                self.warnings.error(string, "Unterminated multiline string")
+                return
+
+            slash = self.file.line.last_was_slash()
+
+            if self.file.next == "\n":
+                line = self.file.line
+
+                if not slash:
+                    self.file.take()
+
+                self.new_token("StringConstant", line)
+                continue
+
+            if slash and self.file.next == '"':
+                self.file.take(1)
+                continue
+
+            if self.file.take(3, these = '"') == '"""':
+                self.new_token("StringConstant")
+                return

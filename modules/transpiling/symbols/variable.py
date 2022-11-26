@@ -28,14 +28,20 @@ class Variable(Identifier):
         return expression.new("/*%s*/")
 
     def assign(self, node, expression):
-        if self.is_transfered:
-            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
-
         if not self.initialized:
             self.initialized = True
             self.ownership = expression.ownership
 
-        if self.s_type == "bool" and expression.e_type not in "bool":
+        if self.is_transfered:
+            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
+
+        if self.s_type == "str" and expression.e_type != "str":
+            node.transpiler.warnings.error(node, "Cannot assign non-str value to str identifeir")
+
+        if self.s_type != "str" and expression.e_type == "str":
+            node.transpiler.warnings.error(node, "Cannot assign str value to non-str identifier")
+
+        if self.s_type == "bool" and expression.e_type != "bool":
             node.transpiler.warnings.error(node, "".join((
                 "Cannot assign non-bool value to bool identifier. ",
                 "(Consider using the '?' operator to get boolean value)"

@@ -13,7 +13,7 @@
 `_type-keyword_`: one of
 {tab} `*int8*` `*int16*` `*int32*` `*int64*` `*int*`
 {tab} `*nat8*` `*nat16*` `*nat32*` `*nat64*` `*nat*`
-{tab} `*bool*` `*char*`
+{tab} `*bool*` `*char*` `*str*`
 {tab} `*real32*` `*real64*` `*real*`
 {tab} `*imag32*` `*imag64*` `*imag*`
 {tab} `*cplex32*` `*cplex64*` `*cplex*`

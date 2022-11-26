@@ -1,3 +1,4 @@
+import re
 from lexing.token import PRIMARY_KEYWORDS
 from ..node import Node, PrimaryNode
 
@@ -9,6 +10,9 @@ class PrimaryExpression(Node):
 
         if cls.parser.next.of("CharacterConstant"):
             return CharacterConstant.construct()
+
+        if cls.parser.next.of("StringConstant"):
+            return StringConstant.construct()
 
         if cls.parser.next.of("Identifier"):
             return Identifier.construct()
@@ -98,6 +102,37 @@ class NumericConstant(PrimaryNode):
 class CharacterConstant(PrimaryNode):
     def transpile(self):
         return self.transpiler.expression("u64", self.token.string)
+
+class StringConstant(PrimaryNode):
+    @classmethod
+    def construct(cls):
+        tokens = [cls.parser.take()]
+
+        if '"""' not in tokens[0].string:
+            return cls(*tokens)
+
+        while '"""' not in cls.parser.next.string and cls.parser.next.of("StringConstant"):
+            tokens += [cls.parser.take()]
+
+        return cls(*tokens, cls.parser.take())
+
+    # TODO Fix \\ before newline lexing
+
+    def transpile(self):
+        prefix = self.token.string[0]
+        prefix = "" if prefix == '"' else prefix
+
+        if prefix != "":
+            raise NotImplementedError("String prefixes cannot be transpiled (yet)")
+
+        string = self.token.string
+        if len(self.tokens) > 0:
+            string = (string + "".join(t.string for t in self.tokens)).replace('"""', '"')
+            string = re.sub(r"(?<!\\)\\n", " \\\n", string)
+            string = re.sub(r"(?<!\\)\\t", "\t", string)
+
+        string = string.replace(r"\\n", r"\n").replace(r"\\t", r"\t")
+        return self.transpiler.expression("str", string)
 
 class Identifier(PrimaryNode):
     def transpile(self):

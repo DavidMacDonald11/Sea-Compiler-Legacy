@@ -144,7 +144,7 @@ INT_TYPE_KEYWORDS = {"int"} | {f"int{2 ** x}" for x in range(3, 7)}
 NAT_TYPE_KEYWORDS = {"bool", "char"} | {"nat"} | {f"nat{2 ** x}" for x in range(3, 7)}
 FLOAT_TYPE_KEYWORDS = {"real", "imag", "cplex"}
 FLOAT_TYPE_KEYWORDS |= {f"{t}{2 ** x}" for x in range(5, 7) for t in FLOAT_TYPE_KEYWORDS}
-TYPE_KEYWORDS = INT_TYPE_KEYWORDS | NAT_TYPE_KEYWORDS | FLOAT_TYPE_KEYWORDS
+TYPE_KEYWORDS = INT_TYPE_KEYWORDS | NAT_TYPE_KEYWORDS | FLOAT_TYPE_KEYWORDS | {"str"}
 TYPE_MODIFIER_KEYWORDS = {"var", "invar"}
 KEYWORDS = PRIMARY_KEYWORDS | TYPE_KEYWORDS | TYPE_MODIFIER_KEYWORDS | {
     "mod", "not", "and", "or", "as",
@@ -157,6 +157,7 @@ NUMERIC_START_SYMBOLS = "0123456789."
 NUMERIC_SYMBOLS = NUMERIC_START_SYMBOLS + ascii_uppercase + "be+-"
 IDENTIFIER_START_SYMBOLS = f"{ascii_letters}_"
 IDENTIFIER_SYMBOLS = f"{IDENTIFIER_START_SYMBOLS}0123456789"
+STRING_PREFIXES = "frb"
 
 OPERATOR_FUNCS = {"__||operator||__"} | {f"__{x}operator__" for x in PREFIX_UNARY_OPERATORS}
 OPERATOR_FUNCS |= {f"__operator{x}__" for x in POSTFIX_OPERATORS}
