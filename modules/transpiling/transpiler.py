@@ -24,16 +24,11 @@ class Transpiler:
     def close(self):
         if self.file.closed: return
 
-        self.include("complex")
-        self.include("stdio")
-
-        self.file.write("\n".join((
-            "\nvoid __sea_fun_print__(__sea_type_str__ s)", "{",
-            '\tprintf("%s", s);', "}\n",
-            "void __sea_fun_cprint__(__sea_type_cmax__ c)", "{",
-            '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}\n",
-            "/* FILE CONTENTS */", f"{self.lines.strip()}", "/* FILE CONTENTS */\n",
-            "int main() { return __sea_fun_main__(); }\n"
+        self.header("\n".join((
+            "\n/* FILE CONTENTS */",
+            f"{self.lines.strip()}",
+            "/* FILE CONTENTS */\n",
+            "int main() { return __sea_fun_main__(); }"
         )))
 
         self.file.close()
@@ -63,13 +58,24 @@ class Transpiler:
 
         self.header()
 
-        cprint = self.symbols.new_function(None, "void", "cprint")
-        cprint.parameters = [("invar", "cplex", None)]
-        cprint.declared = cprint.defined = True
+        self.standard_function(None, "cprint", [("invar", "cplex", None)], "\n".join((
+            "\nvoid __sea_fun_cprint__(__sea_type_cmax__ c)", "{",
+            '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}"
+        )), ["complex", "stdio"])
 
-        sprint = self.symbols.new_function(None, "void", "print")
-        sprint.parameters = [("invar", "str", None)]
-        sprint.declared = sprint.defined = True
+        self.standard_function(None, "print", [("invar", "str", None)], "\n".join((
+            "\nvoid __sea_fun_print__(__sea_type_str__ s)", "{",
+            '\tprintf("%s", s);', "}"
+        )), ["stdio"])
+
+    def standard_function(self, r_type, name, parameters, definition, includes):
+        def define():
+            for include in includes:
+                self.include(include)
+
+            self.header(definition)
+
+        self.symbols.new_standard_function(r_type, name, parameters, define)
 
     def include(self, header):
         if header not in self.includes:

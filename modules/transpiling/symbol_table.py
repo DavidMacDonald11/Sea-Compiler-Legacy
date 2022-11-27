@@ -1,7 +1,7 @@
 from .symbols.label import Label
 from .symbols.variable import Variable
 from .symbols.invariable import Invariable
-from .symbols.function import Function
+from .symbols.function import Function, StandardFunction
 
 class SymbolTable:
     count = 0
@@ -35,7 +35,14 @@ class SymbolTable:
 
     def verify_called_functions(self):
         for name, symbol in self.symbols.items():
-            if isinstance(symbol, Function) and symbol.caller is not None and not symbol.defined:
+            if not isinstance(symbol, Function): continue
+
+            if symbol.caller is not None and not symbol.defined:
+                if isinstance(symbol, StandardFunction):
+                    symbol.define()
+                    symbol.defined = True
+                    continue
+
                 message = f"Called function '{name}' has no definition"
                 symbol.caller.transpiler.warnings.error(symbol.caller, message)
 
@@ -68,3 +75,10 @@ class SymbolTable:
             return None
 
         return self._new_identifier(Function, node, s_type, name)
+
+    def new_standard_function(self, r_type, name, parameters, define):
+        func = self._new_identifier(StandardFunction, None, None, name)
+        func.return_type = r_type
+        func.parameters = parameters
+        func.define = define
+        func.declared = True

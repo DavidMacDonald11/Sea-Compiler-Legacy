@@ -35,6 +35,9 @@ class Variable(Identifier):
         if self.is_transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
+        if expression.e_type == "":
+            node.transpiler.warnings.error(node, "Function call has no return value")
+
         if self.s_type == "str" and expression.e_type != "str":
             node.transpiler.warnings.error(node, "Cannot assign non-str value to str identifeir")
 

@@ -97,3 +97,8 @@ class Function(Identifier):
             expression.new("(%s * 1.0j)")
 
         return expression
+
+class StandardFunction(Function):
+    def __init__(self, s_type, name, table_number):
+        self.define = None
+        super().__init__(s_type, name, table_number)
