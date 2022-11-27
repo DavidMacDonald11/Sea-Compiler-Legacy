@@ -32,7 +32,8 @@ class Transpiler:
             '\tprintf("%s", s);', "}\n",
             "void __sea_fun_cprint__(__sea_type_cmax__ c)", "{",
             '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}\n",
-            f"{self.lines}int main() {{ return __sea_fun_main__(); }}\n"
+            "/* FILE CONTENTS */", f"{self.lines.strip()}", "/* FILE CONTENTS */\n",
+            "int main() { return __sea_fun_main__(); }\n"
         )))
 
         self.file.close()
