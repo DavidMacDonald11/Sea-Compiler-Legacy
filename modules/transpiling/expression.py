@@ -31,11 +31,11 @@ class Expression:
         return self
 
     def cast(self, e_type):
-        self.e_type = TYPE_MAP[e_type][0] if e_type in TYPE_MAP and e_type != "bool" else e_type
+        self.e_type = TYPE_MAP[e_type][0] if e_type in TYPE_MAP else e_type
         return self
 
     def cast_up(self):
-        self.e_type = "u64" if self.e_type == "bool" else self.e_type
+        self.e_type = "u64" if self.e_type in ("bool", "char") else self.e_type
         return self
 
     def operate(self, node):
@@ -76,10 +76,10 @@ class Expression:
 
         return expression
 
-
 POINTS = {
     "": -1,
     "bool": 0,
+    "char": .5,
     "u64": 1,
     "i64": 2,
     "umax": 2.25,

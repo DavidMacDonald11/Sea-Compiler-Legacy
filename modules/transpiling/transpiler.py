@@ -54,7 +54,9 @@ class Transpiler:
 
         self.alias("intmax_t", "__sea_type_imax__")
         self.alias("uintmax_t", "__sea_type_umax__")
-        self.alias("char *", "__sea_type_str__")
+        self.alias("__sea_type_u8__", "__sea_type_char__")
+        self.alias("__sea_type_u8__", "__sea_type_bool__")
+        self.alias("__sea_type_char__ *", "__sea_type_str__")
 
         self.header()
 

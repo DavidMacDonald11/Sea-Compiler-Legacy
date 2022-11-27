@@ -25,8 +25,8 @@ FLOAT_MAP = {
 }
 
 TYPE_MAP = INT_MAP | UINT_MAP | FLOAT_MAP | {
-    "bool": ("u64", "u8"),
-    "char": ("u64", "u8"),
+    "bool": ("bool", "u8"),
+    "char": ("char", "u8"),
     "int": ("imax", "imax"),
     "nat": ("umax", "umax"),
     "str": ("str", "str")

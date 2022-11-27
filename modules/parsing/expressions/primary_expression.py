@@ -51,7 +51,7 @@ class NumericConstant(PrimaryNode):
     def convert_base(self, string):
         if "e" not in string:
             if "b" not in string:
-                return str(int(string))
+                return str(int(string)) if self.token.specifier == "i" else str(float(string))
 
             return self.convert_to_base(*string.split("b"))
 
@@ -101,7 +101,7 @@ class NumericConstant(PrimaryNode):
 
 class CharacterConstant(PrimaryNode):
     def transpile(self):
-        return self.transpiler.expression("u64", self.token.string)
+        return self.transpiler.expression("char", self.token.string)
 
 class StringConstant(PrimaryNode):
     @classmethod
