@@ -119,8 +119,12 @@ class Token(FakeToken):
     warnings = None
 
     @cached_property
+    def raw_string(self):
+        return self.line.string[self.locale[0]:self.locale[1]]
+
+    @cached_property
     def string(self):
-        return escape_whitespace(self.line.string[self.locale[0]:self.locale[1]])
+        return escape_whitespace(self.raw_string)
 
     def __init__(self, line, kind, depth):
         self.locale = [0, 0]

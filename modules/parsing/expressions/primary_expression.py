@@ -111,12 +111,11 @@ class StringConstant(PrimaryNode):
         if '"""' not in tokens[0].string:
             return cls(*tokens)
 
-        while '"""' not in cls.parser.next.string and cls.parser.next.of("StringConstant"):
+        while cls.parser.next.of("StringConstant"):
             tokens += [cls.parser.take()]
+            if re.match(r'(?<!\\)"""', tokens[-1].string) is not None: break
 
-        return cls(*tokens, cls.parser.take())
-
-    # TODO Fix \\ before newline lexing
+        return cls(*tokens)
 
     def transpile(self):
         prefix = self.token.string[0]
@@ -125,13 +124,16 @@ class StringConstant(PrimaryNode):
         if prefix != "":
             raise NotImplementedError("String prefixes cannot be transpiled (yet)")
 
-        string = self.token.string
-        if len(self.tokens) > 0:
-            string = (string + "".join(t.string for t in self.tokens)).replace('"""', '"')
-            string = re.sub(r"(?<!\\)\\n", " \\\n", string)
-            string = re.sub(r"(?<!\\)\\t", "\t", string)
+        string = self.token.raw_string
 
-        string = string.replace(r"\\n", r"\n").replace(r"\\t", r"\t")
+        if len(self.tokens) > 0:
+            string = (string + "".join(t.raw_string for t in self.tokens))
+            string = re.sub(r'(?<!\\)"""', '"', string)
+            string = re.sub(r'(?<!\\)\\"', '"', string)
+            string = re.sub(r'(?<!^)"(?!$)', r'\"', string)
+            string = re.sub(r"\n", " \\\n", string)
+            string = re.sub(r"\t", "\t", string)
+
         return self.transpiler.expression("str", string)
 
 class Identifier(PrimaryNode):
