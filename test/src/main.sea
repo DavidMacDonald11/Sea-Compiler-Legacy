@@ -1,5 +1,11 @@
 fun main() -> int:
-    str text = "Hello World!\n"
-    print(text)
+    any value = 5i as imag
+    imag num = $value
 
+    cprint(num)
+
+    int a, b = 1, 2
+    a, b = b, a
+
+    print("\n")
     return 0

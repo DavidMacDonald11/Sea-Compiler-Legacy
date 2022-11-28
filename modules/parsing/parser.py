@@ -53,7 +53,7 @@ class Parser:
         if tab_next and indent.depth == self.indents:
             return indent
 
-        self.warnings.warn(indent, f"Expecting {self.indents} indents")
+        self.warnings.error(indent, f"Expecting {self.indents} indents")
 
     @property
     def expression(self):

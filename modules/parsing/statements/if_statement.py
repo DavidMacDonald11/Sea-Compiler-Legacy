@@ -22,13 +22,16 @@ class IfStatement(Node):
         cls.parser.expecting_has(":")
         block = BlockStatement.construct()
 
-        if cls.check_indent() is False:
+        if cls.parser.next.depth < cls.parser.indents:
             return cls(condition, block, [])
+
+        indent = cls.parser.verify_indent()
 
         elses = []
         else_if = True
 
         while else_if and cls.parser.next.has("else"):
+            indent = None
             elif_condition = None
             cls.parser.take()
 
@@ -43,21 +46,22 @@ class IfStatement(Node):
             kind = ElseIfStatement if else_if else ElseStatement
             elses += [kind(elif_condition, BlockStatement.construct(), [])]
 
-            if cls.check_indent() is False: break
+            if cls.parser.next.depth < cls.parser.indents: break
+            indent = cls.parser.verify_indent()
+
+        if indent is not None:
+            cls.parser.i -= 1
 
         return cls(condition, block, elses)
-
-    @classmethod
-    def check_indent(cls):
-        return False if cls.parser.next.depth < cls.parser.indents else cls.parser.verify_indent()
 
     def transpile(self):
         condition = self.condition.transpile().boolean(self.condition)
         block = self.block.transpile()
         statement = self.transpiler.expression("", f"if ({condition}) {block}")
 
-        for else_if in self.elses:
-            statement = statement.new(f"{self.indent}%s else {else_if.transpile()}")
+        for i, else_if in enumerate(self.elses):
+            if i != 0: statement.new(f"{self.indent}%s")
+            statement.new(f"%s {self.indent}else {else_if.transpile()}")
 
         return statement
 

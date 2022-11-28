@@ -1,4 +1,4 @@
-from .comparative_expression import ComparativeExpression
+from .type_check_expression import TypeCheckExpression
 from ..node import Node
 
 class LogicalNotExpression(Node):
@@ -13,7 +13,7 @@ class LogicalNotExpression(Node):
     @classmethod
     def construct(cls):
         if not cls.parser.next.has("not"):
-            return ComparativeExpression.construct()
+            return TypeCheckExpression.construct()
 
         keyword = cls.parser.take()
         return cls(keyword, cls.construct())

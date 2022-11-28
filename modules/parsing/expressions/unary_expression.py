@@ -1,5 +1,4 @@
 from lexing.token import PREFIX_UNARY_OPERATORS
-from transpiling.symbols.invariable import Invariable
 from .primary_expression import Identifier
 from .exponential_expression import ExponentialExpression
 from ..node import Node, PrimaryNode
@@ -125,9 +124,5 @@ class OwnershipExpression(UnaryExpression):
         if identifier is None:
             return expression.new("/*%s*/")
 
-        expression.is_invar = isinstance(identifier, Invariable)
-        expression.owners[0] = identifier
-        identifier.is_transfered = operator == "$"
-
         self.transpiler.context.in_ownership = False
-        return expression.new("&%s")
+        return identifier.transfer(self, expression, operator)

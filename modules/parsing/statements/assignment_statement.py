@@ -135,8 +135,8 @@ class AssignmentList(Node):
         prefix = None
 
         for a_list in a_lists:
-            new_prefix, result = a_list.transpile()
-            prefix = new_prefix if prefix is None else prefix.new(f"%s\n{new_prefix}")
+            result = a_list.transpile()
+            prefix = result.prefix if prefix is None else prefix.new(f"%s{result.prefix}")
 
             if statement is None:
                 if a_list.c_type is not None:
@@ -149,7 +149,7 @@ class AssignmentList(Node):
 
                 statement.new(f"%s;/*%e*/\n{a_list.indent}{result}")
 
-        statement = statement if prefix is None else prefix.new(f"%s\n{statement}")
+        statement = statement if prefix is None else prefix.new(f"%s{statement}")
         statement.newline = True
 
         return statement
@@ -170,7 +170,6 @@ class AssignmentList(Node):
 
     def transpile_identifiers(self, expression):
         temped = len(self.others) == 0
-        prefix = None
 
         for i, identifier in enumerate(self.identifiers[::-1]):
             name = identifier.token.string
@@ -179,11 +178,7 @@ class AssignmentList(Node):
             self.others += [name]
 
             if not temped:
-                old_prefix = prefix
-                temped, prefix, expression = self.handle_temporaries(expression)
-
-                if old_prefix is not None:
-                    prefix = old_prefix if prefix is None else old_prefix.new(f"%s\n{prefix}")
+                temped, expression = self.handle_temporaries(expression)
 
             if identifier is None:
                 return expression.new(f"/*{name} = */%s")
@@ -200,11 +195,11 @@ class AssignmentList(Node):
 
                 expression.new(f"{self.c_type}{'*' if is_ref else ''} %s")
 
-        return prefix, expression
+        return expression
 
     def handle_temporaries(self, expression):  # sourcery skip: use-next
         for identifier in self.others:
             if identifier in expression.identifiers:
-                return True, *self.transpiler.new_temp(expression)
+                return True, self.transpiler.new_temp(expression)
 
-        return False, None, expression
+        return False, expression

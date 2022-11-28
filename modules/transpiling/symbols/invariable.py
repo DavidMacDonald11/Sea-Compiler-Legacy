@@ -16,3 +16,7 @@ class Invariable(Variable):
             node.transpiler.warnings.error(node, f"Cannot reassign invariable '{self.name}'")
 
         return super().assign(node, expression)
+
+    def transfer(self, node, expression, operator):
+        expression.is_invar = True
+        return super().transfer(node, expression, operator)

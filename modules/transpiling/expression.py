@@ -5,6 +5,10 @@ class Expression:
     def c_type(self):
         return f"__sea_type_{self.e_type}__"
 
+    @property
+    def any_type(self):
+        return ANY_TYPE_VALUES[self.e_type]
+
     def __init__(self, e_type = "", string = ""):
         self.string = string
         self.e_type = e_type
@@ -13,6 +17,7 @@ class Expression:
         self.identifiers = []
         self.is_invar = False
         self.newline = False
+        self.prefix = None
 
     def __repr__(self):
         return self.string + ("\n" if self.newline else "")
@@ -38,12 +43,15 @@ class Expression:
         self.e_type = "u64" if self.e_type in ("bool", "char") else self.e_type
         return self
 
-    def operate(self, node):
+    def operate(self, node, check_any = True):
         if self.e_type == "":
             node.transpiler.warnings.error(node, "Function call has no return value")
 
         if self.ownership is not None:
             node.transpiler.warnings.error(node, "Cannot perform operations on ownership rvalue")
+
+        if check_any and self.e_type == "any":
+            node.transpiler.warnings.error(node, "Must cast any value to perform operations on it")
 
         return self
 
@@ -91,5 +99,22 @@ POINTS = {
     "c64": 4,
     "cmax": 4.5,
     "str": 10,
-    "list": 11
+    "list": 11,
+    "any": 15
+}
+
+ANY_TYPE_VALUES = {
+    "bool": 0,
+    "char": 1,
+    "u64": 1,
+    "i64": 2,
+    "umax": 3,
+    "imax": 4,
+    "f64": 5,
+    "fmax": 6,
+    "g64": 7,
+    "gmax": 8,
+    "c64": 9,
+    "cmax": 10,
+    "str": 11
 }

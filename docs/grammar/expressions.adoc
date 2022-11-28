@@ -92,8 +92,12 @@
 `_comparative-operator_`: one of
 {tab} `*<*` `*>*` `*\<=*` `*>=*` `*==*` `*!=*`
 
-`_logical-not-expression_`:
+`_type-check-expression_`:
 {tab} `_comparative-expression_`
+{tab} `_type-check-expression_` `*is*` `*not*`~opt~ `_type-keyword_`
+
+`_logical-not-expression_`:
+{tab} `_type-check-expression_`
 {tab} `*not*` `_logical-not-expression_`
 
 `_logical-and-expression_`:

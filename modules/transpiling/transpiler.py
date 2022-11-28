@@ -58,6 +58,12 @@ class Transpiler:
         self.alias("__sea_type_u8__", "__sea_type_bool__")
         self.alias("__sea_type_char__ *", "__sea_type_str__")
 
+        self.header("\n".join((
+            "\ntypedef struct __sea_type_any__ {",
+            "\tvoid *value;", "\t__sea_type_u8__ type;",
+            "} __sea_type_any__;"
+        )))
+
         self.header()
 
         self.standard_function(None, "cprint", [("invar", "cplex", None)], "\n".join((
@@ -94,13 +100,21 @@ class Transpiler:
         self.lines += f"{string}{end}"
 
     def new_temp(self, expression):
-        expression = expression.copy().cast_up()
+        prefix = expression.copy()
 
-        c_type = expression.c_type
+        c_type = prefix.c_type
         c_name = f"__sea_temp_value_{self.temps}__"
         self.temps += 1
 
-        return expression.copy().new(f"{c_type} {c_name} = %s;"), expression.new(c_name)
+        indent = "\t" * self.context.blocks
+        prefix.new(f"{indent}{c_type} {c_name} = %s;\n")
+
+        if expression.prefix is None:
+            expression.prefix = prefix
+        else:
+            expression.prefix.new(f"%s{prefix}")
+
+        return expression.new(c_name)
 
     def push_symbol_table(self):
         self.symbols = SymbolTable(self.symbols)
