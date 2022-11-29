@@ -2,7 +2,6 @@ class Context:
     def __init__(self):
         self.blocks = 0
         self.loops = 0
-        self.type_checks = 0
         self.in_return = False
         self.in_ownership = False
         self.function = None
@@ -14,10 +13,6 @@ class Context:
     @property
     def in_loop(self):
         return self.loops > 0
-
-    @property
-    def in_type_check(self):
-        return self.type_checks > 0
 
     @property
     def in_function(self):

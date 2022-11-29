@@ -58,12 +58,6 @@ class Transpiler:
         self.alias("__sea_type_u8__", "__sea_type_bool__")
         self.alias("__sea_type_char__ *", "__sea_type_str__")
 
-        self.header("\n".join((
-            "\ntypedef struct __sea_type_any__ {",
-            "\tvoid *value;", "\t__sea_type_u8__ type;",
-            "} __sea_type_any__;"
-        )))
-
         self.header()
 
         self.standard_function(None, "cprint", [("invar", "cplex", None)], "\n".join((

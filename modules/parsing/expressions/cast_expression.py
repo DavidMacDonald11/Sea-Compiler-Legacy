@@ -22,7 +22,7 @@ class CastExpression(Node):
         return expression
 
     def transpile(self):
-        expression = self.expression.transpile().operate(self, check_any = False)
+        expression = self.expression.transpile().operate(self)
         keyword = self.type_keyword.token.string
 
         if keyword == "bool":

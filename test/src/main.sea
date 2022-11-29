@@ -1,5 +1,5 @@
 fun main() -> int:
-    any value = 5i as imag
+    imag value = 5i
     imag num = $value
 
     cprint(num)
