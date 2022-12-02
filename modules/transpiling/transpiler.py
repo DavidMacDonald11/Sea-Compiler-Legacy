@@ -3,10 +3,6 @@ from .symbol_table import SymbolTable
 from .expression import Expression
 
 class Transpiler:
-    @property
-    def expression(self):
-        return Expression
-
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
@@ -38,30 +34,31 @@ class Transpiler:
         self.include("limits")
         self.header()
 
-        self.alias("float", "__sea_type_f32__")
-        self.alias("double", "__sea_type_f64__")
-        self.alias("long double", "__sea_type_fmax__")
-        self.alias("double", "__sea_type_g64__")
-        self.alias("long double", "__sea_type_gmax__")
-        self.alias("_Complex float", "__sea_type_c32__")
-        self.alias("_Complex double", "__sea_type_c64__")
-        self.alias("_Complex long double", "__sea_type_cmax__")
+        self.alias("float", "__sea_type_real32__")
+        self.alias("double", "__sea_type_real64__")
+        self.alias("long double", "__sea_type_real__")
+        self.alias("float", "__sea_type_imag32__")
+        self.alias("double", "__sea_type_imag64__")
+        self.alias("long double", "__sea_type_imag__")
+        self.alias("_Complex float", "__sea_type_cplex32__")
+        self.alias("_Complex double", "__sea_type_cplex64__")
+        self.alias("_Complex long double", "__sea_type_cplex__")
 
         for i in range(3, 7):
             bits = 2 ** i
-            self.alias(f"int_least{bits}_t", f"__sea_type_i{bits}__")
-            self.alias(f"uint_least{bits}_t", f"__sea_type_u{bits}__")
+            self.alias(f"int_least{bits}_t", f"__sea_type_int{bits}__")
+            self.alias(f"uint_least{bits}_t", f"__sea_type_nat{bits}__")
 
-        self.alias("intmax_t", "__sea_type_imax__")
-        self.alias("uintmax_t", "__sea_type_umax__")
-        self.alias("__sea_type_u8__", "__sea_type_char__")
-        self.alias("__sea_type_u8__", "__sea_type_bool__")
-        self.alias("__sea_type_char__ *", "__sea_type_str__")
+        self.alias("intmax_t", "__sea_type_int__")
+        self.alias("uintmax_t", "__sea_type_nat__")
+        self.alias("__sea_type_nat8__", "__sea_type_char__")
+        self.alias("__sea_type_nat8__", "__sea_type_bool__")
+        self.alias("__sea_type_char__*", "__sea_type_str__")
 
         self.header()
 
         self.standard_function(None, "cprint", [("invar", "cplex", None)], "\n".join((
-            "\nvoid __sea_fun_cprint__(__sea_type_cmax__ c)", "{",
+            "\nvoid __sea_fun_cprint__(__sea_type_cplex__ c)", "{",
             '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}"
         )), ["complex", "stdio"])
 
@@ -93,22 +90,15 @@ class Transpiler:
     def write(self, string = "", end = "\n"):
         self.lines += f"{string}{end}"
 
-    def new_temp(self, expression):
-        prefix = expression.copy()
-
-        c_type = prefix.c_type
-        c_name = f"__sea_temp_value_{self.temps}__"
+    def new_temp(self, statement):
+        kind = statement.expression.kind
+        name =  f"__sea_temp_value_{self.temps}__"
         self.temps += 1
 
-        indent = "\t" * self.context.blocks
-        prefix.new(f"{indent}{c_type} {c_name} = %s;\n")
+        prefix = Expression(kind, statement.expression.string)
+        prefix.add(f"__sea_type_{kind}__ {name} = ")
 
-        if expression.prefix is None:
-            expression.prefix = prefix
-        else:
-            expression.prefix.new(f"%s{prefix}")
-
-        return expression.new(c_name)
+        return statement.prefix(prefix).new(name)
 
     def push_symbol_table(self):
         self.symbols = SymbolTable(self.symbols)

@@ -1,16 +1,12 @@
+from transpiling.expression import OwnershipExpression
+from transpiling.statement import Statement
 from ..expressions.expression import Expression
-from ..node import Node
+from .hidden_statement import HiddenStatement
 
-class ExpressionStatement(Node):
+class ExpressionStatement(HiddenStatement):
     @property
-    def nodes(self) -> list:
-        return [self.expression]
-
-    def __init__(self, expression):
-        self.expression = expression
-
-    def tree_repr(self, prefix):
-        return self.expression.tree_repr(prefix)
+    def expression(self):
+        return self.statement
 
     @classmethod
     def construct(cls):
@@ -18,10 +14,8 @@ class ExpressionStatement(Node):
         return cls(expression)
 
     def transpile(self):
-        expression = self.expression.transpile()
-
-        if expression.ownership is not None:
+        if isinstance(self.expression, OwnershipExpression):
             message = "Must assign result of ownership expression to an identifier"
             self.transpiler.warnings.error(self, message)
 
-        return expression
+        return Statement(self.expression.transpile()).show_kind().finish(self)

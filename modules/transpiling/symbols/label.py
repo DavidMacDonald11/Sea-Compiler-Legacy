@@ -1,12 +1,14 @@
-from .identifier import Identifier
+from .symbol import Symbol
+from ..expression import Expression
+from ..statement import Statement
 
-class Label(Identifier):
+class Label(Symbol):
     @property
     def c_name(self):
         return f"__sea_label_{self.name}"
 
-    def surround(self, node, expression):
-        c_label = f"{self.c_name}_continue__:"
-        b_label = f"{self.c_name}_break__:"
+    def surround(self, statement):
+        statement.prefix(Expression("", f"{self.c_name}_continue__:"))
+        statement.append(Statement(Expression("", f"{self.c_name}_break__:")))
 
-        return expression.new(f"{node.indent}{c_label}\n%s\n {node.indent}{b_label}")
+        return statement

@@ -1,11 +1,46 @@
+fun add(real a, imag b) -> cplex
+fun inc(var cplex $c) -> var cplex$
+fun inc_borrow(var cplex &c)
+
 fun main() -> int:
-    imag value = 5i
-    imag num = $value
+    str o
+    int a, b, c = [1, 2, 3]
+    c, b, a = a, c, b
 
-    cprint(num)
+    five do:
+        break five
+    while True
 
-    int a, b = 1, 2
-    a, b = b, a
+    six do: break while True
+
+    while True:
+        break
+
+    cplex i = add(1, 2i)
+    int x = (i as int) + 5
+
+    cprint((x as nat)!)
+    cprint(||i||)
 
     print("\n")
+    cprint(i)
+    cplex i2 = inc($i)
+    cprint(i2)
+    inc_borrow(&i2)
+    cprint(i2)
+
+    o = "This is a string!\n"
+    print(o)
+
     return 0
+
+fun add(real a, imag b) -> cplex:
+    cplex x = a + b
+    return x
+
+fun inc(var cplex $c) -> var cplex$:
+    c += 1 + 1i
+    return $c
+
+fun inc_borrow(var cplex &c):
+    c += 1 + 1i

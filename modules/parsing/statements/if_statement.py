@@ -1,3 +1,4 @@
+from transpiling.statement import Statement
 from .block_statement import BlockStatement
 from ..expressions.expression import Expression
 from ..node import Node
@@ -55,15 +56,22 @@ class IfStatement(Node):
         return cls(condition, block, elses)
 
     def transpile(self):
-        condition = self.condition.transpile().boolean(self.condition)
+        condition = self.condition.transpile().operate(self.condition, boolean = True)
         block = self.block.transpile()
-        statement = self.transpiler.expression("", f"if ({condition}) {block}")
+        statement = Statement(condition.add("if (", ")")).append(block)
 
-        for i, else_if in enumerate(self.elses):
-            if i != 0: statement.new(f"{self.indent}%s")
-            statement.new(f"%s {self.indent}else {else_if.transpile()}")
+        for else_if in self.elses:
+            statement.new("else")
 
-        return statement
+            if not isinstance(else_if, ElseStatement):
+                condition = self.condition.transpile().operate(self.condition, boolean = True)
+                statement.new_append(Statement(condition.add(" if (", ")")))
+            else:
+                statement.append()
+
+            statement.new_append(else_if.block.transpile())
+
+        return statement.finish(self, semicolons = False)
 
 class ElseIfStatement(IfStatement):
     pass

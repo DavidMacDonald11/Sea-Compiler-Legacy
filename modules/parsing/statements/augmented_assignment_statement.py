@@ -34,16 +34,13 @@ class AugmentedAssignmentStatement(Node):
             return AssignmentStatement.construct()
 
         operator = cls.parser.expecting_has(*ASSIGNMENT_OPERATORS)
-        return cls(identifier, operator, ExpressionStatement.construct())
+        return cls(identifier, operator, ExpressionStatement.construct().expression)
 
     def transpile(self):
         name = self.identifier.string
         operator = self.operator.string
         expression = self.expression.transpile()
-        var = self.transpiler.symbols.at(self, name)
-
-        if var is None:
-            return expression.new(f"/*{name} {operator}*/%s/*%e*/")
+        self.transpiler.symbols.at(self, name)
 
         op = operator[:-1]
 
@@ -70,6 +67,6 @@ class AugmentedAssignmentStatement(Node):
                 cls = BitwiseOrExpression
 
         identifier = ExpressionList([left])
-        expression = ExpressionList([ExpressionStatement(cls(left, operator, right))])
+        expression = ExpressionList([cls(left, operator, right)])
 
         return AssignmentStatement([identifier, expression]).transpile()

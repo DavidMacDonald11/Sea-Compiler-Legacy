@@ -1,7 +1,7 @@
 from lexing.token import POSTFIX_UNARY_OPERATORS
+from transpiling.expression import Expression, OwnershipExpression, FLOATING_TYPES
 from transpiling.symbols.function import Function
 from .primary_expression import PrimaryExpression, Identifier
-from ..declarations.type_keyword import TYPE_MAP
 from ..node import Node
 
 class PostfixExpression(Node):
@@ -40,7 +40,7 @@ class PostfixExpression(Node):
 class PercentExpression(PostfixExpression):
     def transpile(self):
         expression = self.expression.transpile().operate(self)
-        return expression.new("(%s / 100)").cast_up()
+        return expression.add("(", " / 100)").cast_up()
 
 class FactorialExpression(PostfixExpression):
     wrote = []
@@ -48,26 +48,30 @@ class FactorialExpression(PostfixExpression):
     def transpile(self):
         expression = self.expression.transpile().operate(self)
 
-        if expression.e_type in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
+        if expression.kind in FLOATING_TYPES:
             self.transpiler.warnings.error(self, "Cannot use factorial on floating type")
-            return expression.new("%s/*!*/")
+            return expression.add(after = "/*!*/")
 
-        largest = expression.e_type in ("imax", "umax")
-        func = self.write_func(expression.cast("u64" if largest else "umax"))
-        return expression.new(f"({func}(%s))")
+        if "int" in expression.kind:
+            message = "Factorial of an integer, if negative, may produce unexpected results"
+            self.transpiler.warnings.warn(self, message)
 
-    def write_func(self, expression):
-        func = f"__sea_func_factorial_{expression.e_type}__"
+        expression.cast("nat")
+        func = self.write_func()
+        return expression.add(f"({func}(", "))")
+
+    def write_func(self):
+        func = "__sea_func_factorial__"
 
         if func in type(self).wrote: return func
         type(self).wrote += [func]
 
-        e_type = expression.c_type
+        kind = "__sea_type_nat__"
 
         self.transpiler.header("\n".join((
-            f"{e_type} {func}({e_type} num)", "{",
-            f"\t{e_type} result = 1;",
-            f"\tfor({e_type} i = 2; i <= num; i++) result *= i;",
+            f"{kind} {func}({kind} num)", "{",
+            f"\t{kind} result = 1;",
+            f"\tfor({kind} i = 2; i <= num; i++) result *= i;",
             "\treturn result;", "}\n"
         )))
 
@@ -76,7 +80,11 @@ class FactorialExpression(PostfixExpression):
 class TestExpression(PostfixExpression):
     def transpile(self):
         expression = self.expression.transpile().operate(self)
-        return expression.new("%s" if expression.e_type == "bool" else "(%s != 0)").cast("bool")
+
+        if expression.kind != "bool":
+            expression.add("(", " != 0)").cast("bool")
+
+        return expression
 
 class CallExpression(PostfixExpression):
     @property
@@ -90,16 +98,14 @@ class CallExpression(PostfixExpression):
     def transpile(self):
         if not isinstance(self.expression, Identifier):
             self.transpiler.warnings.error(self, "Cannot call a non-function")
-            return self.transpiler.expression("", f"/*{self.expression.transpile()}(...)*/")
+            return Expression("", f"/*{self.expression.transpile()}(...)*/")
 
         name = self.expression.token.string
         function = self.transpiler.symbols.at(self, name)
 
         if not isinstance(function, Function):
-            if function is not None:
-                self.transpiler.warnings.error(self, "Cannot call a non-function")
-
-            return self.transpiler.expression("", f"/*{self.expression.transpile()}(...)*/")
+            self.transpiler.warnings.error(self, "Cannot call a non-function")
+            return Expression("", f"/*{self.expression.transpile()}(...)*/")
 
         return function.call(self, self.arguments)
 
@@ -127,25 +133,28 @@ class ArgumentExpressionList(Node):
         raise NotImplementedError(type(self).__name__)
 
     def transpile_parameters(self, parameters):
-        statement = None
+        expression = None
 
-        for i in range(len(self.arguments)):
-            arg = self.arguments[i].transpile()
-            p_qualifier, p_keyword, p_borrow = parameters[i]
-            p_keyword = TYPE_MAP[p_keyword][0]
+        for i, (argument, parameter) in enumerate(zip(self.arguments, parameters)):
+            arg = argument.transpile()
+            p_qualifier, p_keyword, p_borrow = parameter
 
-            a_qualifier = "invar" if arg.is_invar else "var"
-            a_borrow = arg.ownership
+            if isinstance(arg, OwnershipExpression):
+                a_qualifier = "invar" if arg.invariable else "var"
+                a_borrow = arg.operator
+            else:
+                a_qualifier = "var"
+                a_borrow = None
 
             self.compare_borrow(i, p_borrow, a_borrow)
             self.check_var_borrow(i, a_borrow, p_borrow, a_qualifier, p_qualifier)
             self.compare_types(i, arg, p_keyword)
 
-            if p_keyword not in ("c64", "cmax"):
+            if "cplex" not in p_keyword:
                 arg.drop_imaginary(self)
 
-            statement = arg if statement is None else statement.new(f"%s, {arg}")
-        return statement
+            expression = arg if expression is None else expression.add(after = f", {arg}")
+        return expression
 
     def compare_borrow(self, i, p_borrow, a_borrow):
         if a_borrow == p_borrow:
@@ -166,11 +175,10 @@ class ArgumentExpressionList(Node):
         self.transpiler.warnings.error(self, message)
 
     def compare_types(self, i, arg, p_keyword):
-        expression = self.transpiler.expression(p_keyword)
-        expression = self.transpiler.expression.resolve(arg, expression)
+        expression = Expression.resolve(arg, Expression(p_keyword), allow_str = True)
 
-        if expression.e_type == p_keyword:
+        if expression.kind == p_keyword:
             return
 
-        message = f"Parameter {i + 1} requires {p_keyword}; found {arg.e_type}"
+        message = f"Parameter {i + 1} requires {p_keyword}; found {arg.kind}"
         self.transpiler.warnings.error(self, message)

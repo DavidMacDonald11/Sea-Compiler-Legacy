@@ -1,3 +1,4 @@
+from transpiling.statement import Statement
 from .type_keyword import TypeKeyword
 from ..node import Node
 
@@ -22,20 +23,18 @@ class IdentifierDeclaration(Node):
         return cls(type_keyword, identifiers)
 
     def transpile(self):
-        c_type = ""
-        decl = ""
-
-        for c_type, identifier in self.transpile_generator():
-            decl = f"{identifier}" if decl == "" else f"{identifier}, {decl}"
-
-        return self.transpiler.expression("", f"{self.indent}{c_type} {decl}")
-
-    def transpile_generator(self):
-        keyword = self.type_keyword.token.string
-        c_type = self.type_keyword.transpile().string
+        kind = self.type_keyword.token.string
+        statement = Statement().cast(kind)
 
         for name in self.identifiers[::-1]:
-            yield (c_type, self.transpile_name(keyword, name.string))
+            identifier = self.transpile_name(name.string, kind)
 
-    def transpile_name(self, keyword, name):
+            if statement.expression.string == "":
+                statement.new(f"{identifier}")
+            else:
+                statement.add(f"{identifier}, ")
+
+        return statement.add(f"__sea_type_{kind}__ ").finish(self)
+
+    def transpile_name(self, name, kind):
         raise NotImplementedError(type(self).__name__)

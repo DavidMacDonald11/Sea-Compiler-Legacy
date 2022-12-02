@@ -26,14 +26,15 @@ class CastExpression(Node):
         keyword = self.type_keyword.token.string
 
         if keyword == "bool":
-            return expression.new("%s" if expression.e_type == "bool" else "(%s != 0)").cast("bool")
+            if expression.kind == "bool": return expression
+            return expression.add("(", " != 0)").cast("bool")
 
         type_keyword = self.type_keyword.transpile()
-        e_type, c_type = type_keyword.e_type, type_keyword.c_type
+        kind = type_keyword.kind
 
-        if keyword not in ("imag32", "imag64", "imag"):
-            return expression.new(f"({c_type})(%s)").cast(e_type)
+        if "imag" not in keyword:
+            return expression.add(f"(__sea_type_{kind}__)(", ")").cast(kind)
 
-        suffix = "f" if keyword == "imag32" else ("l" if keyword == "imag" else "")
+        suffix = "f" if "32" in keyword else ("" if "64" in keyword else "l")
         self.transpiler.include("complex")
-        return expression.new(f"(cimag{suffix}(%s) * 1.0j)").cast(e_type)
+        return expression.add(f"(cimag{suffix}(", ") * 1.0j)").cast(kind)

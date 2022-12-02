@@ -1,5 +1,6 @@
 import re
 from lexing.token import PRIMARY_KEYWORDS
+from transpiling.expression import Expression
 from ..node import Node, PrimaryNode
 
 class PrimaryExpression(Node):
@@ -40,13 +41,13 @@ class NumericConstant(PrimaryNode):
         return cls(num, cls.parser.take()) if cls.parser.next.has("i") else cls(num)
 
     def transpile(self):
-        specifier = self.token.specifier
+        specifier = "nat" if self.token.specifier == "i" else "float"
         string = self.convert_base(self.token.string)
 
         if len(self.nodes) == 1:
-            return self.transpiler.expression(f"{specifier}64", string)
+            return Expression(f"{specifier}64", string)
 
-        return self.transpiler.expression("g64", f"{string}j")
+        return Expression("imag64", f"{string}j")
 
     def convert_base(self, string):
         if "e" not in string:
@@ -101,7 +102,7 @@ class NumericConstant(PrimaryNode):
 
 class CharacterConstant(PrimaryNode):
     def transpile(self):
-        return self.transpiler.expression("char", self.token.string)
+        return Expression("char", self.token.string)
 
 class StringConstant(PrimaryNode):
     @classmethod
@@ -134,26 +135,16 @@ class StringConstant(PrimaryNode):
             string = re.sub(r"\n", " \\\n", string)
             string = re.sub(r"\t", "\t", string)
 
-        return self.transpiler.expression("str", string)
+        return Expression("str", string)
 
 class Identifier(PrimaryNode):
     def transpile(self):
         name = self.token.string
         var = self.transpiler.symbols.at(self, name)
+        expression = var.access(self)
 
-        if var is None:
-            return self.transpiler.expression("cmax", f"/*{name}*/")
-
-        expression = var.access(self, self.transpiler.expression())
-        expression.identifiers += [name]
-
-        if var.s_type in ("imag32", "imag64", "imag"):
-            expression.cast("g64" if var.s_type in ("imag32", "imag64") else "gmax")
-
-            if self.transpiler.context.in_ownership:
-                return expression
-
-            return expression.new("(%s * 1.0j)")
+        if "imag" in var.kind and not self.transpiler.context.in_ownership:
+            return expression.add("(", " * 1.0j)")
 
         return expression
 
@@ -185,12 +176,12 @@ class ExpressionList(Node):
 
     # TODO allow x,y = [1,2] if True else [3,4] or x, y = [1, 2] + [3, 4]
     def transpile(self):
-        expression = self.transpiler.expression("list", f"{self.expressions[0].transpile()}")
+        expression = Expression("list", f"{self.expressions[0].transpile()}")
 
         for exp in self.expressions[1:]:
-            expression.new(f"%s, {exp.transpile()}")
+            expression.add(after = f", {exp.transpile()}")
 
-        return expression.new("/*{%s}*/")
+        return expression
 
 class ParenthesesExpression(Node):
     @property
@@ -208,7 +199,7 @@ class ParenthesesExpression(Node):
         return node
 
     def transpile(self):
-        return self.expression.transpile().new("(%s)")
+        return self.expression.transpile().add("(", ")")
 
 class NormExpression(ParenthesesExpression):
     wrote = []
@@ -224,36 +215,41 @@ class NormExpression(ParenthesesExpression):
         if isinstance(self.expression, NormExpression):
             return self.expression.transpile()
 
-        expression = self.expression.transpile().operate(self)
+        expression = self.expression.transpile().operate(self).add("(", ")")
+        kind = expression.kind
 
-        match expression.e_type:
-            case "bool":
-                return expression.new("(%s)").cast("u64")
-            case "u64"|"umax":
-                return expression.new("(%s)")
-            case "i64"|"imax":
-                func = self.write_generic_func(expression)
-                return expression.new(f"({func}(%s))").cast("umax")
-            case "f64":
-                self.transpiler.include("math")
-                return expression.new("(fabs(%s))")
-            case "g64"|"c64":
-                self.transpiler.include("complex")
-                return expression.new("(cabs(%s))").cast("f64")
-            case "fmax"|"gmax"|"cmax":
-                self.transpiler.include("complex")
-                return expression.new("(cabsl(%s))").cast("fmax")
+        if kind in ("bool", "char"):
+            return expression.cast("nat8")
 
-    def write_generic_func(self, expression):
-        func = f"__sea_func_norm_{expression.e_type}__"
+        if "nat" in kind:
+            return expression
+
+        if "int" in kind:
+            func = self.write_generic_func("int" if kind == "int" else "int64")
+            return expression.add(f"({func}", ")").cast("nat")
+
+        if kind in ("real32", "real64"):
+            self.transpiler.include("math")
+            return expression.add("(fabs", ")").cast("real")
+
+        if kind in ("imag32", "imag64", "cplex32", "cplex64"):
+            self.transpiler.include("complex")
+            return expression.add("(cabs", ")").cast("real32" if "32" in kind else "real64")
+
+        if kind in ("real", "imag", "cplex"):
+            self.transpiler.include("complex")
+            return expression.add("(cabsl", ")").cast("real")
+
+        raise NotImplementedError(f"NormExpression of {kind}")
+
+    def write_generic_func(self, kind):
+        func = f"__sea_func_norm_{kind}__"
 
         if func in type(self).wrote: return func
         type(self).wrote += [func]
 
-        e_type = expression.c_type
-
         self.transpiler.header("\n".join((
-            f"{e_type} {func}({e_type} num)", "{",
+            f"__sea_type_{kind}__ {func}({kind} num)", "{",
             "\treturn (num < 0) ? -num : num; ", "}\n"
         )))
 
@@ -261,4 +257,4 @@ class NormExpression(ParenthesesExpression):
 
 class PrimaryKeyword(PrimaryNode):
     def transpile(self):
-        return self.transpiler.expression("bool", "1" if self.token.has("True") else "0")
+        return Expression("bool", "1" if self.token.has("True") else "0")

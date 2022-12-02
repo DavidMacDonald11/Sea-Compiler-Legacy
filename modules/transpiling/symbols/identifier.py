@@ -1,12 +1,11 @@
-class Identifier:
+from .symbol import Symbol
+
+class Identifier(Symbol):
     @property
     def c_name(self):
         raise NotImplementedError(type(self).__name__)
 
-    def __init__(self, s_type, name, table_number):
-        self.s_type = s_type
-        self.name = name
+    def __init__(self, name, kind, table_number):
+        self.kind = kind
         self.table_number = table_number
-
-    def __repr__(self):
-        return self.c_name
+        super().__init__(name)

@@ -19,13 +19,5 @@ class LogicalNotExpression(Node):
         return cls(keyword, cls.construct())
 
     def transpile(self):
-        expression = self.expression.transpile().operate(self)
-
-        if expression.e_type != "bool":
-            self.transpiler.warnings.error(self, "".join((
-                "Cannot perform negation of non-boolean value. ",
-                "(Consider using the '?' operator to get boolean value)")))
-
-            return expression.new("/*not*/(%s)")
-
-        return expression.new("!(%s)").cast("bool")
+        expression = self.expression.transpile().operate(self, boolean = True)
+        return expression.add("!(", ")").cast("bool")

@@ -3,32 +3,15 @@ from .expression_statement import ExpressionStatement
 from .identifier_statement import IdentifierStatement
 from .assignment_statement import AssignmentStatement
 from .augmented_assignment_statement import AugmentedAssignmentStatement
+from .hidden_statement import HiddenStatement
 from ..node import Node
 
-class LineStatement(Node):
-    @property
-    def nodes(self) -> list:
-        return [self.statement]
-
-    def __init__(self, statement):
-        self.statement = statement
-
-    def tree_repr(self, prefix):
-        return self.statement.tree_repr(prefix)
-
+class LineStatement(HiddenStatement):
     @classmethod
     def construct(cls):
         statement = LineStatementComponent.construct()
         cls.parser.expecting_has(r"\n", "EOF")
         return statement if isinstance(statement, IdentifierStatement) else cls(statement)
-
-    def transpile(self):
-        statement = self.statement.transpile().new("%s;/*%e*/")
-
-        if isinstance(self.statement, AssignmentStatement):
-            return statement
-
-        return statement.new(f"{self.indent}%s")
 
 class LineStatementComponent(Node):
     @classmethod

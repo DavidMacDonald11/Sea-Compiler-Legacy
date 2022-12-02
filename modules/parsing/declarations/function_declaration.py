@@ -1,10 +1,10 @@
+from transpiling.statement import Statement
+from transpiling.expression import Expression
 from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .type_keyword import TypeKeyword
 from ..node import Node
 
-# TODO allow ownership return value/type
 # TODO implement function overloading or default args
-# TODO improve mismatching type errors
 # TODO verify returns from all branches
 # TODO add varargs
 # TODO check local var ownership return
@@ -41,14 +41,19 @@ class FunctionDeclaration(Node):
         return cls(identifier, parameters, FunctionReturnType.construct())
 
     def transpile(self):
-        return self.transpile_definition()
+        return self.transpile_definition().finish(self)
 
     def transpile_definition(self, is_definition = False):
         if self.transpiler.context.in_block:
             self.transpiler.warnings.error(self, "Cannot declare function outside of global scope")
 
-        return_type = self.return_type.transpile() if self.return_type is not None else "void"
-        function = self.transpiler.symbols.new_function(self, return_type, self.identifier.string)
+        if self.return_type is not None:
+            return_type = self.return_type.transpile()
+        else:
+            return_type = Expression("", "void")
+
+        function = self.transpiler.symbols.new_function(self, self.identifier.string)
+        self.transpiler.context.function = function
 
         if is_definition:
             self.transpiler.push_symbol_table()
@@ -57,12 +62,7 @@ class FunctionDeclaration(Node):
                 self.parameters.is_def = True
 
         parameters = self.parameters.transpile() if self.parameters is not None else "void"
-        statement = self.transpiler.expression("", f"{return_type}")
-
-        if function is None:
-            return statement.new(f"/*%s {self.identifier.string}({parameters})*/")
-
-        self.transpiler.context.function = function
+        statement = Statement(return_type)
 
         if not is_definition and function.declared:
             self.transpiler.warnings.error(self, "Cannot declare function twice")
@@ -76,7 +76,7 @@ class FunctionDeclaration(Node):
         else:
             self.transpiler.context.function = None
 
-        return statement.new(f"%s {function.c_name}({parameters});")
+        return statement.add(after = f" {function.c_name}({parameters})")
 
 class FunctionParameterList(Node):
     @property
@@ -101,13 +101,13 @@ class FunctionParameterList(Node):
 
     def transpile(self):
         first, *parameters = self.parameters
-        statement = first.transpile_def() if self.is_def else first.transpile()
+        expression = first.transpile_def() if self.is_def else first.transpile()
 
         for parameter in parameters:
             result = parameter.transpile_def() if self.is_def else parameter.transpile()
-            statement = statement.new(f"%s, {result}")
+            expression.add(after = f", {result}")
 
-        return statement
+        return expression
 
 class FunctionParameter(Node):
     @property
@@ -141,36 +141,33 @@ class FunctionParameter(Node):
         return cls(type_qualifier, type_keyword, borrow_qualifier, identifier)
 
     def transpile(self):
-        statement = self.type_keyword.transpile()
+        expression = self.type_keyword.transpile()
 
         if self.borrow_qualifier is not None:
-            statement = statement.new("%s*")
+            expression.add(after = "*")
 
         if self.identifier is not None:
-            statement = statement.new(f"%s {self.identifier.string}")
+            expression.add(after = f" {self.identifier.string}")
 
-        return statement
+        return expression
 
     def transpile_def(self):
         qualifier, keyword, borrow = self.transpile_qualifiers()
         name = self.identifier.string if self.identifier is not None else ""
 
         if qualifier == "var":
-            parameter = self.transpiler.symbols.new_variable(self, keyword, name)
+            parameter = self.transpiler.symbols.new_variable(self, name, keyword)
         else:
-            parameter = self.transpiler.symbols.new_invariable(self, keyword, name)
-
-        if parameter is None:
-            return self.transpiler.expression("", f"/*{keyword} {name}*/")
+            parameter = self.transpiler.symbols.new_invariable(self, name, keyword)
 
         parameter.initialized = True
         parameter.ownership = borrow
         keyword = self.type_keyword.transpile()
 
         if parameter.ownership is not None:
-            keyword = keyword.new("%s*")
+            keyword.add(after = "*")
 
-        return self.transpiler.expression("", f"{keyword} {parameter.c_name}")
+        return Expression("", f"{keyword} {parameter.c_name}")
 
     def transpile_qualifiers(self):
         qualifier = self.type_qualifier
@@ -232,6 +229,6 @@ class FunctionReturnType(Node):
         statement = self.keyword.transpile()
 
         if self.borrow is not None:
-            statement.new("%s*")
+            statement.add(after = "*")
 
         return statement

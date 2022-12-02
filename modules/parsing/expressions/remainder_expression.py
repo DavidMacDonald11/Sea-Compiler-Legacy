@@ -1,3 +1,4 @@
+from transpiling.expression import Expression
 from .unary_expression import RoundExpression
 from .cast_expression import CastExpression
 from ..node import BinaryOperation
@@ -12,36 +13,36 @@ class RemainderExpression(BinaryOperation):
     def transpile(self):
         left = self.left.transpile().operate(self)
         right = self.right.transpile().operate(self)
-        result = self.transpiler.expression.resolve(left, right).cast_up()
+        result = Expression.resolve(left, right).cast_up()
 
-        if result.e_type in ("f64", "fmax"):
+        if "real" in result.kind:
             self.transpiler.include("math")
-            func = "fmod" if result.e_type else "fmodl"
+            func = "fmod" if result.kind != "real" else "fmodl"
             return result.new(f"{func}({left}, {right})")
 
-        if result.e_type in ("g64", "gmax", "c64", "cmax"):
+        if any(map(lambda x: x in result.kind, ("imag", "cplex"))):
             self.transpiler.include("complex")
             self.transpiler.include("math")
 
-            if result.e_type[0] == "g":
-                result.e_type = f"c{result.e_type[1:]}"
+            if "imag" in result.kind :
+                result.cast(result.kind.replace("imag", "cplex"))
 
-            func = self.write_func(result)
+            func = self.write_func(result.kind)
             return result.new(f"{func}({left}, {right})")
 
         return result.new(f"({left}) % ({right})")
 
-    def write_func(self, expression):
-        func = f"__sea_func_mod_{expression.e_type}__"
+    def write_func(self, kind):
+        func = f"__sea_func_mod_{kind}__"
 
         if func in type(self).wrote: return func
         type(self).wrote += [func]
 
-        round_func = RoundExpression.write_func(self.transpiler, "floor", expression)
-        e_type = expression.c_type
+        round_func = RoundExpression.write_func(self.transpiler, "floor", kind)
+        kind = f"__sea_type_{kind}"
 
         self.transpiler.header("\n".join((
-            f"{e_type} {func}({e_type} left, {e_type} right)", "{",
+            f"{kind} {func}({kind} left, {kind} right)", "{",
             f"\treturn left - right * {round_func}(left / right);", "}\n"
         )))
 

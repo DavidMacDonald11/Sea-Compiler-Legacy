@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from util.misc import last_enumerate, set_add
+from transpiling.expression import Expression
 
 class Node(ABC):
     parser = None
@@ -13,10 +14,6 @@ class Node(ABC):
     @property
     def transpiler(self):
         return type(self).c_transpiler
-
-    @property
-    def indent(self):
-        return "\t" * self.transpiler.context.blocks
 
     def __repr__(self):
         return self.tree_repr("     ")
@@ -105,26 +102,9 @@ class BinaryOperation(Node):
         return self.transpile_binary(self.operator.string)
 
     def transpile_binary(self, operator, bitwise = False, boolean = False):
-        left = self.left.transpile().operate(self)
-        right = self.right.transpile().operate(self)
-        result = self.transpiler.expression.resolve(left, right).cast_up()
+        left = self.left.transpile().operate(self, bitwise = bitwise, boolean = boolean)
+        right = self.right.transpile().operate(self, bitwise = bitwise, boolean = boolean)
+        result = Expression.resolve(left, right).cast_up()
+        result.new(f"{left} {operator} {right}")
 
-        if not boolean and not bitwise:
-            return result.new(f"{left} {operator} {right}")
-
-        if bitwise:
-            if result.e_type not in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
-                return result.new(f"{left} {operator} {right}")
-
-            message = "Cannot perform bitwise operation on floating type"
-            self.transpiler.warnings.error(self, message)
-            return result.new(f"{left} /*{operator} {right}*/")
-
-        if not left.e_type == right.e_type == "bool":
-            self.transpiler.warnings.error(self, "".join((
-                f"Cannot perform boolean operation '{self.operator.token}' on non-boolean type. ",
-                "(Consider using the '?' operator to get boolean value)")))
-
-            return result.new(f"{left} /*{self.operator.token} {right}*/")
-
-        return result.new(f"{left} {operator} {right}").cast("bool")
+        return result.cast("bool") if boolean else result

@@ -1,3 +1,4 @@
+from transpiling.expression import Expression
 from lexing.token import COMPARATIVE_OPERATORS
 from .three_way_comparison_expression import ThreeWayComparisonExpression
 from ..node import BinaryOperation
@@ -10,8 +11,8 @@ class ComparativeExpression(BinaryOperation):
     def transpile(self):
         left = self.left.transpile().operate(self)
         right = self.right.transpile().operate(self)
+        result = Expression.resolve(left, right).cast("bool")
         operator = self.operator.string
-        result = self.transpiler.expression.resolve(left, right).cast("bool")
 
         if not isinstance(self.left, ComparativeExpression):
             self.verify_types(left, operator, right)
@@ -25,8 +26,15 @@ class ComparativeExpression(BinaryOperation):
     def verify_types(self, left, operator, right):
         if operator not in (">", ">=", "<", "<="): return
 
-        if self.transpiler.expression.resolve(left, right).e_type in ("c64", "cmax"):
+        if "cplex" in Expression.resolve(left, right).kind:
+            kind1, kind2 = left.kind, right.kind
+
+            if "imag" in kind1 and "imag" not in kind2 or "imag" in kind2 and "imag" not in kind1:
+                message = "between 'real' and 'imag' values"
+            else:
+                message = "on a 'cplex' value"
+
             self.transpiler.warnings.error(self, "".join((
-                f"Cannot perform operation {operator} on cplex value. ",
+                f"Cannot perform operation '{operator}' {message}. ",
                 "(Consider using '|| ||' brackets to get real value)"
             )))

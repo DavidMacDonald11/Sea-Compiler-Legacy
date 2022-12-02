@@ -1,3 +1,4 @@
+from transpiling.expression import Expression
 from .logical_or_expression import LogicalOrExpression
 from ..node import Node
 
@@ -25,8 +26,8 @@ class ConditionalExpression(Node):
 
     def transpile(self):
         left = self.left.transpile().operate(self)
-        condition = self.condition.transpile().boolean(self.condition)
+        condition = self.condition.transpile().operate(self, boolean = True)
         right = self.right.transpile().operate(self)
-        result = self.transpiler.expression.resolve(left, right).cast_up()
+        result = Expression.resolve(left, right).cast_up()
 
         return result.new(f"({condition}) ? {left} : {right}")

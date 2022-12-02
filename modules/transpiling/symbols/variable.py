@@ -1,4 +1,5 @@
 from .identifier import Identifier
+from ..expression import Expression, OwnershipExpression
 
 class Variable(Identifier):
     @property
@@ -9,45 +10,48 @@ class Variable(Identifier):
     def c_access(self):
         return f"(*{self.c_name})" if self.ownership is not None else self.c_name
 
-    def __init__(self, s_type, name, table_number):
+    def __init__(self, name, kind, table_number):
         self.initialized = False
-        self.is_transfered = False
+        self.transfered = False
         self.ownership = None
-        super().__init__(s_type, name, table_number)
+        super().__init__(name, kind, table_number)
 
-    def access(self, node, expression):
-        if self.is_transfered:
+    def access(self, node):
+        if self.transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
-        expression.new(self.c_access).cast(self.s_type)
+        expression = Expression(self.kind, self.c_access)
+        expression.identifiers += [self.name]
 
         if self.initialized:
             return expression
 
         node.transpiler.warnings.error(node, f"Accessing uninitialized identifier '{self.name}'")
-        return expression.new("/*%s*/")
+        return expression.add("/*", "*/")
 
     def assign(self, node, expression):
         if not self.initialized:
             self.initialized = True
-            self.ownership = expression.ownership
 
-        if self.is_transfered:
+            if isinstance(expression, OwnershipExpression):
+                self.ownership = expression.operator
+
+        if self.transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
 
-        if expression.e_type == "":
+        if expression.kind == "":
             node.transpiler.warnings.error(node, "Function call has no return value")
 
-        if self.s_type in ("imag32", "imag64", "imag"):
+        if "imag" in self.kind:
             expression.drop_imaginary(node)
 
-        if self.s_type == "str" and expression.e_type != "str":
+        if self.kind == "str" and expression.kind != "str":
             node.transpiler.warnings.error(node, "Cannot assign non-str value to str identifeir")
 
-        if self.s_type != "str" and expression.e_type == "str":
+        if self.kind != "str" and expression.kind == "str":
             node.transpiler.warnings.error(node, "Cannot assign str value to non-str identifier")
 
-        if self.s_type == "bool" and expression.e_type != "bool":
+        if self.kind == "bool" and expression.kind != "bool":
             node.transpiler.warnings.error(node, "".join((
                 "Cannot assign non-bool value to bool identifier. ",
                 "(Consider using the '?' operator to get boolean value)"
@@ -55,7 +59,7 @@ class Variable(Identifier):
 
         return expression
 
-    def transfer(self, _, expression, operator):
-        expression.owners[0] = self
-        self.is_transfered = operator == "$"
-        return expression.new("&%s")
+    def transfer(self, expression, operator):
+        expression = OwnershipExpression(self, operator, self.kind, expression.string)
+        self.transfered = (operator == "$")
+        return expression.add("&")

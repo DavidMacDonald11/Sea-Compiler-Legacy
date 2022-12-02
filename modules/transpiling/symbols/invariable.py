@@ -5,9 +5,9 @@ class Invariable(Variable):
     def c_name(self):
         return f"__sea_invar_{self.name}__"
 
-    def access(self, node, expression):
-        result = super().access(node, expression)
-        result.is_invar = True
+    def access(self, node):
+        result = super().access(node)
+        result.invariable = True
 
         return result
 
@@ -17,6 +17,7 @@ class Invariable(Variable):
 
         return super().assign(node, expression)
 
-    def transfer(self, node, expression, operator):
-        expression.is_invar = True
-        return super().transfer(node, expression, operator)
+    def transfer(self, expression, operator):
+        expression = super().transfer(expression, operator)
+        expression.invariable = True
+        return expression

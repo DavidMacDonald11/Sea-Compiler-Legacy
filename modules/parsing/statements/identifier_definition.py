@@ -28,4 +28,20 @@ class IdentifierDefinition(Node):
         return AssignmentList.transpile_lists(self.statement.make_lists(self, self.declaration))
 
     def check_references(self, expression):
-        raise NotImplementedError(type(self).__name__)
+        owner1 = expression.owners[0]
+        owner2 = expression.owners[1]
+
+        if None in (owner1, owner2):
+            return
+
+        if owner1.kind != owner2.kind:
+            message = f"Ownership must be passed to exact same type ({owner1.kind})"
+            self.transpiler.warnings.error(self, message)
+
+        if owner1.table_number != owner2.table_number:
+            message = "Cannot transfer ownership into lower-scope identifier"
+            self.transpiler.warnings.error(self, message)
+
+        if owner1.ownership == "&" and expression.operator == "$":
+            message = "Cannot take ownership from a borrowed identifier"
+            self.transpiler.warnings.error(self, message)

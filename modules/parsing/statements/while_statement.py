@@ -1,3 +1,4 @@
+from transpiling.statement import Statement
 from .block_statement import BlockStatement
 from ..expressions.expression import Expression
 from ..node import Node
@@ -37,14 +38,15 @@ class WhileStatement(Node):
 
     def transpile(self):
         self.transpiler.context.loops += 1
-        condition = self.condition.transpile().boolean(self.condition)
-        statement = condition.new("while (%s)")
+        condition = self.condition.transpile().operate(self.condition, boolean = True)
+        statement = Statement(condition.add("while (", ")"))
 
         if self.label is None:
-            return statement.new(f"{self.indent}%s {self.block.transpile()}")
+            return statement.append(self.block.transpile()).finish(self, semicolons = False)
 
         label = self.transpiler.symbols.new_label(self, self.label.string)
-        statement = statement.new(f"{self.indent}%s {self.block.transpile()}")
+        statement.append(self.block.transpile()).drop()
 
         self.transpiler.context.loops -= 1
-        return statement if self.label is None else label.surround(self, statement)
+        statement = statement if self.label is None else label.surround(statement)
+        return statement.finish(self, semicolons = False)

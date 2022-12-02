@@ -1,3 +1,4 @@
+from transpiling.statement import Statement
 from .line_statement import LineStatement
 from .blockable_statement import BlockableStatement
 from ..node import Node
@@ -55,12 +56,12 @@ class BlockStatement(Node):
 
     def transpile_for_function(self):
         self.transpiler.context.blocks += 1
-        block = self.statements[0].transpile().new(f"\n{self.indent[:-1]}{{\n%s")
+        block = Statement().new("{").append()
 
-        for statement in self.statements[1:]:
-            block = block.new(f"%s\n{statement.transpile()}")
+        for statement in self.statements:
+            block.new_append(statement.transpile())
 
         self.transpiler.pop_symbol_table()
         self.transpiler.context.blocks -= 1
 
-        return block.new(f"%s\n{self.indent}}}\n")
+        return block.new("}")

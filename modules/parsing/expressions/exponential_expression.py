@@ -1,3 +1,4 @@
+from transpiling.expression import Expression
 from .postfix_expression import PostfixExpression
 from ..node import BinaryOperation
 
@@ -9,27 +10,22 @@ class ExponentialExpression(BinaryOperation):
     def transpile(self):
         left = self.left.transpile().operate(self)
         right = self.right.transpile().operate(self)
-        result = self.transpiler.expression.resolve(left, right).cast_up()
+        result = Expression.resolve(left, right).cast_up().new(f"({left}, {right})")
 
-        cast = ""
+        if result.kind in ("int", "nat", "real"):
+            self.transpiler.include("math")
+            return result.add(f"(({result.kind})powl", ")")
 
-        match result.e_type:
-            case "u64"|"i64"|"f64":
-                self.transpiler.include("math")
-                func = "pow"
-                cast = "" if result.e_type == "f64" else f"({result.c_type})"
-            case "umax"|"imax"|"fmax":
-                self.transpiler.include("math")
-                func = "powl"
-                cast = "" if result.e_type == "fmax" else f"({result.c_type})"
-            case "g64"|"c64":
-                self.transpiler.include("complex")
-                func = "cpow"
-            case "gmax"|"cmax":
-                self.transpiler.include("tgmath")
-                func = "cpowl"
+        if any(map(lambda x: x in result.kind, ("int", "nat", "real"))):
+            self.transpiler.include("math")
+            return result.add(f"(({result.kind})pow", ")")
 
-        if result.e_type[0] == "g":
-            result.cast(f"c{result.e_type[1:]}")
+        if result.kind in ("imag", "cplex"):
+            self.transpiler.include("tgmath")
+            return result.add("(cpowl", ")").cast("cplex")
 
-        return result.new(f"({cast}{func}({left}, {right}))")
+        if any(map(lambda x: x in result.kind), ("imag", "cplex")):
+            self.transpiler.include("complex")
+            return result.add("(cpow", ")").cast(result.kind.replace("imag", "cplex"))
+
+        raise NotImplementedError(f"ExponentialExpression of {result.kind}")

@@ -1,3 +1,5 @@
+from transpiling.expression import OwnershipExpression
+from transpiling.statement import Statement
 from .expression_statement import ExpressionStatement
 from ..expressions.expression import Expression
 from ..expressions.primary_expression import Identifier
@@ -36,11 +38,10 @@ class AssignmentStatement(Node):
         return AssignmentList.transpile_lists(self.make_lists())
 
     def make_lists(self, definition = None, declaration = None):
-        identifier_lists, lists, decl_gen = self.initalize_lists(declaration)
+        identifier_lists, lists, kind = self.initalize_lists(declaration)
 
-        for i, identifiers in enumerate(identifier_lists):
-            c_types = [x[0] for x in decl_gen] if i == 0 and declaration is not None else None
-            self.move_identifiers_into_lists(identifiers, lists, c_types, definition)
+        for identifiers in identifier_lists:
+            self.move_identifiers_into_lists(identifiers, lists, kind, definition)
 
         return lists
 
@@ -50,18 +51,21 @@ class AssignmentStatement(Node):
 
         if declaration is not None:
             identifier_lists = [ExpressionList(declaration.identifiers), *identifier_lists]
-            decl_gen = declaration.transpile_generator()
+            kind = declaration.type_keyword.token.string
+
+            for name in declaration.identifiers[::-1]:
+                declaration.transpile_name(name.string, kind)
         else:
-            decl_gen = None
+            kind = None
 
         for identifiers in identifier_lists:
             if len(identifiers) != len(expressions):
                 raise self.transpiler.warnings.fail(self, "Mismatched number of values")
 
         lists = [AssignmentList([], x, self.identifiers) for x in expressions]
-        return identifier_lists, lists, decl_gen
+        return identifier_lists, lists, kind
 
-    def move_identifiers_into_lists(self, identifiers, lists, c_types, definition):
+    def move_identifiers_into_lists(self, identifiers, lists, kind, definition):
         for j, identifier in enumerate(identifiers):
             is_token = not isinstance(identifier, Node) and identifier.of("Identifier")
 
@@ -71,8 +75,8 @@ class AssignmentStatement(Node):
 
             lists[j] += identifier
 
-            if c_types is not None:
-                lists[j].c_type = c_types[j]
+            if kind is not None:
+                lists[j].kind = kind
                 lists[j].check = definition.check_references
 
 class ExpressionList(Node):
@@ -114,11 +118,11 @@ class AssignmentList(Node):
     def nodes(self) -> list:
         return [*self.identifiers, self.expression]
 
-    def __init__(self, identifiers, expression, others, c_type = None, check = None):
+    def __init__(self, identifiers, expression, others, kind = None, check = None):
         self.identifiers = identifiers
         self.expression = expression
         self.others = others
-        self.c_type = c_type
+        self.kind = kind
         self.check = check
 
     def __iadd__(self, other):
@@ -131,26 +135,11 @@ class AssignmentList(Node):
 
     @classmethod
     def transpile_lists(cls, a_lists):
-        statement = None
-        prefix = None
+        statement = Statement()
 
         for a_list in a_lists:
-            result = a_list.transpile()
-            prefix = result.prefix if prefix is None else prefix.new(f"%s{result.prefix}")
-
-            if statement is None:
-                if a_list.c_type is not None:
-                    result.new(f"{a_list.indent}%s")
-
-                statement = result
-            else:
-                if prefix is not None:
-                    statement.new(f"{a_list.indent}%s")
-
-                statement.new(f"%s;/*%e*/\n{a_list.indent}{result}")
-
-        statement = statement if prefix is None else prefix.new(f"%s{statement}")
-        statement.newline = True
+            result = a_list.transpile().show_kind()
+            statement.new_prefix(result.finish(a_list)).append()
 
         return statement
 
@@ -158,17 +147,18 @@ class AssignmentList(Node):
         count = len(self.identifiers)
         expression = self.expression.transpile()
 
-        if expression.ownership is not None:
+        if isinstance(expression, OwnershipExpression):
             if count > 1:
                 message = "Cannot transfer ownership to multiple identifiers"
                 self.transpiler.warnings.warn(self, message)
-            elif count == 1 and self.c_type is None:
+            elif count == 1 and self.kind is None:
                 message = "Must create new identifier to transfer ownership"
                 self.transpiler.warnings.warn(self, message)
 
         return self.transpile_identifiers(expression)
 
     def transpile_identifiers(self, expression):
+        statement = Statement(expression)
         temped = len(self.others) == 0
 
         for i, identifier in enumerate(self.identifiers[::-1]):
@@ -178,28 +168,24 @@ class AssignmentList(Node):
             self.others += [name]
 
             if not temped:
-                temped, expression = self.handle_temporaries(expression)
+                temped, expression = self.handle_temporaries(statement)
 
-            if identifier is None:
-                return expression.new(f"/*{name} = */%s")
+            access = identifier.c_access if identifier.ownership is not None else f"{identifier}"
+            identifier.assign(self, statement.expression).add(f"{access} = ")
 
-            access = identifier.c_access if identifier.ownership is not None else repr(identifier)
-            expression = identifier.assign(self, expression).new(f"{access} = %s")
+            if self.kind is not None and i == len(self.identifiers) - 1:
+                if isinstance(statement.expression, OwnershipExpression):
+                    statement.expression.owners[1] = identifier
+                    statement.add("*")
+                    self.check(statement.expression)
 
-            if self.c_type is not None and i == len(self.identifiers) - 1:
-                is_ref = expression.ownership is not None
+                statement.add(f"__sea_type_{self.kind}__ ")
 
-                if is_ref:
-                    expression.owners[1] = identifier
-                    self.check(expression)
+        return statement
 
-                expression.new(f"{self.c_type}{'*' if is_ref else ''} %s")
-
-        return expression
-
-    def handle_temporaries(self, expression):  # sourcery skip: use-next
+    def handle_temporaries(self, statement):  # sourcery skip: use-next
         for identifier in self.others:
-            if identifier in expression.identifiers:
-                return True, self.transpiler.new_temp(expression)
+            if identifier in statement.expression.identifiers:
+                return True, self.transpiler.new_temp(statement)
 
-        return False, expression
+        return False, statement

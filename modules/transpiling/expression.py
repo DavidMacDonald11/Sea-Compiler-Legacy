@@ -1,96 +1,104 @@
-from parsing.declarations.type_keyword import TYPE_MAP
-
 class Expression:
-    @property
-    def c_type(self):
-        return f"__sea_type_{self.e_type}__"
-
-    def __init__(self, e_type = "", string = ""):
+    def __init__(self, kind = "", string = ""):
+        self.kind = kind
         self.string = string
-        self.e_type = e_type
-        self.ownership = None
-        self.owners = [None, None]
         self.identifiers = []
-        self.is_invar = False
-        self.newline = False
-        self.prefix = None
+        self.finished = False
+        self._show_kind = False
 
     def __repr__(self):
-        return self.string + ("\n" if self.newline else "")
+        return self.string
 
-    def copy(self):
-        expression = Expression(self.e_type, self.string)
-        expression.ownership = self.ownership
-        expression.owners = self.owners.copy()
-        expression.identifiers = self.identifiers.copy()
-        expression.is_invar = self.is_invar
-
-        return expression
-
-    def new(self, string):
-        self.string = string.replace("%s", self.string).replace("%e", self.e_type)
+    def show_kind(self):
+        self._show_kind = True
         return self
 
-    def cast(self, e_type):
-        self.e_type = TYPE_MAP[e_type][0] if e_type in TYPE_MAP else e_type
+    def finish(self, node, semicolons):
+        if self.finished: return self
+        self.finished = True
+
+        indent = "\t" * node.transpiler.context.blocks
+        end = ";" if semicolons else ""
+        end = f"{end} /*{self.kind}*/" if self._show_kind else end
+
+        return self.add(indent, end)
+
+    def new(self, string):
+        self.string = string
+        return self
+
+    def add(self, before = "", after = ""):
+        self.string = f"{before}{self.string}{after}"
+        return self
+
+    def cast(self, kind):
+        self.kind = kind
         return self
 
     def cast_up(self):
-        self.e_type = "u64" if self.e_type in ("bool", "char") else self.e_type
+        self.kind = "nat8" if self.kind in ("bool", "char") else self.kind
         return self
 
-    def operate(self, node):
-        if self.e_type == "":
-            node.transpiler.warnings.error(node, "Function call has no return value")
+    def drop_imaginary(self, node):
+        if "imag" not in self.kind: return self
 
-        if self.ownership is not None:
-            node.transpiler.warnings.error(node, "Cannot perform operations on ownership rvalue")
+        node.transpiler.include("complex")
+        return self.add(f"cimag{'l' if self.kind == 'imag' else ''}(", ")")
 
-        return self
+    def operate(self, node, bitwise = False, boolean = False):
+        if self.kind in ("str", "list"):
+            node.transpiler.warnings.error(node, f"Cannot perform operation on {self.kind} (yet)")
 
-    def boolean(self, node):
-        if self.e_type != "bool":
+        if bitwise and self.kind in FLOATING_TYPES:
+            message = "Cannot perform bitwise operation on floating type"
+            node.transpiler.warnings.error(node, message)
+
+        if boolean and self.kind != "bool":
             node.transpiler.warnings.error(node, "".join((
-                "Conditional value must be of type bool. ",
-                "(Consider using the '?' operator to get boolean value)"
+                "Conditional value must be of type 'bool'. ",
+                "(Consider using the '?' operator to get a boolean value)"
             )))
 
         return self
 
-    def drop_imaginary(self, node):
-        if self.e_type[0] != "g" or self.ownership is not None:
-            return self
-
-        node.transpiler.include("complex")
-        return self.new(f"cimag{'' if self.e_type == 'g64' else 'l'}(%s)")
-
     @classmethod
-    def resolve(cls, left, right):
-        e_type1, e_type2 = left.e_type, right.e_type
-        e_type = e_type1 if POINTS[e_type1] > POINTS[e_type2] else e_type2
+    def resolve(cls, left, right, allow_str = False):
+        kind1, kind2 = left.kind, right.kind
 
-        if e_type1[0] != e_type2[0] == "g" or e_type2[0] != e_type2[0] == "g":
-            e_type = f"c{e_type[1:]}"
+        if "imag" in kind1 and "imag" not in kind2:
+            kind1 = kind1.replace("imag", "cplex")
+        elif "imag" in kind2 and "imag" not in kind1:
+            kind2 = kind2.replace("imag", "cplex")
 
-        expression = cls(e_type)
+        expression = cls(kind1 if POINTS[kind1] > POINTS[kind2] else kind2)
         expression.identifiers = left.identifiers + right.identifiers
+
+        if not allow_str and expression.kind == "str":
+            raise KeyError("String is not allowed in this context")
 
         return expression
 
+FLOATING_TYPES = ("real32, real64, real, imag32, imag64, imag, cplex32, cplex64, cplex")
+
 POINTS = {
-    "": -1,
-    "bool": 0,
-    "char": .5,
-    "u64": 1,
-    "i64": 2,
-    "umax": 2.25,
-    "imax": 2.5,
-    "f64": 3,
-    "fmax": 3.5,
-    "g64": 3,
-    "gmax": 3.5,
-    "c64": 4,
-    "cmax": 4.5,
-    "str": 10,
-    "list": 11
+    "bool": 0, "char": .5,
+    "nat8": 1, "nat16": 2, "nat32": 3, "nat64": 4, "nat": 5,
+    "int8": 1.5, "int16": 2.5, "int32": 3.5, "int64": 4.5, "int": 5.5,
+    "real32": 6, "real64": 7, "real": 8, "imag32": 6, "imag64": 7, "imag": 8,
+    "cplex32": 9, "cplex64": 10, "cplex": 11,
+    "str": 100
 }
+
+class OwnershipExpression(Expression):
+    def __init__(self, owner, operator, kind = "", string = ""):
+        self.owners = [owner, None]
+        self.operator = operator
+        self.invariable = False
+        super().__init__(kind, string)
+
+    def drop_imaginary(self, node):
+        return self
+
+    def operate(self, node, bitwise = False, boolean = False):
+        node.transpiler.warnings.error(node, "Cannot perform operations on ownership rvalue")
+        return self

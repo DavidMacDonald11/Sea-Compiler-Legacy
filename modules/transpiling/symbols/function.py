@@ -1,23 +1,23 @@
-from parsing.declarations.type_keyword import TYPE_MAP
-from .identifier import Identifier
+from .symbol import Symbol
+from ..expression import Expression, OwnershipExpression
 
-class Function(Identifier):
+class Function(Symbol):
     @property
     def c_name(self):
         return f"__sea_fun_{self.name}__"
 
     @property
-    def e_type(self):
-        return TYPE_MAP[self.return_type[1]][0] if self.return_type is not None else ""
+    def kind(self):
+        return self.return_type[1] if self.return_type is not None else ""
 
-    def __init__(self, s_type, name, table_number):
+    def __init__(self, name):
         self.declared = False
         self.defined = False
         self.returned = False
         self.caller = None
         self.parameters = []
         self.return_type = None
-        super().__init__(s_type, name, table_number)
+        super().__init__(name)
 
     def define(self):
         self.defined = True
@@ -39,8 +39,8 @@ class Function(Identifier):
             node.transpiler.warnings.error(node, message)
             return
 
-        for i in range(len(params)):
-            if params[i] != self.parameters[i]:
+        for param, parameter in zip(params, self.parameters):
+            if param != parameter:
                 node.transpiler.warnings.error(node, message)
                 return
 
@@ -58,9 +58,9 @@ class Function(Identifier):
             return ""
 
         args = arguments.transpile_parameters(self.parameters)
-        expression = node.transpiler.expression(self.e_type, f"{self.c_name}({args})")
+        expression = Expression(self.kind, f"{self.c_name}({args})")
 
-        return self.set_expression(expression, called = True)
+        return self.set_expression(expression)
 
     def set_return_type(self, node, return_type):
         if return_type is not None:
@@ -74,31 +74,31 @@ class Function(Identifier):
             message = "Function definition return type conflicts with previous function declaration"
             node.transpiler.warnings.error(node, message)
 
-    def return_expression(self, node):
+    def return_expression(self):
         self.returned = True
-        return self.set_expression(node.transpiler.expression(self.e_type))
+        return self.set_expression(Expression(self.kind))
 
-    def set_expression(self, expression, called = False):
+    def set_expression(self, expression):
         if self.return_type is None:
-            if self.e_type in ("g64", "gmax"):
-                expression.new("(%s * 1.0j)")
+            if "imag" in self.kind:
+                expression.add("(", " * 1.0j)")
 
             return expression
 
         qualifier, _, borrow = self.return_type
-        expression.ownership = borrow
 
-        if called:
-            expression.is_invar = qualifier != "var" and borrow is not None
-        else:
-            expression.is_invar = qualifier == "invar" or qualifier is None and borrow is not None
+        if borrow is None:
+            if "imag" in self.kind:
+                expression.add("(", " * 1.0j)")
 
-        if self.e_type in ("g64", "gmax") and borrow is None:
-            expression.new("(%s * 1.0j)")
+            return expression
+
+        expression = OwnershipExpression(None, borrow, expression.kind, expression.string)
+        expression.invariable = (qualifier != "var")
 
         return expression
 
 class StandardFunction(Function):
-    def __init__(self, s_type, name, table_number):
+    def __init__(self, name):
         self.define = None
-        super().__init__(s_type, name, table_number)
+        super().__init__(name)

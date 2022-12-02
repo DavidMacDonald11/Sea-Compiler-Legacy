@@ -1,7 +1,7 @@
 from lexing.token import PREFIX_UNARY_OPERATORS
-from .primary_expression import Identifier
+from .primary_expression import Identifier, NumericConstant
 from .exponential_expression import ExponentialExpression
-from ..node import Node, PrimaryNode
+from ..node import Node
 
 class UnaryExpression(Node):
     @property
@@ -35,71 +35,62 @@ class UnaryExpression(Node):
 
 class UnaryPlusExpression(UnaryExpression):
     def transpile(self):
-        exp = self.expression
-        expression = exp.transpile().operate()
+        expression = self.expression.transpile().operate(self)
 
-        if expression.e_type == "i64" and exp.of(PrimaryNode) and exp.token.of("NumericConstant"):
-            return expression.new("%sU").cast("u64")
+        if "int" in expression.kind and self.expression.of(NumericConstant):
+            return expression.new("%sU").cast(expression.kind.replace("int", "nat"))
 
         return expression
 
 class UnaryMinusExpression(UnaryExpression):
     def transpile(self):
-        expression = self.expression.transpile().operate(self)
+        expression = self.expression.transpile().operate(self).cast_up()
 
-        if expression.e_type in ("u64", "bool"):
-            expression.cast("i64")
-        elif expression.e_type == "umax":
-            expression.cast("imax")
+        if "nat" in expression.kind:
+            expression.cast(expression.kind.replace("nat", "int"))
 
-        return expression.new("-%s")
+        return expression.add("-")
 
 class BitwiseNotExpression(UnaryExpression):
     def transpile(self):
-        expression = self.expression.transpile().operate(self).cast_up()
-
-        if expression.e_type not in ("f64", "fmax", "g64", "gmax", "c64", "cmax"):
-            return expression.new("~%s")
-
-        message = "Cannot perform bitwise operation on floating type"
-        self.transpiler.warnings.error(self, message)
-        return expression.new("/*!*/%s")
+        return self.expression.transpile().operate(self).cast_up().add("~")
 
 class RoundExpression(UnaryExpression):
     wrote = []
 
     def transpile(self):
         expression = self.expression.transpile().operate(self).cast_up()
+        kind = expression.kind
 
-        if expression.e_type in ("u64", "umax", "i64", "imax"):
+        if "nat" in kind or "int" in kind:
             return expression
 
         self.transpiler.include("math")
         func = {"~": "round", "~>": "ceil", "<~": "floor"}[self.operator.string]
 
-        if expression.e_type not in ("f64", "g64", "gmax", "c64", "cmax"):
+        if kind == "real":
             func += "l"
 
-        if expression.e_type in ("g64", "gmax", "c64", "cmax"):
+        if "imag" in kind or "cplex" in kind:
             self.transpiler.include("complex")
-            func = type(self).write_func(self.transpiler, func, expression)
+            func = type(self).write_func(self.transpiler, func, kind)
 
-        return expression.new(f"({func}(%s))")
+        return expression.add(f"({func}(", "))")
 
     @classmethod
-    def write_func(cls, transpiler, func, expression):
-        sea_func = f"__sea_func_{func}_{expression.e_type}__"
+    def write_func(cls, transpiler, func, kind):
+        sea_func = f"__sea_func_{func}_{kind}__"
 
         if sea_func in cls.wrote: return sea_func
         cls.wrote += [sea_func]
 
-        e_type, c_type = expression.e_type, expression.c_type
+        c_kind = f"__sea_type_{kind}__"
 
-        long = "l" if e_type in ("gmax", "cmax") else ""
-        real_comp = "" if e_type in ("g64", "gmax") else f"{func}{long}(creal{long}(num)) + "
+        long = "l" if kind in ("imag", "cplex") else ""
+        real_comp = "" if "imag" in kind else f"{func}{long}(creal{long}(num)) + "
 
         transpiler.header("\n".join((
-            f"{c_type} {sea_func}({c_type} num)", "{",
+            f"{c_kind} {sea_func}({c_kind} num)", "{",
             f"\treturn {real_comp}{func}{long}(cimag{long}(num)) * 1.0j;", "}\n"
         )))
 
@@ -108,21 +99,15 @@ class RoundExpression(UnaryExpression):
 class OwnershipExpression(UnaryExpression):
     def transpile(self):
         self.transpiler.context.in_ownership = True
-
-        operator = self.operator.string
         expression = self.expression.transpile()
-        expression.ownership = operator
 
         if not isinstance(self.expression, Identifier):
             message = "Cannot borrow/transfer ownership of non-identifier"
             self.transpiler.warnings.error(self, message)
-            return expression.new(f"/*{operator}*/%s")
+            return expression
 
         name = self.expression.token.string
         identifier = self.transpiler.symbols.at(self, name)
 
-        if identifier is None:
-            return expression.new("/*%s*/")
-
         self.transpiler.context.in_ownership = False
-        return identifier.transfer(self, expression, operator)
+        return identifier.transfer(expression, self.operator.string)

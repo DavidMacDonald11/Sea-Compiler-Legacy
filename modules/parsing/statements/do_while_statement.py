@@ -1,3 +1,4 @@
+from transpiling.statement import Statement
 from .line_statement import LineStatementComponent
 from .blockable_statement import BlockableStatementComponent
 from .block_statement import BlockStatement
@@ -69,26 +70,34 @@ class DoWhileStatement(Node):
 
     def transpile(self):
         self.transpiler.context.loops += 1
-        condition = self.condition.transpile().boolean(self.condition)
-        statement = condition.new("while(%s)")
+        condition = self.condition.transpile().operate(self.condition, boolean = True)
+        condition.add("while(", ");")
+        statement = Statement()
 
         if self.label is None:
             block = self.block.transpile()
-            block = block if isinstance(self.block, BlockStatement) else block.new("{ %s; }")
-            return statement.new(f"{self.indent}do {block} %s")
+
+            if not isinstance(self.block, BlockStatement):
+                block.finish(self).add("\t")
+                statement.new("do {").append(block).new("}")
+                return statement.append(Statement(condition)).finish(self, semicolons = False)
+
+            statement.new("do").append(block).new_append(Statement(condition))
+            return statement.finish(self, semicolons = False)
 
         label = self.transpiler.symbols.new_label(self, self.label.string)
         block = self.block.transpile()
 
         if not isinstance(self.block, BlockStatement):
-            block = block.new("{ %s;")
+            block.finish(self).add("\t")
+            statement.new("do {").append(block).new("}")
         else:
-            block.string = block.string[:-1]
-
-        statement = statement.new(f"{self.indent}}} %s")
+            statement.new("do").append(block)
+            statement.lines = statement.lines[:-1]
 
         if label is not None:
-            statement = label.surround(self, statement)
+            label = label.surround(Statement().new(condition.add("} ")))
+            statement.new("").new_append(label).drop()
 
         self.transpiler.context.loops -= 1
-        return statement.new(f"{self.indent}do {block} %s")
+        return statement.finish(self, semicolons = False)
