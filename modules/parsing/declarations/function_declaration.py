@@ -8,7 +8,6 @@ from ..node import Node
 # TODO implement function overloading or default args
 # TODO verify returns from all branches
 # TODO add varargs
-# TODO check local var ownership return
 
 class FunctionDeclaration(Node):
     @property

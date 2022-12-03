@@ -45,3 +45,5 @@ class IdentifierDefinition(Node):
         if owner1.ownership == "&" and expression.operator == "$":
             message = "Cannot take ownership from a borrowed identifier"
             self.transpiler.warnings.error(self, message)
+
+        owner2.fun_local = owner1.fun_local

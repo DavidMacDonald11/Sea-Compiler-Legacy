@@ -13,6 +13,7 @@ class Variable(Identifier):
     def __init__(self, name, kind, table_number):
         self.initialized = False
         self.transfered = False
+        self.fun_local = False
         self.ownership = None
         super().__init__(name, kind, table_number)
 
@@ -32,6 +33,7 @@ class Variable(Identifier):
     def assign(self, node, expression):
         if not self.initialized:
             self.initialized = True
+            self.fun_local = node.transpiler.context.in_function
 
             if isinstance(expression, OwnershipExpression):
                 self.ownership = expression.operator

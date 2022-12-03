@@ -117,6 +117,9 @@ class ReturnStatement(Node):
         e_owner = isinstance(expression, OwnershipExpression)
         f_owner = isinstance(func, OwnershipExpression)
 
+        if e_owner and expression.owners[0] is not None and expression.owners[0].fun_local:
+            self.transpiler.warnings.error(self, "Cannot return local identifier from function")
+
         if e_owner and f_owner:
             same = expression.operator == func.operator
             same = same and not expression.invariable or func.invariable
