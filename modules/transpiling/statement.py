@@ -1,12 +1,15 @@
 from .expression import Expression
 
 class Statement:
+    cached = []
+
     @property
     def expression(self):
         return self.lines[-1]
 
     def __init__(self, expression = None):
-        self.lines = [expression or Expression()]
+        self.lines = [*type(self).cached, expression or Expression()]
+        type(self).cached = []
 
     def show_kind(self):
         for line in self.lines:

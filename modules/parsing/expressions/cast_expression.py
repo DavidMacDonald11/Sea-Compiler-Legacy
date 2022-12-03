@@ -22,19 +22,54 @@ class CastExpression(Node):
         return expression
 
     def transpile(self):
-        expression = self.expression.transpile().operate(self)
-        keyword = self.type_keyword.token.string
+        expression = self.expression.transpile()
+        kind = self.type_keyword.token.string
 
-        if keyword == "bool":
-            if expression.kind == "bool": return expression
+        if expression.kind == kind:
+            return expression
+
+        expression.operate(self)
+
+        if kind == "bool":
             return expression.add("(", " != 0)").cast("bool")
 
-        type_keyword = self.type_keyword.transpile()
-        kind = type_keyword.kind
+        if kind == "str":
+            return self.transpile_str(expression)
 
-        if "imag" not in keyword:
-            return expression.add(f"(__sea_type_{kind}__)(", ")").cast(kind)
+        keyword = self.type_keyword.transpile()
 
-        suffix = "f" if "32" in keyword else ("" if "64" in keyword else "l")
+        if "imag" not in kind:
+            return expression.add(f"({keyword})(", ")").cast(kind)
+
         self.transpiler.include("complex")
+        suffix = "f" if "32" in kind else ("" if "64" in kind else "l")
         return expression.add(f"(cimag{suffix}(", ") * 1.0j)").cast(kind)
+
+    def transpile_str(self, expression):
+        self.transpiler.include("stdio")
+        format_tag = expression.format_tag
+
+        if expression.kind == "bool":
+            expression.add("(", ') ? "True" : "False"').cast("str")
+        elif "imag" in expression.kind:
+            expression.drop_imaginary(self).cast(expression.kind.replace("imag", "real"))
+            format_tag = f"{format_tag}i"
+        elif "cplex" in expression.kind:
+            expression, format_tag = self.transpile_str_cplex(expression, format_tag)
+
+        if "cplex" not in expression.kind:
+            expression = self.transpiler.cache_new_temp(expression)
+
+        expression.add(f'"{format_tag}", ').cast("str")
+        return self.transpiler.cache_new_temp(expression, buffer = True)
+
+    def transpile_str_cplex(self, expression, format_tag):
+        expression = self.transpiler.cache_new_temp(expression)
+        kind, string = expression.kind, expression.string
+
+        self.transpiler.include("complex")
+        suffix = "f" if "32" in kind else ("" if "64" in kind else "l")
+        expression.new(f"creal{suffix}({string}), cimag{suffix}({string})")
+        format_tag = f"{format_tag} + {format_tag}i"
+
+        return expression, format_tag

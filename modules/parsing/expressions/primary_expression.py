@@ -41,7 +41,7 @@ class NumericConstant(PrimaryNode):
         return cls(num, cls.parser.take()) if cls.parser.next.has("i") else cls(num)
 
     def transpile(self):
-        specifier = "nat" if self.token.specifier == "i" else "float"
+        specifier = "nat" if self.token.specifier == "i" else "real"
         string = self.convert_base(self.token.string)
 
         if len(self.nodes) == 1:
@@ -102,7 +102,7 @@ class NumericConstant(PrimaryNode):
 
 class CharacterConstant(PrimaryNode):
     def transpile(self):
-        return Expression("char", self.token.string)
+        return Expression("char", self.token.raw_string)
 
 class StringConstant(PrimaryNode):
     @classmethod

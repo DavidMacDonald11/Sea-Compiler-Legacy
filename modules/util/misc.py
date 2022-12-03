@@ -13,7 +13,7 @@ class MatchRe:
 
     def __eq__(self, other):
         pattern = re.compile(other)
-        return pattern.matches(self.string)
+        return pattern.match(self.string) is not None
 
 def last_enumerate(iterable, **kwargs):
     for i, thing in enumerate(iterable, **kwargs):

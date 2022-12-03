@@ -101,7 +101,12 @@ class ReturnStatement(Node):
         return statement.show_kind()
 
     def check_return_kinds(self, statement, func, f_kind):
-        statement = self.check_missing_return(statement, func, f_kind)
+        if self.expression is None:
+            if func.kind != "":
+                self.transpiler.warnings.error(self, f"Function must return {f_kind}")
+
+            return statement
+
         statement, expression = self.transpile_expression(statement, func)
 
         if func.kind == "":
@@ -125,13 +130,6 @@ class ReturnStatement(Node):
         message = f"Function returns {f_kind}; found {kind}"
         self.transpiler.warnings.error(self, message)
 
-        return statement
-
-    def check_missing_return(self, statement, func, f_kind):
-        if self.expression is not None or func.kind == "":
-            return statement
-
-        self.transpiler.warnings.error(self, f"Function must return {f_kind}")
         return statement
 
     def transpile_expression(self, statement, func):

@@ -1,8 +1,14 @@
 from .context import Context
 from .symbol_table import SymbolTable
 from .expression import Expression
+from .statement import Statement
 
 class Transpiler:
+    @property
+    def temps(self):
+        self._temps += 1
+        return self._temps
+
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
@@ -10,7 +16,7 @@ class Transpiler:
         self.symbols = SymbolTable()
         self.includes = []
         self.lines = ""
-        self.temps = 0
+        self._temps = -1
 
         self.standard()
 
@@ -57,11 +63,6 @@ class Transpiler:
 
         self.header()
 
-        self.standard_function(None, "cprint", [("invar", "cplex", None)], "\n".join((
-            "\nvoid __sea_fun_cprint__(__sea_type_cplex__ c)", "{",
-            '\tprintf("%Lf + %Lfi\\n", creall(c), cimagl(c));', "}"
-        )), ["complex", "stdio"])
-
         self.standard_function(None, "print", [("invar", "str", None)], "\n".join((
             "\nvoid __sea_fun_print__(__sea_type_str__ s)", "{",
             '\tprintf("%s", s);', "}"
@@ -93,12 +94,27 @@ class Transpiler:
     def new_temp(self, statement):
         kind = statement.expression.kind
         name =  f"__sea_temp_value_{self.temps}__"
-        self.temps += 1
 
         prefix = Expression(kind, statement.expression.string)
         prefix.add(f"__sea_type_{kind}__ {name} = ")
 
         return statement.prefix(prefix).new(name)
+
+    def cache_new_temp(self, expression, buffer = False):
+        name = f"__sea_temp_value_{self.temps}__"
+        prefix = Expression(expression.kind, expression.string)
+
+        if buffer:
+            prefix.add(f"__sea_type_char__ {name}[1 + snprintf(NULL, 0, ", ")]")
+            Statement.cached += [prefix]
+
+            prefix = Expression(expression.kind, expression.string)
+            prefix.add(f"sprintf({name}, ", ")")
+        else:
+            prefix.add(f"__sea_type_{expression.kind}__ {name} = ")
+
+        Statement.cached += [prefix]
+        return expression.new(name)
 
     def push_symbol_table(self):
         self.symbols = SymbolTable(self.symbols)

@@ -1,4 +1,8 @@
 class Expression:
+    @property
+    def format_tag(self):
+        return FORMAT_TAGS[self.kind]
+
     def __init__(self, kind = "", string = ""):
         self.kind = kind
         self.string = string
@@ -87,6 +91,15 @@ POINTS = {
     "real32": 6, "real64": 7, "real": 8, "imag32": 6, "imag64": 7, "imag": 8,
     "cplex32": 9, "cplex64": 10, "cplex": 11,
     "str": 100
+}
+
+FORMAT_TAGS = {
+    "bool": "%s", "char": "%c",
+    "nat8": "%hu", "nat16": "%hu", "nat32": "%u", "nat64": "%lu", "nat": "%lu",
+    "int8": "%hd", "int16": "%hd", "int32": "%d", "int64": "%ld", "int": "%ld",
+    "real32": "%f", "real64": "%lf", "real": "%Lf", "imag32": "%f", "imag64": "%lf", "imag": "%Lf",
+    "cplex32": "%f", "cplex64": "%lf", "cplex": "%Lf",
+    "str": "%s"
 }
 
 class OwnershipExpression(Expression):

@@ -7,6 +7,10 @@ class FakeToken:
     warnings = None
 
     @cached_property
+    def raw_string(self):
+        return self._string
+
+    @cached_property
     def string(self):
         return self._string
 
@@ -54,11 +58,11 @@ class FakeToken:
         d_int = re.compile(r"^\d+$")
         n_int = re.compile(r"^\d+b[A-Z0-9]+$")
 
-        if d_int.match(self.string) or n_int.match(self.string):
+        if d_int.match(self.raw_string) or n_int.match(self.raw_string):
             self.specifier = "i"
             return
 
-        if "." not in self.string and "e" not in self.string:
+        if "." not in self.raw_string and "e" not in self.raw_string:
             type(self).warnings.error(self, "Incorrect integer constant")
             return
 
@@ -70,7 +74,7 @@ class FakeToken:
         ]
 
         for pattern in patterns:
-            if pattern.match(self.string):
+            if pattern.match(self.raw_string):
                 self.specifier = "f"
                 return
 
@@ -80,17 +84,17 @@ class FakeToken:
         patterns = [
             re.compile(r"^'[^\\]'$"),
             re.compile(r"^'\\[abfnrtv'\"\\?]'$"),
-            re.compile(r"^'\\[0-7]{1, 3}'$"),
+            re.compile(r"^'\\[0-7]{1,3}'$"),
             re.compile(r"^'\\x[0-9A-F]+'$"),
             re.compile(r"^'\\u[0-9A-F]{4}'$"),
             re.compile(r"^'\\U[0-9A-F]{8}'$")
         ]
 
         for pattern in patterns:
-            if pattern.match(self.string):
+            if pattern.match(self.raw_string):
                 return
 
-        match MatchRe(self.string):
+        match MatchRe(self.raw_string):
             case r"^''$":
                 message = "Empty character constant"
             case r"^'[^']*$":
@@ -103,12 +107,12 @@ class FakeToken:
     def _validate_identifier(self):
         pattern = re.compile(r"^\w+$")
 
-        if pattern.match(self.string):
+        if pattern.match(self.raw_string):
             return
 
-        if self.string in OPERATOR_FUNCS:
-            if self.string in DISALLOWED_OPERATOR_FUNCS:
-                op = DISALLOWED_OPERATOR_FUNCS[self.string]
+        if self.raw_string in OPERATOR_FUNCS:
+            if self.raw_string in DISALLOWED_OPERATOR_FUNCS:
+                op = DISALLOWED_OPERATOR_FUNCS[self.raw_string]
                 type(self).warnings.error(self, f"Cannot overload {op} operator")
 
             return
