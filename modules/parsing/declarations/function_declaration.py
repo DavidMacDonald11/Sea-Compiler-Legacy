@@ -1,5 +1,6 @@
 from transpiling.statement import Statement
 from transpiling.expression import Expression
+from transpiling.symbols.function import FunctionKind
 from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .type_keyword import TypeKeyword
 from ..node import Node
@@ -152,16 +153,16 @@ class FunctionParameter(Node):
         return expression
 
     def transpile_def(self):
-        qualifier, keyword, borrow = self.transpile_qualifiers()
+        f_kind = self.transpile_qualifiers()
         name = self.identifier.string if self.identifier is not None else ""
 
-        if qualifier == "var":
-            parameter = self.transpiler.symbols.new_variable(self, name, keyword)
+        if f_kind.qualifier == "var":
+            parameter = self.transpiler.symbols.new_variable(self, name, f_kind.kind)
         else:
-            parameter = self.transpiler.symbols.new_invariable(self, name, keyword)
+            parameter = self.transpiler.symbols.new_invariable(self, name, f_kind.kind)
 
         parameter.initialized = True
-        parameter.ownership = borrow
+        parameter.ownership = f_kind.borrow
         keyword = self.type_keyword.transpile()
 
         if parameter.ownership is not None:
@@ -171,20 +172,13 @@ class FunctionParameter(Node):
 
     def transpile_qualifiers(self):
         qualifier = self.type_qualifier
+        if qualifier is not None: qualifier = qualifier.string
+
+        kind = self.type_keyword.token.string
         borrow = self.borrow_qualifier
+        if borrow is not None: borrow = borrow.string
 
-        has_qualifier = qualifier is not None
-        has_borrow = borrow is not None
-
-        if not has_borrow and not has_qualifier or has_qualifier and qualifier.string == "var":
-            qualifier = "var"
-        else:
-            qualifier = "invar"
-
-        borrow = borrow.string if has_borrow else None
-        keyword = self.type_keyword.token.string
-
-        return qualifier, keyword, borrow
+        return FunctionKind(qualifier, kind, borrow)
 
 class FunctionReturnType(Node):
     @property

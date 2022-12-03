@@ -1,6 +1,6 @@
 from lexing.token import POSTFIX_UNARY_OPERATORS
 from transpiling.expression import Expression, OwnershipExpression, FLOATING_TYPES
-from transpiling.symbols.function import Function
+from transpiling.symbols.function import Function, FunctionKind
 from .primary_expression import PrimaryExpression, Identifier
 from ..node import Node
 
@@ -136,49 +136,23 @@ class ArgumentExpressionList(Node):
         expression = None
 
         for i, (argument, parameter) in enumerate(zip(self.arguments, parameters)):
-            arg = argument.transpile()
-            p_qualifier, p_keyword, p_borrow = parameter
+            arg, argument = self.initialize_arg(argument)
+            parameter.verify_arg(self, argument, i)
 
-            if isinstance(arg, OwnershipExpression):
-                a_qualifier = "invar" if arg.invariable else "var"
-                a_borrow = arg.operator
-            else:
-                a_qualifier = "var"
-                a_borrow = None
-
-            self.compare_borrow(i, p_borrow, a_borrow)
-            self.check_var_borrow(i, a_borrow, p_borrow, a_qualifier, p_qualifier)
-            self.compare_types(i, arg, p_keyword)
-
-            if "cplex" not in p_keyword:
+            if "cplex" not in parameter.kind:
                 arg.drop_imaginary(self)
 
             expression = arg if expression is None else expression.add(after = f", {arg}")
         return expression
 
-    def compare_borrow(self, i, p_borrow, a_borrow):
-        if a_borrow == p_borrow:
-            return
+    def initialize_arg(self, argument):
+        arg = argument.transpile()
 
-        p_kind = "borrow" if p_borrow == "&" else "ownership" if p_borrow == "$" else "value"
-        a_kind = "borrow" if a_borrow == "&" else "ownership" if a_borrow == "$" else "value"
+        if isinstance(arg, OwnershipExpression):
+            qualifier = "invar" if arg.invariable else "var"
+            borrow = arg.operator
+        else:
+            qualifier = "var"
+            borrow = None
 
-        message = f"Parameter {i + 1} requires {p_kind}; found {a_kind}"
-        self.transpiler.warnings.error(self, message)
-
-    def check_var_borrow(self, i, a_borrow, p_borrow, a_qualifier, p_qualifier):
-        if a_borrow is None or a_qualifier == "var" or a_qualifier == p_qualifier:
-            return
-
-        p_kind = "borrow" if p_borrow == "&" else "ownership" if p_borrow == "$" else "value"
-        message = f"Parameter {i + 1} requires variable {p_kind}; found invariable"
-        self.transpiler.warnings.error(self, message)
-
-    def compare_types(self, i, arg, p_keyword):
-        expression = Expression.resolve(arg, Expression(p_keyword), allow_str = True)
-
-        if expression.kind == p_keyword:
-            return
-
-        message = f"Parameter {i + 1} requires {p_keyword}; found {arg.kind}"
-        self.transpiler.warnings.error(self, message)
+        return arg, FunctionKind(qualifier, arg.kind, borrow)

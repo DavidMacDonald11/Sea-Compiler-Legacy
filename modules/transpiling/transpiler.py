@@ -2,6 +2,7 @@ from .context import Context
 from .symbol_table import SymbolTable
 from .expression import Expression
 from .statement import Statement
+from .symbols.function import FunctionKind
 
 class Transpiler:
     @property
@@ -63,7 +64,10 @@ class Transpiler:
 
         self.header()
 
-        self.standard_function(None, "print", [("invar", "str", None)], "\n".join((
+        r_type = FunctionKind(None, None, None)
+        parameters = [FunctionKind("invar", "str", None)]
+
+        self.standard_function(r_type, "print", parameters, "\n".join((
             "\nvoid __sea_fun_print__(__sea_type_str__ s)", "{",
             '\tprintf("%s", s);', "}"
         )), ["stdio"])

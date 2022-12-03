@@ -8,7 +8,7 @@ class Function(Symbol):
 
     @property
     def kind(self):
-        return self.return_type[1] if self.return_type is not None else ""
+        return self.return_type.kind if self.return_type is not None else ""
 
     def __init__(self, name):
         self.declared = False
@@ -44,6 +44,20 @@ class Function(Symbol):
                 node.transpiler.warnings.error(node, message)
                 return
 
+    def set_return_type(self, node, return_type):
+        if return_type is not None:
+            return_type = FunctionKind(*return_type.components)
+        else:
+            return_type = FunctionKind(None, None, None)
+
+        if not self.declared:
+            self.return_type = return_type
+            return
+
+        if self.return_type != return_type:
+            message = "Function definition return type conflicts with previous function declaration"
+            node.transpiler.warnings.error(node, message)
+
     def call(self, node, arguments):
         self.caller = self.caller or node
 
@@ -62,39 +76,26 @@ class Function(Symbol):
 
         return self.set_expression(expression)
 
-    def set_return_type(self, node, return_type):
-        if return_type is not None:
-            return_type = return_type.components
-
-        if not self.declared:
-            self.return_type = return_type
-            return
-
-        if self.return_type != return_type:
-            message = "Function definition return type conflicts with previous function declaration"
-            node.transpiler.warnings.error(node, message)
-
     def return_expression(self):
         self.returned = True
         return self.set_expression(Expression(self.kind))
 
     def set_expression(self, expression):
-        if self.return_type is None:
+        if self.kind == "":
             if "imag" in self.kind:
                 expression.add("(", " * 1.0j)")
 
             return expression
 
-        qualifier, _, borrow = self.return_type
-
-        if borrow is None:
+        if self.return_type.borrow is None:
             if "imag" in self.kind:
                 expression.add("(", " * 1.0j)")
 
             return expression
 
+        borrow = self.return_type.borrow
         expression = OwnershipExpression(None, borrow, expression.kind, expression.string)
-        expression.invariable = (qualifier != "var")
+        expression.invariable = (self.return_type.qualifier != "var")
 
         return expression
 
@@ -102,3 +103,49 @@ class StandardFunction(Function):
     def __init__(self, name):
         self.define = None
         super().__init__(name)
+
+class FunctionKind:
+    @property
+    def noun(self):
+        return "borrow" if self.borrow == "&" else "ownership" if self.borrow == "$" else "value"
+
+    def __init__(self, qualifier, kind, borrow):
+        self.qualifier = qualifier or ("var" if borrow is None else "invar")
+        self.kind = kind or ""
+        self.borrow = borrow
+
+    def __eq__(self, other):
+        if not isinstance(other, FunctionKind):
+            raise NotImplementedError(f"Cannot compare FunctionKind to {type(other).__name__}")
+
+        result = (self.qualifier == other.qualifier)
+        result = result and self.kind == other.kind
+        result = result and self.borrow == other.borrow
+
+        return result
+
+    def verify_arg(self, node, arg, i):
+        message = f"Parameter {i + 1}"
+
+        self.verify_arg_qualifier(node, arg, message)
+        self.verify_arg_borrow(node, arg, message)
+        self.verify_arg_kind(node, arg, message)
+
+    def verify_arg_qualifier(self, node, arg, message):
+        if self.qualifier != arg.qualifier == "invar":
+            message = f"{message} requires variable {self.noun}; found invariable {arg.noun}"
+            node.transpiler.warnings.error(node, message)
+
+    def verify_arg_borrow(self, node, arg, message):
+        if self.borrow != arg.borrow:
+            message = f"{message} requires {self.noun}; found {arg.noun}"
+            node.transpiler.warnings.error(node, message)
+
+    def verify_arg_kind(self, node, arg, message):
+        expression1 = Expression(self.kind)
+        expression2 = Expression(arg.kind)
+        kind = Expression.resolve(expression1, expression2, allow_str = True).kind
+
+        if kind != self.kind:
+            message = f"{message} must be {self.kind}; found {arg.kind}"
+            node.transpiler.warnings.error(node, message)
