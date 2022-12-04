@@ -5,7 +5,6 @@ from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
 from .type_keyword import TypeKeyword
 from ..node import Node
 
-# TODO implement function overloading or default args
 # TODO verify returns from all branches
 # TODO add varargs
 
@@ -89,10 +88,17 @@ class FunctionParameterList(Node):
 
     @classmethod
     def construct(cls):
+        positional = True
         parameters = []
 
         while cls.parser.next.has(*TYPE_KEYWORDS, *TYPE_MODIFIER_KEYWORDS):
             parameters += [FunctionParameter.construct()]
+
+            if parameters[-1].default is None and not positional:
+                message = "Positional parameter cannot follow default parameter"
+                cls.parser.warnings.error(parameters[-1], message)
+
+            positional = parameters[-1].default is None
 
             if cls.parser.next.has(","):
                 cls.parser.take()
@@ -123,13 +129,17 @@ class FunctionParameter(Node):
         if self.identifier is not None:
             nodes += [self.identifier]
 
+        if self.default is not None:
+            nodes += [self.default]
+
         return nodes
 
-    def __init__(self, type_qualifier, type_keyword, borrow_qualifier, identifier):
+    def __init__(self, type_qualifier, type_keyword, borrow_qualifier, identifier, default):
         self.type_qualifier = type_qualifier
         self.type_keyword = type_keyword
         self.borrow_qualifier = borrow_qualifier
         self.identifier = identifier
+        self.default = default
 
     @classmethod
     def construct(cls):
@@ -137,8 +147,17 @@ class FunctionParameter(Node):
         type_keyword = TypeKeyword.construct()
         borrow_qualifier = cls.parser.take() if cls.parser.next.has("&", "$") else None
         identifier = cls.parser.take() if cls.parser.next.of("Identifier") else None
+        default = None
 
-        return cls(type_qualifier, type_keyword, borrow_qualifier, identifier)
+        if cls.parser.next.has("="):
+            if identifier is None:
+                message = "Default parameter must be given identifier"
+                cls.parser.warnings.error(cls.parser.take(), message)
+            else:
+                cls.parser.take()
+                default = cls.parser.expression.construct()
+
+        return cls(type_qualifier, type_keyword, borrow_qualifier, identifier, default)
 
     def transpile(self):
         expression = self.type_keyword.transpile()
@@ -160,6 +179,9 @@ class FunctionParameter(Node):
         else:
             parameter = self.transpiler.symbols.new_invariable(self, name, f_kind.kind)
 
+        if f_kind.defaults is not None:
+            parameter.assign(self, f_kind.defaults[1])
+
         parameter.initialized = True
         parameter.ownership = f_kind.borrow
         keyword = self.type_keyword.transpile()
@@ -177,7 +199,12 @@ class FunctionParameter(Node):
         borrow = self.borrow_qualifier
         if borrow is not None: borrow = borrow.string
 
-        return FunctionKind(qualifier, kind, borrow)
+        defaults = self.default
+        if defaults is not None:
+            defaults = self.default.transpile().assert_constant(self)
+            defaults = (self.identifier.string, defaults)
+
+        return FunctionKind(qualifier, kind, borrow, defaults)
 
 class FunctionReturnType(Node):
     @property

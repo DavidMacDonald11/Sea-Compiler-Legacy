@@ -1,12 +1,19 @@
-fun test(int $num) -> int $:
-    invar int num1 = $num
-    return $num1
+fun inc(var cplex &num, real re = 1, imag im = 1i):
+    num += re + im
 
 fun main() -> int:
-    int num = 5
-    invar int num2 = test($num)
+    cplex num = 2 + 2i
 
-    print(num2 as str)
-    print("\n")
+    inc(&num)
+    print(num as str)
+
+    inc(&num, -2)
+    print(num as str)
+
+    inc(&num, im = -2i)
+    print(num as str)
+
+    inc(&num, im = 0i, re = 0)
+    print(num as str)
 
     return 0

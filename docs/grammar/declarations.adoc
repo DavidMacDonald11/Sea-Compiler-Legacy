@@ -37,11 +37,18 @@
 {tab} `*invar*` `_identifier-declaration_`
 
 `_function-declaration_`:
-{tab} `*fun*` `_identifier_` `*(*` `function-parameter-list`~opt~ `*)*` `_function-return-type_`~opt~
-`_function-parameter-list_`:
-{tab} `_function-parameter_`
-{tab} `_function-parameter-list_` `*,*` `_function-parameter_`
-`_function-parameter_`:
+{tab} `*fun*` `_identifier_` `*(*` `_parameter-list_`~opt~ `_defaults_`~opt~ `*)*` `_return-type_`~opt~
+`_parameter-list_`:
+{tab} `_parameter_`
+{tab} `_parameter-list_` `*,*` `_parameter_`
+`_defaults_`:
+{tab} `*,*` `_default-parameter-list_`
+`_default-parameter-list_`:
+{tab} `_default-parameter_`
+{tab} `_default-parameter-list_` `*,*` `_default-parameter_`
+`_parameter_`:
 {tab} `_type-qualifier_`~opt~ `_type-keyword_` `_borrow-qualifier_`~opt~ `_identifier_`~opt~
-`_function-return-type_`:
+`_default-parameter_`:
+{tab} `_type-qualifier_`~opt~ `_type-keyword_` `_identifier_` `*=*` `_expression_`
+`_return-type_`:
 {tab} `*\->*` `_type-qualifier_`~opt~ `_type-keyword_` `*$*`~opt~

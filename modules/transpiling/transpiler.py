@@ -65,11 +65,14 @@ class Transpiler:
         self.header()
 
         r_type = FunctionKind(None, None, None)
-        parameters = [FunctionKind("invar", "str", None)]
+        parameters = [
+            FunctionKind("invar", "str", None),
+            FunctionKind("invar", "str", None, ("end", Expression("", r'"\n"')))
+            ]
 
         self.standard_function(r_type, "print", parameters, "\n".join((
-            "\nvoid __sea_fun_print__(__sea_type_str__ s)", "{",
-            '\tprintf("%s", s);', "}"
+            "\nvoid __sea_fun_print__(__sea_type_str__ s, __sea_type_str__ end)", "{",
+            '\tprintf("%s%s", s, end);', "}"
         )), ["stdio"])
 
     def standard_function(self, r_type, name, parameters, definition, includes):

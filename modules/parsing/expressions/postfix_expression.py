@@ -119,10 +119,17 @@ class ArgumentExpressionList(Node):
 
     @classmethod
     def construct(cls):
+        positional = True
         arguments = []
 
         while not cls.parser.next.has(")", r"\n", "EOF"):
-            arguments += [cls.parser.expression.construct()]
+            arguments += [FunctionArgument.construct()]
+
+            if arguments[-1].identifier is None and not positional:
+                message = "Positional argument cannot follow keyword argument"
+                cls.parser.warnings.error(arguments[-1], message)
+
+            positional = arguments[-1].identifier is None
 
             if cls.parser.next.has(","):
                 cls.parser.take()
@@ -136,7 +143,7 @@ class ArgumentExpressionList(Node):
         expression = None
 
         for i, (argument, parameter) in enumerate(zip(self.arguments, parameters)):
-            arg, argument = self.initialize_arg(argument)
+            arg, argument = argument.transpile()
             parameter.verify_arg(self, argument, i)
 
             if "cplex" not in parameter.kind:
@@ -156,3 +163,55 @@ class ArgumentExpressionList(Node):
             borrow = None
 
         return arg, FunctionKind(qualifier, arg.kind, borrow)
+
+class FunctionArgument(Node):
+    @property
+    def nodes(self):
+        nodes = [self.expression]
+
+        if self.identifier is not None:
+            nodes = [self.identifier, self.expression]
+
+        return nodes
+
+    @property
+    def defaults(self):
+        return self.identifier
+
+    def __init__(self, identifier, expression):
+        self.identifier = identifier
+        self.expression = expression
+
+    @classmethod
+    def construct(cls):
+        identifier = None
+        expression = cls.parser.expression.construct()
+
+        if cls.parser.next.has("="):
+            if not expression.of(Identifier):
+                message = "Cannot assign value to non-keyword argument"
+                cls.parser.warnings.error(cls.parser.take(), message)
+            else:
+                cls.parser.take()
+                identifier = expression
+                expression = cls.parser.expression.construct()
+
+        return cls(identifier, expression)
+
+    def transpile(self):
+        identifier = self.identifier
+
+        if identifier is not None:
+            identifier = identifier.token.string
+
+        expression = self.expression.transpile()
+        defaults = (identifier, expression)
+
+        if isinstance(expression, OwnershipExpression):
+            qualifier = "invar" if expression.invariable else "var"
+            borrow = expression.operator
+        else:
+            qualifier = "var"
+            borrow = None
+
+        return expression, FunctionKind(qualifier, expression.kind, borrow, defaults)

@@ -13,6 +13,14 @@ class Expression:
     def __repr__(self):
         return self.string
 
+    def copy(self):
+        other = Expression(self.kind, self.string)
+        other.identifiers = self.identifiers
+        other.finished = self.finished
+        if self._show_kind: other.show_kind()
+
+        return other
+
     def show_kind(self):
         self._show_kind = True
         return self
@@ -62,6 +70,12 @@ class Expression:
                 "Conditional value must be of type 'bool'. ",
                 "(Consider using the '?' operator to get a boolean value)"
             )))
+
+        return self
+
+    def assert_constant(self, node):
+        if len(self.identifiers) > 0:
+            node.transpiler.warnings.error(node, "Expression must be a constant expression")
 
         return self
 

@@ -60,19 +60,11 @@ class Function(Symbol):
 
     def call(self, node, arguments):
         self.caller = self.caller or node
+        arguments = [] if arguments is None else arguments.arguments
 
-        arg_count = 0 if arguments is None else len(arguments.arguments)
-        param_count = len(self.parameters)
-
-        if arg_count != param_count:
-            message = f"Function requires {param_count} parameters; found {arg_count} arguments"
-            node.transpiler.warnings.error(node, message)
-
-        if arguments is None or arg_count != param_count:
-            return ""
-
-        args = arguments.transpile_parameters(self.parameters)
+        args = FunctionKind.verify_args(node, self.parameters, arguments)
         expression = Expression(self.kind, f"{self.c_name}({args})")
+        expression.identifiers += [self.name]
 
         return self.set_expression(expression)
 
@@ -109,10 +101,12 @@ class FunctionKind:
     def noun(self):
         return "borrow" if self.borrow == "&" else "ownership" if self.borrow == "$" else "value"
 
-    def __init__(self, qualifier, kind, borrow):
+    def __init__(self, qualifier, kind, borrow, defaults = None):
         self.qualifier = qualifier or ("var" if borrow is None else "invar")
         self.kind = kind or ""
         self.borrow = borrow
+        self.defaults = defaults
+        self.arg = None
 
     def __eq__(self, other):
         if not isinstance(other, FunctionKind):
@@ -121,15 +115,137 @@ class FunctionKind:
         result = (self.qualifier == other.qualifier)
         result = result and self.kind == other.kind
         result = result and self.borrow == other.borrow
+        result = result and self.defaults == other.defaults
 
         return result
 
-    def verify_arg(self, node, arg, i):
+    @classmethod
+    def verify_args(cls, node, params, args):
+        pos_params, key_params = cls.split_positional(params)
+        pos_args, key_args = cls.split_positional(args)
+
+        if len(pos_args) < len(pos_params):
+            p_count = len(pos_params)
+            a_count = len(pos_args)
+
+            p_noun = "positional " + ("parameter" if p_count == 1 else "parameters")
+            a_noun = "positional " + ("argument" if a_count == 1 else "arguments")
+
+            message = f"Function requires {p_count} {p_noun}; found {a_count} {a_noun}"
+            node.transpiler.warnings.error(node, message)
+            return Expression()
+
+        key_args += pos_args[len(pos_params):]
+        pos_args = pos_args[:len(pos_params)]
+
+        expression = cls.verify_positional_args(node, pos_params, pos_args)
+        expression2 = cls.verify_keyword_args(node, key_params, key_args, len(pos_params))
+
+        for param in params:
+            param.arg = None
+
+        if expression.string == "":
+            expression = expression2
+        elif expression2.string != "":
+            expression.add(after = f", {expression2}")
+
+        return expression
+
+    @classmethod
+    def split_positional(cls, kinds):
+        positional = []
+        keyword = []
+
+        for kind in kinds:
+            if kind.defaults is None:
+                positional += [kind]
+            else:
+                keyword += [kind]
+
+        return positional, keyword
+
+    @classmethod
+    def verify_positional_args(cls, node, params, args):
+        expression = None
+
+        for i, (arg, param) in enumerate(zip(args, params)):
+            arg_exp, arg_kind = arg.transpile()
+            param.verify_arg(node, arg_exp, arg_kind, i)
+
+            if "cplex" not in param.kind:
+                arg_exp.drop_imaginary(node)
+
+            expression = arg_exp if expression is None else expression.add(after = f", {arg_exp}")
+
+        return expression or Expression()
+
+    @classmethod
+    def verify_keyword_args(cls, node, params, args, pos_count):
+        expression = None
+        original = params
+
+        for i, arg in enumerate(args):
+            arg_exp, arg_kind = arg.transpile()
+
+            if arg.identifier is None:
+                data = (node, params, arg_exp, arg_kind, pos_count + i)
+                params = cls.match_positional_to_keyword(*data)
+
+                if params is None: break
+            else:
+                cls.match_keywords(node, original, arg_exp, arg_kind, pos_count + i)
+
+        for param in original:
+            arg = param.arg or param.defaults[1].copy()
+
+            if "cplex" not in param.kind:
+                arg.drop_imaginary(node)
+
+            expression = arg if expression is None else expression.add(after = f", {arg}")
+
+        return expression or Expression()
+
+    @classmethod
+    def match_positional_to_keyword(cls, node, params, arg_exp, arg_kind, pos_count):
+        if len(params) == 0:
+            node.transpiler.warnings.error(node, "Too many function arguments provided")
+            return None
+
+        param, *params = params
+        param.verify_arg(node, arg_exp, arg_kind, pos_count)
+        return params
+
+    @classmethod
+    def match_keywords(cls, node, params, arg_exp, arg_kind, pos_count):
+        identifier = arg_kind.defaults[0]
+        param = cls.param_at(node, params, identifier)
+
+        if param is not None:
+            param.verify_arg(node, arg_exp, arg_kind, pos_count)
+
+    @classmethod
+    def param_at(cls, node, params, key):
+        for param in params:
+            if param.defaults[0] == key:
+                return param
+
+        message = f"No such keyword argument as '{key}'"
+        node.transpiler.warnings.error(node, message)
+        return None
+
+    def verify_arg(self, node, arg_exp, arg, i):
+        if self.arg is not None:
+            message = f"Multiple values given for argument '{self.defaults[0]}'"
+            node.transpiler.warnings.error(node, message)
+            return
+
         message = f"Parameter {i + 1}"
 
         self.verify_arg_qualifier(node, arg, message)
         self.verify_arg_borrow(node, arg, message)
         self.verify_arg_kind(node, arg, message)
+
+        self.arg = arg_exp
 
     def verify_arg_qualifier(self, node, arg, message):
         if self.qualifier != arg.qualifier == "invar":
