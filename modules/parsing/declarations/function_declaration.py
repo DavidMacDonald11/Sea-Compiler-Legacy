@@ -140,6 +140,7 @@ class FunctionParameter(Node):
         self.borrow_qualifier = borrow_qualifier
         self.identifier = identifier
         self.default = default
+        self._qualifiers = None
 
     @classmethod
     def construct(cls):
@@ -153,6 +154,10 @@ class FunctionParameter(Node):
             if identifier is None:
                 message = "Default parameter must be given identifier"
                 cls.parser.warnings.error(cls.parser.take(), message)
+            elif borrow_qualifier is not None:
+                message = "Default parameter cannot be borrow or ownership"
+                cls.parser.warnings.error(cls.parser.take(), message)
+                cls.parser.expression.construct()
             else:
                 cls.parser.take()
                 default = cls.parser.expression.construct()
@@ -192,6 +197,9 @@ class FunctionParameter(Node):
         return Expression("", f"{keyword} {parameter.c_name}")
 
     def transpile_qualifiers(self):
+        if self._qualifiers is not None:
+            return self._qualifiers
+
         qualifier = self.type_qualifier
         if qualifier is not None: qualifier = qualifier.string
 
@@ -204,7 +212,8 @@ class FunctionParameter(Node):
             defaults = self.default.transpile().assert_constant(self)
             defaults = (self.identifier.string, defaults)
 
-        return FunctionKind(qualifier, kind, borrow, defaults)
+        self._qualifiers = FunctionKind(qualifier, kind, borrow, defaults)
+        return self._qualifiers
 
 class FunctionReturnType(Node):
     @property
