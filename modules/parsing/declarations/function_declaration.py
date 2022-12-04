@@ -172,6 +172,10 @@ class FunctionParameter(Node):
 
         if self.identifier is not None:
             expression.add(after = f" {self.identifier.string}")
+            f_kind = self.transpile_qualifiers()
+
+            if f_kind.defaults is not None:
+                f_kind.defaults[1].verify_assign(self, expression.kind)
 
         return expression
 
@@ -185,7 +189,7 @@ class FunctionParameter(Node):
             parameter = self.transpiler.symbols.new_invariable(self, name, f_kind.kind)
 
         if f_kind.defaults is not None:
-            parameter.assign(self, f_kind.defaults[1])
+            f_kind.defaults[1].verify_assign(self, parameter.kind)
 
         parameter.initialized = True
         parameter.ownership = f_kind.borrow

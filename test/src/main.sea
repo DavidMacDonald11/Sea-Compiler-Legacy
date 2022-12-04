@@ -1,19 +1,16 @@
-fun inc(var cplex &num, real re = 1, imag im = 1i):
-    num += re + im
+fun inc(var cplex &num, real re = 1, imag im = 1i)
 
 fun main() -> int:
     cplex num = 2 + 2i
 
     inc(&num)
-    print(num as str)
-
     inc(&num, -2)
-    print(num as str)
-
+    inc(&num, im = 0i)
     inc(&num, im = -2i)
-    print(num as str)
-
     inc(&num, im = 0i, re = 0)
-    print(num as str)
 
     return 0
+
+fun inc(var cplex &num, real re = 1, imag im = 1i):
+    num += re + im
+    print(num as str)

@@ -10,6 +10,9 @@ class Expression:
         self.finished = False
         self._show_kind = False
 
+    def __eq__(self, other):
+        return self.string == other.string
+
     def __repr__(self):
         return self.string
 
@@ -76,6 +79,21 @@ class Expression:
     def assert_constant(self, node):
         if len(self.identifiers) > 0:
             node.transpiler.warnings.error(node, "Expression must be a constant expression")
+
+        return self
+
+    def verify_assign(self, node, kind):
+        if self.kind == "str" and kind != "str":
+            node.transpiler.warnings.error(node, "Cannot assign non-str value to str identifier")
+
+        if self.kind != "str" and kind == "str":
+            node.transpiler.warnings.error(node, "Cannot assign str value to non-str identifier")
+
+        if self.kind == "bool" and kind != "bool":
+            node.transpiler.warnings.error(node, "".join((
+                "Cannot assign non-bool value to bool identifier. ",
+                "(Consider using the '?' operator to get boolean value)"
+            )))
 
         return self
 

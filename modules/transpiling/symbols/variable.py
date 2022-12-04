@@ -47,19 +47,7 @@ class Variable(Identifier):
         if "imag" in self.kind:
             expression.drop_imaginary(node)
 
-        if self.kind == "str" and expression.kind != "str":
-            node.transpiler.warnings.error(node, "Cannot assign non-str value to str identifeir")
-
-        if self.kind != "str" and expression.kind == "str":
-            node.transpiler.warnings.error(node, "Cannot assign str value to non-str identifier")
-
-        if self.kind == "bool" and expression.kind != "bool":
-            node.transpiler.warnings.error(node, "".join((
-                "Cannot assign non-bool value to bool identifier. ",
-                "(Consider using the '?' operator to get boolean value)"
-            )))
-
-        return expression
+        return expression.verify_assign(node, self.kind)
 
     def transfer(self, expression, operator):
         expression = OwnershipExpression(self, operator, self.kind, expression.string)
