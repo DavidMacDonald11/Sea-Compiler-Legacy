@@ -25,13 +25,19 @@ class CastExpression(Node):
         expression = self.expression.transpile()
         kind = self.type_keyword.token.string
 
-        if expression.kind == kind:
+        if expression.kind == kind and expression.arrays == 0:
             return expression
 
-        expression.operate(self)
-
         if kind == "bool":
+            if expression.kind == "str" or expression.arrays > 0:
+                expression.add(after = ".size")
+                expression.arrays = 0
+            elif expression.kind == "bool":
+                return expression
+
             return expression.add("(", " != 0)").cast("bool")
+
+        expression.operate(self)
 
         if kind == "str":
             return self.transpile_str(expression)
@@ -61,7 +67,7 @@ class CastExpression(Node):
             expression = self.transpiler.cache_new_temp(expression)
 
         expression.add(f'"{format_tag}", ').cast("str")
-        return self.transpiler.cache_new_temp(expression, buffer = True)
+        return self.transpiler.cache_new_temp_buffer(expression)
 
     def transpile_str_cplex(self, expression, format_tag):
         expression = self.transpiler.cache_new_temp(expression)

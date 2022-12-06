@@ -3,8 +3,9 @@ class Expression:
     def format_tag(self):
         return FORMAT_TAGS[self.kind]
 
-    def __init__(self, kind = "", string = ""):
+    def __init__(self, kind = "", string = "", arrays = 0):
         self.kind = kind
+        self.arrays = arrays
         self.string = string
         self.identifiers = []
         self.finished = False
@@ -34,7 +35,7 @@ class Expression:
 
         indent = "\t" * node.transpiler.context.blocks
         end = ";" if semicolons else ""
-        end = f"{end} /*{self.kind}*/" if self._show_kind else end
+        end = f"{end} /*{self.kind}{'[]' * self.arrays}*/" if self._show_kind else end
 
         return self.add(indent, end)
 
@@ -54,15 +55,15 @@ class Expression:
         self.kind = "nat8" if self.kind in ("bool", "char") else self.kind
         return self
 
-    def drop_imaginary(self, node):
-        if "imag" not in self.kind: return self
+    def drop_imaginary(self, node, any_kind = False):
+        if not any_kind and "imag" not in self.kind or self.arrays > 0: return self
 
         node.transpiler.include("complex")
-        return self.add(f"cimag{'l' if self.kind == 'imag' else ''}(", ")")
+        return self.add(f"cimag{'' if self.kind[-1].isdigit() else 'l'}(", ")")
 
-    def operate(self, node, bitwise = False, boolean = False):
-        if self.kind in ("str", "list"):
-            node.transpiler.warnings.error(node, f"Cannot perform operation on {self.kind} (yet)")
+    def operate(self, node, bitwise = False, boolean = False, arrays = False):
+        if not arrays and (self.kind == "str" or self.arrays > 0):
+            node.transpiler.warnings.error(node, "Cannot perform operation on arrays")
 
         if bitwise and self.kind in FLOATING_TYPES:
             message = "Cannot perform bitwise operation on floating type"
@@ -98,7 +99,7 @@ class Expression:
         return self
 
     @classmethod
-    def resolve(cls, left, right, allow_str = False):
+    def resolve(cls, left, right, allow_str = False, allow_arr = False):
         kind1, kind2 = left.kind, right.kind
 
         if "imag" in kind1 and "imag" not in kind2:
@@ -108,9 +109,13 @@ class Expression:
 
         expression = cls(kind1 if POINTS[kind1] > POINTS[kind2] else kind2)
         expression.identifiers = left.identifiers + right.identifiers
+        expression.arrays = left.arrays if left.arrays > right.arrays else right.arrays
 
         if not allow_str and expression.kind == "str":
             raise KeyError("String is not allowed in this context")
+
+        if not allow_arr and expression.arrays > 0:
+            raise KeyError("Arrays are not allows in this context")
 
         return expression
 
@@ -141,9 +146,9 @@ class OwnershipExpression(Expression):
         self.invariable = False
         super().__init__(kind, string)
 
-    def drop_imaginary(self, node):
+    def drop_imaginary(self, node, any_kind = False):
         return self
 
-    def operate(self, node, bitwise = False, boolean = False):
+    def operate(self, node, bitwise = False, boolean = False, arrays = False):
         node.transpiler.warnings.error(node, "Cannot perform operations on ownership rvalue")
         return self

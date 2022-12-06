@@ -5,6 +5,7 @@ class Context:
         self.in_return = False
         self.in_ownership = False
         self.function = None
+        self.array = None
 
     @property
     def in_block(self):

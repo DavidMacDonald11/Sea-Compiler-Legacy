@@ -19,7 +19,7 @@ class PrimaryExpression(Node):
             return Identifier.construct()
 
         if cls.parser.next.has("["):
-            return ExpressionList.construct()
+            return ArrayList.construct()
 
         if cls.parser.next.has("("):
             return ParenthesesExpression.construct()
@@ -135,7 +135,8 @@ class StringConstant(PrimaryNode):
             string = re.sub(r"\n", " \\\n", string)
             string = re.sub(r"\t", "\t", string)
 
-        return Expression("str", string)
+        self.transpiler.include("string")
+        return self.transpiler.cache_new_temp_array(Expression("str", string), -1)
 
 class Identifier(PrimaryNode):
     def transpile(self):
@@ -148,7 +149,22 @@ class Identifier(PrimaryNode):
 
         return expression
 
-class ExpressionList(Node):
+# TODO str from char[], char[] from str
+# TODO postfix index and splitting
+# TODO function parameters/return values
+# TODO foreach loop
+# TODO array ranges
+# TODO array generators
+# TODO "in" keyword
+
+class ArrayList(Node):
+    @property
+    def imag(self):
+        if self.transpiler.context.array is None:
+            return False
+
+        return "imag" in self.transpiler.context.array.kind
+
     @property
     def nodes(self) -> list:
         return self.expressions
@@ -174,14 +190,43 @@ class ExpressionList(Node):
         cls.parser.expecting_has("]")
         return cls(expressions)
 
-    # TODO allow x,y = [1,2] if True else [3,4] or x, y = [1, 2] + [3, 4]
     def transpile(self):
-        expression = Expression("list", f"{self.expressions[0].transpile()}")
+        left = self.expressions[0].transpile().operate(self, arrays = True)
 
-        for exp in self.expressions[1:]:
-            expression.add(after = f", {exp.transpile()}")
+        if self.imag:
+            left.drop_imaginary(self, any_kind = True)
 
-        return expression
+        for expression in self.expressions[1:]:
+            right = expression.transpile().operate(self, arrays = True)
+
+            if self.imag:
+                right.drop_imaginary(self, any_kind = True)
+
+            self.verify_next(left, right)
+
+            left = Expression.resolve(left, right, True, True).new(f"{left}")
+            left.add(after = f", {right}")
+
+        left.arrays += 1
+        left.add("{", "}")
+
+        self.verify_string_array(left, self.transpiler.context.array)
+        return self.transpiler.cache_new_temp_array(left, len(self.expressions))
+
+    def verify_string_array(self, left, array):
+        if array is None:
+            return
+
+        if array.kind == "str" and left.kind != "str":
+            self.transpiler.warnings.error(self, "Cannot assign str array to non-str array")
+        elif array.kind != "str" and left.kind == "str":
+            self.transpiler.warnings.error(self, "Cannot assign non-str array to str array")
+
+    def verify_next(self, left, right):
+        if left.kind != "str" and right.kind == "str":
+            self.transpiler.warnings.error(self, "Cannot have str in non-str array")
+        elif left.kind == "str" and right.kind != "str":
+            self.transpiler.warnings.error(self, "Cannot have non-str in str array")
 
 class ParenthesesExpression(Node):
     @property

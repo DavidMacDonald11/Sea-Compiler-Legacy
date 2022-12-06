@@ -1,16 +1,11 @@
-fun inc(var cplex &num, real re = 1, imag im = 1i)
-
 fun main() -> int:
-    cplex num = 2 + 2i
+    str string = "HI"
+    cplex[] arr = [1, 2i, 3i]
+    str[][] arr2 = [["Hi"], ["Hello", string]]
 
-    inc(&num)
-    inc(&num, -2)
-    inc(&num, im = 0i)
-    inc(&num, im = -2i)
-    inc(&num, im = 0i, re = 0)
+    print(len(string) as str)
+    print(len(arr) as str)
+    print(len(5) as str)
+    print(len(arr2) as str)
 
     return 0
-
-fun inc(var cplex &num, real re = 1, imag im = 1i):
-    num += re + im
-    print(num as str)

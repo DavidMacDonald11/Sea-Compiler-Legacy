@@ -113,7 +113,7 @@ class FunctionKind:
             raise NotImplementedError(f"Cannot compare FunctionKind to {type(other).__name__}")
 
         result = (self.qualifier == other.qualifier)
-        result = result and self.kind == other.kind
+        result = result and self.kind == other.kind or other.kind == "any"
         result = result and self.borrow == other.borrow
         result = result and self.defaults == other.defaults
 
@@ -243,7 +243,9 @@ class FunctionKind:
 
         self.verify_arg_qualifier(node, arg, message)
         self.verify_arg_borrow(node, arg, message)
-        self.verify_arg_kind(node, arg, message)
+
+        if self.kind != "any":
+            self.verify_arg_kind(node, arg, message)
 
         self.arg = arg_exp
 

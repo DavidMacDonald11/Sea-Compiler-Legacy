@@ -25,9 +25,12 @@ class ConditionalExpression(Node):
         return left
 
     def transpile(self):
-        left = self.left.transpile().operate(self)
+        left = self.left.transpile().operate(self, arrays = True)
         condition = self.condition.transpile().operate(self, boolean = True)
-        right = self.right.transpile().operate(self)
-        result = Expression.resolve(left, right).cast_up()
+        right = self.right.transpile().operate(self, arrays = True)
+        result = Expression.resolve(left, right, True, True).cast_up()
+
+        if left.arrays != right.arrays:
+            self.transpiler.warnings.error(self, "Mismatching array dimensions")
 
         return result.new(f"({condition}) ? {left} : {right}")

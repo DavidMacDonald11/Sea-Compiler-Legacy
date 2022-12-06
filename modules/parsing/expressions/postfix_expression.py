@@ -79,12 +79,15 @@ class FactorialExpression(PostfixExpression):
 
 class TestExpression(PostfixExpression):
     def transpile(self):
-        expression = self.expression.transpile().operate(self)
+        expression = self.expression.transpile().operate(self, arrays = True)
 
-        if expression.kind != "bool":
-            expression.add("(", " != 0)").cast("bool")
+        if expression.kind == "str" or expression.arrays > 0:
+            expression.add(after = ".size")
+            expression.arrays = 0
+        elif expression.kind == "bool":
+            return expression
 
-        return expression
+        return expression.add("(", " != 0)").cast("bool")
 
 class CallExpression(PostfixExpression):
     @property

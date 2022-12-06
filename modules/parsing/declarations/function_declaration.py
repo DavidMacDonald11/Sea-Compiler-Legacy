@@ -6,7 +6,6 @@ from .type_keyword import TypeKeyword
 from ..node import Node
 
 # TODO verify returns from all branches
-# TODO add varargs
 
 class FunctionDeclaration(Node):
     @property

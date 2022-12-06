@@ -24,7 +24,7 @@ class Statement:
         return self
 
     def prefix(self, expression):
-        self.lines = [expression, *self.lines]
+        self.lines = [*self.lines[:-1], expression, self.lines[-1]]
         return self
 
     def new_prefix(self, statement):

@@ -1,9 +1,7 @@
 from transpiling.expression import OwnershipExpression
 from transpiling.statement import Statement
-from .expression_statement import ExpressionStatement
 from ..expressions.expression import Expression
-from ..expressions.primary_expression import Identifier
-from ..expressions.primary_expression import ExpressionList as PExpressionList
+from ..expressions.primary_expression import Identifier, ArrayList
 from ..node import Node
 
 class AssignmentStatement(Node):
@@ -51,10 +49,10 @@ class AssignmentStatement(Node):
 
         if declaration is not None:
             identifier_lists = [ExpressionList(declaration.identifiers), *identifier_lists]
-            kind = declaration.type_keyword.token.string
+            kind = (declaration.type_keyword.token.string, declaration.arrays)
 
             for name in declaration.identifiers[::-1]:
-                declaration.transpile_name(name.string, kind)
+                declaration.transpile_name(name.string, kind[0])
         else:
             kind = None
 
@@ -85,8 +83,7 @@ class ExpressionList(Node):
         return self.expressions
 
     def __init__(self, expressions):
-        self.was_primary = len(expressions) == 1 and isinstance(expressions[0], PExpressionList)
-        self.expressions = expressions[0].expressions if self.was_primary else expressions
+        self.expressions = expressions
 
     def __len__(self):
         return len(self.expressions)
@@ -106,12 +103,6 @@ class ExpressionList(Node):
 
     def transpile(self):
         raise NotImplementedError(type(self).__name__)
-
-    def to_expression_statement(self):
-        if self.was_primary:
-            return ExpressionStatement(PExpressionList(self.expressions[0]))
-
-        return ExpressionStatement(self.expressions[0])
 
 class AssignmentList(Node):
     @property
@@ -164,28 +155,39 @@ class AssignmentList(Node):
         for i, identifier in enumerate(self.identifiers[::-1]):
             name = identifier.token.string
             identifier = self.transpiler.symbols.at(self, name)
+            declaration = self.kind is not None and i == len(self.identifiers) - 1
 
             self.others += [name]
 
+            if declaration:
+                identifier.arrays = self.kind[1]
+
+            if identifier.arrays > 0 and self.expression.of(ArrayList):
+                self.transpiler.context.array = identifier
+                statement = Statement(self.expression.transpile()).cast(identifier.kind)
+                self.transpiler.context.array = None
+
             if not temped:
-                temped, expression = self.handle_temporaries(statement)
+                temped = self.handle_temporaries(statement)
 
             access = identifier.c_access if identifier.ownership is not None else f"{identifier}"
             identifier.assign(self, statement.expression).add(f"{access} = ")
 
-            if self.kind is not None and i == len(self.identifiers) - 1:
+            if declaration:
                 if isinstance(statement.expression, OwnershipExpression):
                     statement.expression.owners[1] = identifier
                     statement.add("*")
                     self.check(statement.expression)
 
-                statement.add(f"__sea_type_{self.kind}__ ")
+                kind = "array" if self.kind[1] > 0 or self.kind[0] == "str" else self.kind[0]
+                statement.add(f"__sea_type_{kind}__ ")
 
         return statement
 
     def handle_temporaries(self, statement):  # sourcery skip: use-next
         for identifier in self.others:
             if identifier in statement.expression.identifiers:
-                return True, self.transpiler.new_temp(statement)
+                self.transpiler.new_temp(statement)
+                return True
 
-        return False, statement
+        return False

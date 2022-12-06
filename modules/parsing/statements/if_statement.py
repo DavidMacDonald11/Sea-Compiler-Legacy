@@ -57,8 +57,9 @@ class IfStatement(Node):
 
     def transpile(self):
         condition = self.condition.transpile().operate(self.condition, boolean = True)
-        block = self.block.transpile()
-        statement = Statement(condition.add("if (", ")")).append(block)
+        statement = Statement().show_kind().finish(self)
+        statement.lines[-1] = condition.add("if (", ")")
+        statement.append(self.block.transpile())
 
         for else_if in self.elses:
             statement.new("else")

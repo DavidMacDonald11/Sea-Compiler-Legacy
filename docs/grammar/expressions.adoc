@@ -14,13 +14,13 @@
 {tab} `_character-constant_`
 {tab} `_string-constant_`
 {tab} `_identifier_`
-{tab} `*[*` `_expression-list_`~opt~ `*]*`
+{tab} `*[*` `_array-list_` `*]*`
 {tab} `*(*` `_expression_` `*)*`
 {tab} `*||*` `_expression_` `*||*`
 {tab} `_primary-keyword_`
-`_expression-list_`:
+`_array-list_`:
 {tab} `_expression_`
-{tab} `_expression-list_` `*,*` `_expression_`~opt~
+{tab} `_array-list_` `*,*` `_expression_`~opt~
 `_primary-keyword_`: one of
 {tab} `*True*` `*False*`
 

@@ -25,7 +25,10 @@
 {tab} `*&*` `*$*`
 
 `_identifier-declaration_`:
-{tab} `_type-keyword_` `_identifier-list_`
+{tab} `_type-keyword_` `_array-declaration-list_`~opt~ `_identifier-list_`
+`_array-declaration-list_`:
+{tab} `*[*` `*]*`
+{tab} `_array-declaration-list_` `*[*` `*]*`
 `_identifier-list_`:
 {tab} `_identifier_`
 {tab} `_identifier-list_` `*,*` `_identifier_`
