@@ -263,8 +263,6 @@ class FunctionKind:
             node.transpiler.warnings.error(node, message)
 
     def verify_arg_borrow(self, node, arg, message):
-        print(self.borrow, arg.borrow)
-
         if self.borrow != arg.borrow:
             message = f"{message} requires {self.noun}; found {arg.noun}"
             node.transpiler.warnings.error(node, message)

@@ -27,9 +27,13 @@
 `_postfix-expression_`:
 {tab} `_primary-expression_`
 {tab} `_postfix-expression_` `_postfix-unary-operator_`
-{tab} `_postfix-expression_` `*(*`  `_argument-expression-list_`~opt~ `_defaults_`~opt~ `*)*`
+{tab} `_postfix-call-expression_`
+{tab} `_postfix-access-expression_`
 `_postfix-unary-operator_`: one of
 {tab} `*%*` `*!*` `*?*`
+
+`_postfix-call-expression_`:
+{tab} `_postfix-expression_` `*(*`  `_argument-expression-list_`~opt~ `_defaults_`~opt~ `*)*`
 `_argument-expression-list_`:
 {tab} `_expression_`
 {tab} `_argument-expression-list_` `*,*` `_expression_`
@@ -38,6 +42,12 @@
 `_default-argument-expression-list_`:
 {tab} `_identifier_` `*=*` `_expression_`
 {tab} `_default-argument-expression-list_` `*,*` `_identifier_` `*=*` `_expression_`
+
+`_postfix-access-expression_`:
+{tab} `_postfix-expression_` `*[*` `_expression_` `_split-expression_`~opt~ `_split-expression_`~opt~ `*]*`
+{tab} `_postfix-expression_` `*[*` `_split-expression_`~opt~ `_split-expression_`~opt~`*]*`
+`_split-expression_`:
+{tab} `*:*` `_expression_`~opt~
 
 `_exponential-expression_`:
 {tab} `_postfix-expression_`
