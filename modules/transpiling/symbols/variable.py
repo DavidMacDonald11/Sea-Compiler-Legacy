@@ -54,12 +54,7 @@ class Variable(Identifier):
         if "imag" in self.kind:
             expression.drop_imaginary(node, any_kind = True)
 
-        if expression.arrays != self.arrays:
-            e_title = f"{expression.arrays}D array" if expression.arrays > 0 else "non-array"
-            s_title = f"{self.arrays}D array" if self.arrays > 0 else "non-array"
-            node.transpiler.warnings.error(node, f"{e_title} cannot be assigned to {s_title}")
-
-        return expression.verify_assign(node, self.kind)
+        return expression.verify_assign(node, self)
 
     def transfer(self, expression, operator):
         expression = OwnershipExpression(self, operator, self.kind, expression.string)

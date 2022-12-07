@@ -155,7 +155,8 @@ class Identifier(PrimaryNode):
 # TODO foreach loop
 # TODO array ranges
 # TODO array generators
-# TODO "in" keyword
+# TODO "is" keyword
+# TODO main(str[] args = nullarr)
 
 class ArrayList(Node):
     @property
@@ -227,6 +228,9 @@ class ArrayList(Node):
             self.transpiler.warnings.error(self, "Cannot have str in non-str array")
         elif left.kind == "str" and right.kind != "str":
             self.transpiler.warnings.error(self, "Cannot have non-str in str array")
+
+        if left.arrays != right.arrays:
+            self.transpiler.warnings.error(self, "Mismatching array element dimensions")
 
 class ParenthesesExpression(Node):
     @property

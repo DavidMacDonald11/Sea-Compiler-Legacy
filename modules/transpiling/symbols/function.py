@@ -33,7 +33,10 @@ class Function(Symbol):
             self.parameters = params
             return
 
-        message = "Function definition parameters conflict with previous function declaration"
+        if self.name == "main":
+            message = "Main function must be declared 'fun main(str[] args) -> int'"
+        else:
+            message = "Function definition parameters conflict with previous function declaration"
 
         if len(params) != len(self.parameters):
             node.transpiler.warnings.error(node, message)
@@ -48,7 +51,7 @@ class Function(Symbol):
         if return_type is not None:
             return_type = FunctionKind(*return_type.components)
         else:
-            return_type = FunctionKind(None, None, None)
+            return_type = FunctionKind(None, None, 0, None)
 
         if not self.declared:
             self.return_type = return_type
@@ -73,6 +76,8 @@ class Function(Symbol):
         return self.set_expression(Expression(self.kind))
 
     def set_expression(self, expression):
+        expression.arrays = self.return_type.arrays
+
         if self.kind == "":
             if "imag" in self.kind:
                 expression.add("(", " * 1.0j)")
@@ -85,8 +90,8 @@ class Function(Symbol):
 
             return expression
 
-        borrow = self.return_type.borrow
-        expression = OwnershipExpression(None, borrow, expression.kind, expression.string)
+        args = (self.return_type.borrow, expression.kind, expression.string, expression.arrays)
+        expression = OwnershipExpression(None, *args)
         expression.invariable = (self.return_type.qualifier != "var")
 
         return expression
@@ -101,9 +106,10 @@ class FunctionKind:
     def noun(self):
         return "borrow" if self.borrow == "&" else "ownership" if self.borrow == "$" else "value"
 
-    def __init__(self, qualifier, kind, borrow, defaults = None):
+    def __init__(self, qualifier, kind, arrays, borrow, defaults = None):
         self.qualifier = qualifier or ("var" if borrow is None else "invar")
         self.kind = kind or ""
+        self.arrays = arrays or 0
         self.borrow = borrow
         self.defaults = defaults
         self.arg = None
@@ -114,6 +120,7 @@ class FunctionKind:
 
         result = (self.qualifier == other.qualifier)
         result = result and self.kind == other.kind or other.kind == "any"
+        result = result and self.arrays == other.arrays
         result = result and self.borrow == other.borrow
         result = result and self.defaults == other.defaults
 
@@ -246,6 +253,7 @@ class FunctionKind:
 
         if self.kind != "any":
             self.verify_arg_kind(node, arg, message)
+            self.verify_arg_dimensions(node, arg, message)
 
         self.arg = arg_exp
 
@@ -255,6 +263,8 @@ class FunctionKind:
             node.transpiler.warnings.error(node, message)
 
     def verify_arg_borrow(self, node, arg, message):
+        print(self.borrow, arg.borrow)
+
         if self.borrow != arg.borrow:
             message = f"{message} requires {self.noun}; found {arg.noun}"
             node.transpiler.warnings.error(node, message)
@@ -266,4 +276,11 @@ class FunctionKind:
 
         if kind != self.kind:
             message = f"{message} must be {self.kind}; found {arg.kind}"
+            node.transpiler.warnings.error(node, message)
+
+    def verify_arg_dimensions(self, node, arg, message):
+        if self.arrays != arg.arrays:
+            a_title = f"{arg.arrays}D array" if arg.arrays > 0 else "non-array"
+            s_title = f"{self.arrays}D array" if self.arrays > 0 else "non-array"
+            message = f"{message} requires {s_title}; found {a_title}"
             node.transpiler.warnings.error(node, message)

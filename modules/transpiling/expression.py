@@ -83,14 +83,19 @@ class Expression:
 
         return self
 
-    def verify_assign(self, node, kind):
-        if self.kind == "str" and kind != "str":
+    def verify_assign(self, node, expression):
+        if expression.arrays != self.arrays:
+            e_title = f"{expression.arrays}D array" if expression.arrays > 0 else "non-array"
+            s_title = f"{self.arrays}D array" if self.arrays > 0 else "non-array"
+            node.transpiler.warnings.error(node, f"{e_title} cannot be assigned to {s_title}")
+
+        if self.kind == "str" and expression.kind != "str":
             node.transpiler.warnings.error(node, "Cannot assign non-str value to str identifier")
 
-        if self.kind != "str" and kind == "str":
+        if self.kind != "str" and expression.kind == "str":
             node.transpiler.warnings.error(node, "Cannot assign str value to non-str identifier")
 
-        if self.kind == "bool" and kind != "bool":
+        if self.kind == "bool" and expression.kind != "bool":
             node.transpiler.warnings.error(node, "".join((
                 "Cannot assign non-bool value to bool identifier. ",
                 "(Consider using the '?' operator to get boolean value)"
@@ -140,11 +145,11 @@ FORMAT_TAGS = {
 }
 
 class OwnershipExpression(Expression):
-    def __init__(self, owner, operator, kind = "", string = ""):
+    def __init__(self, owner, operator, kind = "", string = "", arrays = 0):
         self.owners = [owner, None]
         self.operator = operator
         self.invariable = False
-        super().__init__(kind, string)
+        super().__init__(kind, string, arrays)
 
     def drop_imaginary(self, node, any_kind = False):
         return self

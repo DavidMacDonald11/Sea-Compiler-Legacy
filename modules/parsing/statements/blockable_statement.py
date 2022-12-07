@@ -113,7 +113,7 @@ class ReturnStatement(Node):
             self.transpiler.warnings.error(self, "Function should not return anything")
             return statement
 
-        kind = TExpression.resolve(expression, func).kind
+        kind = TExpression.resolve(expression, func, True, True).kind
         e_owner = isinstance(expression, OwnershipExpression)
         f_owner = isinstance(func, OwnershipExpression)
 
@@ -125,6 +125,8 @@ class ReturnStatement(Node):
             same = same and not expression.invariable or func.invariable
         else:
             same = (e_owner == f_owner)
+
+        same = same and expression.arrays == func.arrays
 
         if kind == func.kind and same:
             return statement
@@ -144,15 +146,20 @@ class ReturnStatement(Node):
 
         self.transpiler.context.in_return = False
 
+        for line in Statement().lines[:-1]:
+            statement.prefix(line)
+
         statement.add(after = f" {expression}")
         return statement, expression
 
     def expression_kind(self, expression):
+        e_dims = "" if expression.arrays == 0 else f"{expression.arrays}D"
+
         if not isinstance(expression, OwnershipExpression):
-            return f"var {expression.kind} value"
+            return f"var {e_dims} {expression.kind} value"
 
         e_qualifier = "invar" if expression.invariable else "var"
         e_borrow = expression.operator
         e_borrow = "ownership" if e_borrow == "$" else "borrow" if e_borrow == "&" else "value"
 
-        return f"{e_qualifier} {expression.kind} {e_borrow}"
+        return f"{e_qualifier} {e_dims} {expression.kind} {e_borrow}"

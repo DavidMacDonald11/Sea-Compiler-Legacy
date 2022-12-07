@@ -1,11 +1,9 @@
-fun main() -> int:
-    str string = "HI"
-    cplex[] arr = [1, 2i, 3i]
-    str[][] arr2 = [["Hi"], ["Hello", string]]
+fun sum(int[] arr) -> int[]:
+    return arr
 
-    print(len(string) as str)
-    print(len(arr) as str)
-    print(len(5) as str)
-    print(len(arr2) as str)
+fun main(str[] args) -> int:
+    int[] arr = [1, 2, 3]
+    arr = sum(arr)
+    print(len(arr) + len(args) * 1i as str)
 
     return 0

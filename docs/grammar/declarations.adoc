@@ -25,10 +25,10 @@
 {tab} `*&*` `*$*`
 
 `_identifier-declaration_`:
-{tab} `_type-keyword_` `_array-declaration-list_`~opt~ `_identifier-list_`
-`_array-declaration-list_`:
+{tab} `_type-keyword_` `_array-dimension-list_`~opt~ `_identifier-list_`
+`_array-dimension-list_`:
 {tab} `*[*` `*]*`
-{tab} `_array-declaration-list_` `*[*` `*]*`
+{tab} `_array-dimension-list_` `*[*` `*]*`
 `_identifier-list_`:
 {tab} `_identifier_`
 {tab} `_identifier-list_` `*,*` `_identifier_`
@@ -38,6 +38,9 @@
 
 `_invariable-declaration_`:
 {tab} `*invar*` `_identifier-declaration_`
+
+`_full-type_`:
+{tab} `_type-qualifier_`~opt~ `_type-keyword_` `_array-dimension-list_`~opt~
 
 `_function-declaration_`:
 {tab} `*fun*` `_identifier_` `*(*` `_parameter-list_`~opt~ `_defaults_`~opt~ `*)*` `_return-type_`~opt~
@@ -50,8 +53,8 @@
 {tab} `_default-parameter_`
 {tab} `_default-parameter-list_` `*,*` `_default-parameter_`
 `_parameter_`:
-{tab} `_type-qualifier_`~opt~ `_type-keyword_` `_borrow-qualifier_`~opt~ `_identifier_`~opt~
+{tab} `_full-type_` `_borrow-qualifier_`~opt~ `_identifier_`~opt~
 `_default-parameter_`:
-{tab} `_type-qualifier_`~opt~ `_type-keyword_` `_identifier_` `*=*` `_expression_`
+{tab} `_full-type_` `_identifier_` `*=*` `_expression_`
 `_return-type_`:
-{tab} `*\->*` `_type-qualifier_`~opt~ `_type-keyword_` `*$*`~opt~
+{tab} `*\->*` `_full-type_` `*$*`~opt~

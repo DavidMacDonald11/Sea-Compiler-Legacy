@@ -31,7 +31,11 @@ class Transpiler:
             "\n/* FILE CONTENTS */",
             f"{self.lines.strip()}",
             "/* FILE CONTENTS */\n",
-            "int main() { return __sea_fun_main__(); }"
+            "int main(__sea_type_nat__ argc, __sea_type_str__ argv[])", "{",
+            "\t__sea_type_array__ str_args[argc];\n",
+            "\tfor(__sea_type_nat__ i = 0; i < argc; i++)", "\t{",
+            "\t\tstr_args[i] = (__sea_type_array__){argv[i], strlen(argv[i])};", "\t}\n",
+            "\treturn __sea_fun_main__((__sea_type_array__){str_args, argc});", "}"
         )))
 
         self.file.close()
@@ -39,6 +43,7 @@ class Transpiler:
     def standard(self):
         self.include("stdint")
         self.include("limits")
+        self.include("string")
         self.header()
 
         for i in range(3, 7):
@@ -71,20 +76,25 @@ class Transpiler:
 
         self.header()
 
-        r_type = FunctionKind(None, None, None)
+        r_type = FunctionKind(None, None, 0, None)
         null_array = Expression("", '__sea_special_null_array__')
         parameters = [
-            FunctionKind("invar", "str", None),
-            FunctionKind("invar", "str", None, ("end", null_array))
+            FunctionKind("invar", "str", 0, None),
+            FunctionKind("invar", "str", 0, None, ("end", null_array))
             ]
+
+        main = self.symbols.new_function(None, "main")
+        main.return_type = FunctionKind(None, "int", 0, None)
+        main.parameters = [FunctionKind("var", "str", 1, None)]
+        main.declared = True
 
         self.standard_function(r_type, "print", parameters, "\n".join((
             "\nvoid __sea_fun_print__(__sea_type_array__ s, __sea_type_array__ end)", "{",
             '\tprintf("%s%s", (char *)s.data, (end.data) ? (char *)end.data : "\\n");', "}"
         )), ["stdio"])
 
-        r_type = FunctionKind("var", "nat", None)
-        parameters = [FunctionKind("invar", "any", None)]
+        r_type = FunctionKind("var", "nat", 0, None)
+        parameters = [FunctionKind("invar", "any", 0, None)]
 
         self.standard_function(r_type, "len", parameters, "\n".join((
             "\n#define __sea_fun_len__(X) _Generic((X), __sea_type_array__: X, \\",

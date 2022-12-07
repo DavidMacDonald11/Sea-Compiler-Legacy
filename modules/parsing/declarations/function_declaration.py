@@ -2,7 +2,7 @@ from transpiling.statement import Statement
 from transpiling.expression import Expression
 from transpiling.symbols.function import FunctionKind
 from lexing.token import TYPE_KEYWORDS, TYPE_MODIFIER_KEYWORDS
-from .type_keyword import TypeKeyword
+from .full_type import FullType
 from ..node import Node
 
 # TODO verify returns from all branches
@@ -117,10 +117,7 @@ class FunctionParameterList(Node):
 class FunctionParameter(Node):
     @property
     def nodes(self) -> list:
-        nodes = [self.type_keyword]
-
-        if self.type_qualifier is not None:
-            nodes = [self.type_qualifier, *nodes]
+        nodes = [self.full_type]
 
         if self.borrow_qualifier is not None:
             nodes += [self.borrow_qualifier]
@@ -133,9 +130,8 @@ class FunctionParameter(Node):
 
         return nodes
 
-    def __init__(self, type_qualifier, type_keyword, borrow_qualifier, identifier, default):
-        self.type_qualifier = type_qualifier
-        self.type_keyword = type_keyword
+    def __init__(self, full_type, borrow_qualifier, identifier, default):
+        self.full_type = full_type
         self.borrow_qualifier = borrow_qualifier
         self.identifier = identifier
         self.default = default
@@ -143,9 +139,8 @@ class FunctionParameter(Node):
 
     @classmethod
     def construct(cls):
-        type_qualifier = cls.parser.take() if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS) else None
-        type_keyword = TypeKeyword.construct()
-        borrow_qualifier = cls.parser.take() if cls.parser.next.has("&", "$") else None
+        full_type = FullType.construct()
+        borrow = cls.parser.take() if cls.parser.next.has("&", "$") else None
         identifier = cls.parser.take() if cls.parser.next.of("Identifier") else None
         default = None
 
@@ -153,7 +148,7 @@ class FunctionParameter(Node):
             if identifier is None:
                 message = "Default parameter must be given identifier"
                 cls.parser.warnings.error(cls.parser.take(), message)
-            elif borrow_qualifier is not None:
+            elif borrow is not None:
                 message = "Default parameter cannot be borrow or ownership"
                 cls.parser.warnings.error(cls.parser.take(), message)
                 cls.parser.expression.construct()
@@ -161,10 +156,10 @@ class FunctionParameter(Node):
                 cls.parser.take()
                 default = cls.parser.expression.construct()
 
-        return cls(type_qualifier, type_keyword, borrow_qualifier, identifier, default)
+        return cls(full_type, borrow, identifier, default)
 
     def transpile(self):
-        expression = self.type_keyword.transpile()
+        expression = self.full_type.transpile()
 
         if self.borrow_qualifier is not None:
             expression.add(after = "*")
@@ -174,7 +169,7 @@ class FunctionParameter(Node):
             f_kind = self.transpile_qualifiers()
 
             if f_kind.defaults is not None:
-                f_kind.defaults[1].verify_assign(self, expression.kind)
+                f_kind.defaults[1].verify_assign(self, expression)
 
         return expression
 
@@ -191,40 +186,40 @@ class FunctionParameter(Node):
             f_kind.defaults[1].verify_assign(self, parameter.kind)
 
         parameter.initialized = True
+        parameter.arrays = f_kind.arrays
         parameter.ownership = f_kind.borrow
-        keyword = self.type_keyword.transpile()
+        kind = self.full_type.transpile()
 
         if parameter.ownership is not None:
-            keyword.add(after = "*")
+            kind.add(after = "*")
 
-        return Expression("", f"{keyword} {parameter.c_name}")
+        return Expression("", f"{kind} {parameter.c_name}")
 
     def transpile_qualifiers(self):
         if self._qualifiers is not None:
             return self._qualifiers
 
-        qualifier = self.type_qualifier
+        qualifier = self.full_type.qualifier
         if qualifier is not None: qualifier = qualifier.string
 
-        kind = self.type_keyword.token.string
+        kind = self.full_type.keyword.token.string
         borrow = self.borrow_qualifier
         if borrow is not None: borrow = borrow.string
+
+        arrays = self.full_type.arrays
 
         defaults = self.default
         if defaults is not None:
             defaults = self.default.transpile().assert_constant(self)
             defaults = (self.identifier.string, defaults)
 
-        self._qualifiers = FunctionKind(qualifier, kind, borrow, defaults)
+        self._qualifiers = FunctionKind(qualifier, kind, arrays, borrow, defaults)
         return self._qualifiers
 
 class FunctionReturnType(Node):
     @property
     def nodes(self) -> list:
-        nodes = [self.keyword]
-
-        if self.qualifier is not None:
-            nodes = [self.qualifier, *nodes]
+        nodes = [self.full_type]
 
         if self.borrow is not None:
             nodes += [self.borrow]
@@ -233,15 +228,21 @@ class FunctionReturnType(Node):
 
     @property
     def components(self):
-        components = [self.keyword.token.string]
-        components = [self.qualifier.string if self.qualifier is not None else None, *components]
+        components = [self.full_type.keyword.token.string]
+
+        qualifier = self.full_type.qualifier
+
+        if qualifier is not None:
+            qualifier = qualifier.string
+
+        components = [qualifier, *components]
+        components += [self.full_type.arrays]
         components += [self.borrow.string] if self.borrow is not None else [None]
 
         return tuple(components)
 
-    def __init__(self, qualifier, keyword, borrow):
-        self.qualifier = qualifier
-        self.keyword = keyword
+    def __init__(self, full_type, borrow):
+        self.full_type = full_type
         self.borrow = borrow
 
     @classmethod
@@ -251,14 +252,13 @@ class FunctionReturnType(Node):
 
         cls.parser.take().kind = "Punctuator"
 
-        qualifier = cls.parser.take() if cls.parser.next.has(*TYPE_MODIFIER_KEYWORDS) else None
-        keyword = TypeKeyword.construct()
+        full_type = FullType.construct()
         borrow = cls.parser.take() if cls.parser.next.has("$") else None
 
-        return cls(qualifier, keyword, borrow)
+        return cls(full_type, borrow)
 
     def transpile(self):
-        statement = self.keyword.transpile()
+        statement = self.full_type.transpile()
 
         if self.borrow is not None:
             statement.add(after = "*")

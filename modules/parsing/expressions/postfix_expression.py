@@ -165,7 +165,7 @@ class ArgumentExpressionList(Node):
             qualifier = "var"
             borrow = None
 
-        return arg, FunctionKind(qualifier, arg.kind, borrow)
+        return arg, FunctionKind(qualifier, arg.kind, arg.arrays, borrow)
 
 class FunctionArgument(Node):
     @property
@@ -217,4 +217,5 @@ class FunctionArgument(Node):
             qualifier = "var"
             borrow = None
 
-        return expression, FunctionKind(qualifier, expression.kind, borrow, defaults)
+        args = (qualifier, expression.kind, expression.arrays, borrow, defaults)
+        return expression, FunctionKind(*args)
