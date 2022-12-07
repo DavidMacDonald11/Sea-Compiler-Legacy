@@ -135,8 +135,11 @@ class Transpiler:
 
     def cache_new_temp(self, expression):
         name = self.temp_name
-        prefix = Expression(expression.kind, expression.string)
-        prefix.add(f"__sea_type_{expression.kind}__ {name} = ")
+        kind = expression.kind
+
+        prefix = Expression(kind, expression.string)
+        kind = "array" if kind == "str" or expression.arrays > 0 else kind
+        prefix.add(f"__sea_type_{kind}__ {name} = ")
         Statement.cached += [prefix]
 
         return expression.new(name)
@@ -169,7 +172,7 @@ class Transpiler:
         buffer_name = self.temp_name
         kind = expression.kind
 
-        if size < 0:
+        if isinstance(size, int) and size < 0:
             prefix.add(f"__sea_type_{kind}__ {buffer_name} = ")
             size = f"strlen({buffer_name})"
         else:
@@ -181,7 +184,8 @@ class Transpiler:
 
                 kind = "array" if expression.arrays > 1 else self.context.array.kind
 
-            prefix.add(f"__sea_type_{kind}__ {buffer_name}[{size}] = ")
+            equals = " = " if prefix.string != "" else ""
+            prefix.add(f"__sea_type_{kind}__ {buffer_name}[{size}]{equals}")
 
         Statement.cached += [prefix]
 

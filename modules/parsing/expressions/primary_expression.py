@@ -150,8 +150,6 @@ class Identifier(PrimaryNode):
         return expression
 
 # TODO str from char[], char[] from str
-# TODO postfix index and splitting
-# TODO function parameters/return values
 # TODO foreach loop
 # TODO array ranges
 # TODO array generators

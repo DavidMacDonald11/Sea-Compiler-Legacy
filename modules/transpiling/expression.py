@@ -18,7 +18,7 @@ class Expression:
         return self.string
 
     def copy(self):
-        other = Expression(self.kind, self.string)
+        other = Expression(self.kind, self.string, self.arrays)
         other.identifiers = self.identifiers
         other.finished = self.finished
         if self._show_kind: other.show_kind()

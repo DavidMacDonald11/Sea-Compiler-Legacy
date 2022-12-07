@@ -1,9 +1,13 @@
-fun sum(int[] arr) -> int[]:
-    return arr
-
 fun main(str[] args) -> int:
-    int[] arr = [1, 2, 3]
-    arr = sum(arr)
-    print(len(arr) + len(args) * 1i as str)
+    str name = args[0]
+    print(name[::-1])
+
+    int[] arr = [1, 2, 3, 4, 5]
+    arr = arr[0::-1]
+
+    nat i = 0
+    while i < len(arr):
+        print(arr[i] as str)
+        i += 1
 
     return 0

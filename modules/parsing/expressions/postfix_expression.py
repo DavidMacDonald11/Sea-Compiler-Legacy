@@ -2,6 +2,7 @@ from lexing.token import POSTFIX_UNARY_OPERATORS
 from transpiling.expression import FLOATING_TYPES
 from .primary_expression import PrimaryExpression
 from .postfix_call_expression import PostfixCallExpression
+from .postfix_access_expression import PostfixAccessExpression
 from ..node import Node
 
 class PostfixExpression(Node):
@@ -17,10 +18,7 @@ class PostfixExpression(Node):
     def construct(cls):
         node = PrimaryExpression.construct()
 
-        if not cls.parser.next.has(*POSTFIX_UNARY_OPERATORS, "("):
-            return node
-
-        while cls.parser.next.has(*POSTFIX_UNARY_OPERATORS, "("):
+        while cls.parser.next.has(*POSTFIX_UNARY_OPERATORS, "(", "["):
             operator = cls.parser.take()
 
             match operator.string:
@@ -34,6 +32,10 @@ class PostfixExpression(Node):
                     call_node = PostfixCallExpression.construct()
                     call_node.expression = node
                     node = call_node
+                case "[":
+                    access_node = PostfixAccessExpression.construct()
+                    access_node.expression = node
+                    node = access_node
 
         return node
 
