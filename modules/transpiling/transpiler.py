@@ -134,12 +134,12 @@ class Transpiler:
 
         return statement.prefix(prefix).new(name)
 
-    def cache_new_temp(self, expression, name = None):
+    def cache_new_temp(self, expression, name = None, string = False):
         name = name or self.temp_name
         kind = expression.kind
 
         prefix = Expression(kind, expression.string)
-        kind = "array" if kind == "str" or expression.arrays > 0 else kind
+        kind = "array" if not string and kind == "str" or expression.arrays > 0 else kind
         prefix.add(f"__sea_type_{kind}__ {name} = ")
         Statement.cached += [prefix]
 

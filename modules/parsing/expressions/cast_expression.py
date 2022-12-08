@@ -64,7 +64,7 @@ class CastExpression(Node):
             expression, format_tag = self.transpile_str_cplex(expression, format_tag)
 
         if "cplex" not in expression.kind:
-            expression = self.transpiler.cache_new_temp(expression)
+            expression = self.transpiler.cache_new_temp(expression, string = True)
 
         expression.add(f'"{format_tag}", ').cast("str")
         return self.transpiler.cache_new_temp_buffer(expression)

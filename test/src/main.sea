@@ -26,8 +26,6 @@ fun main(str[] args) -> int:
 
             print()
 
-    print()
-
-    True xor False
+    print((True xor False) as str)
 
     return 0
