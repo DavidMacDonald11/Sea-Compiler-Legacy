@@ -27,4 +27,7 @@ fun main(str[] args) -> int:
             print()
 
     print()
+
+    True xor False
+
     return 0

@@ -115,8 +115,12 @@
 {tab} `_logical-not-expression_`
 {tab} `_logical-and-expression_` `*and*` `_logical-not-expression_`
 
-`_logical-or-expression_`:
+`_logical-xor-expression_`:
 {tab} `_logical-and-expression_`
+{tab} `_logical-xor-expression_` `*xor*` `_logical-and-expression_`
+
+`_logical-or-expression_`:
+{tab} `_logical-xor-expression_`
 {tab} `_logical-or-expression_` `*or*` `_logical-and-expression_`
 
 `_conditional-expression_`:
