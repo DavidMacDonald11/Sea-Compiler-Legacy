@@ -27,7 +27,7 @@ class FunctionDefinition(Node):
 
     def transpile(self):
         statement = self.declaration.transpile_definition(True)
-        block = self.block.transpile_for_function()
+        block = self.block.transpile_without_symbol_table()
 
         function = self.transpiler.context.function
 

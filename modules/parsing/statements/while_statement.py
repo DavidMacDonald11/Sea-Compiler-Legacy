@@ -42,6 +42,7 @@ class WhileStatement(Node):
         statement = Statement(condition.add("while (", ")"))
 
         if self.label is None:
+            self.transpiler.context.loops -= 1
             return statement.append(self.block.transpile()).finish(self, semicolons = False)
 
         label = self.transpiler.symbols.new_label(self, self.label.string)

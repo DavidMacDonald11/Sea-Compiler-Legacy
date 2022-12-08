@@ -52,9 +52,9 @@ class BlockStatement(Node):
 
     def transpile(self):
         self.transpiler.push_symbol_table()
-        return self.transpile_for_function()
+        return self.transpile_without_symbol_table()
 
-    def transpile_for_function(self):
+    def transpile_without_symbol_table(self):
         self.transpiler.context.blocks += 1
         block = Statement().new("{").append()
 

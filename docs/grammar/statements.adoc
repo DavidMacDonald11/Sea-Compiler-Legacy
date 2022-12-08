@@ -84,6 +84,9 @@
 {tab} `_blockable-statement-component_`
 {tab} `_block-statement_`
 
+`_for-statement_`:
+{tab} `_label_`~opt~ `*for*` `_full-type_` `_borrow-qualifier_`~opt~ `_identifier_` `*in*` `_expression_` `*:*` `_block-statement_`
+
 `_function-definition_`:
 {tab} `_function-declaration_` `*:*` `_block-statement_`
 

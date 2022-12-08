@@ -59,10 +59,10 @@ class PostfixAccessExpression(Node):
         index = self.verify_arg(self.splits[0].transpile())
 
         if expression.kind == "str" and expression.arrays == 0:
-            func = self.write_str_index_func()
+            func = type(self).write_str_index_func(self.transpiler)
             return expression.add(f"{func}(", f", {index})").cast("char")
 
-        func = self.write_array_index_func()
+        func = type(self).write_array_index_func(self.transpiler)
         expression.arrays -= 1
 
         kind = "array" if expression.kind == "str" else expression.kind
@@ -70,18 +70,18 @@ class PostfixAccessExpression(Node):
 
     def transpile_split(self, expression):
         expression, start, stop, step = self.transpile_args(expression)
-        size_func = self.write_split_size_func()
+        size_func = type(self).write_split_size_func(self.transpiler)
         size = Expression("nat", f"{size_func}({start}, {stop}, {step})")
         size = self.transpiler.cache_new_temp(size)
 
         result = self.transpiler.cache_new_temp_array(expression.copy().new(""), size)
 
         if expression.kind == "str" and expression.arrays == 0:
-            func = self.write_str_split_func()
+            func = type(self).write_str_split_func(self.transpiler)
             return expression.add(f"{func}({result}, ", f", {start}, {stop}, {step})")
 
         kind = "array" if expression.kind == "str" else expression.kind
-        func = self.write_array_split_func(kind)
+        func = type(self).write_array_split_func(self.transpiler, kind)
         return expression.add(f"{func}({result}, ", f", {start}, {stop}, {step})")
 
     def transpile_args(self, expression):
@@ -112,14 +112,15 @@ class PostfixAccessExpression(Node):
 
         return arg
 
-    def write_array_index_func(self):
+    @classmethod
+    def write_array_index_func(cls, transpiler):
         func = "__sea_func_array_index__"
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
+        if func in cls.wrote: return func
+        cls.wrote += [func]
 
         helper = "__sea_func_array_safe_i"
 
-        self.transpiler.header("\n".join((
+        transpiler.header("\n".join((
             f"__sea_type_nat__ {helper}_nat__(__sea_type_nat__ i, __sea_type_nat__ size)", "{",
             "\twhile(i >= size) i -= size;", "\treturn i;", "}",
             f"\n__sea_type_nat__ {helper}_int__(__sea_type_int__ i, __sea_type_nat__ size)", "{",
@@ -131,14 +132,15 @@ class PostfixAccessExpression(Node):
 
         return func
 
-    def write_str_index_func(self):
+    @classmethod
+    def write_str_index_func(cls, transpiler):
         func = "__sea_func_str_index__"
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
+        if func in cls.wrote: return func
+        cls.wrote += [func]
 
         helper = "__sea_func_str_safe_i"
 
-        self.transpiler.header("\n".join((
+        transpiler.header("\n".join((
             f"__sea_type_nat__ {helper}_nat__(__sea_type_nat__ i, __sea_type_nat__ size)", "{",
             "\treturn (i > size) ? size : i;", "}",
             f"__sea_type_nat__ {helper}_int__(__sea_type_int__ i, __sea_type_nat__ size)", "{",
@@ -150,14 +152,15 @@ class PostfixAccessExpression(Node):
 
         return func
 
-    def write_split_size_func(self):
+    @classmethod
+    def write_split_size_func(cls, transpiler):
         func = "__sea_func_split_size__"
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
+        if func in cls.wrote: return func
+        cls.wrote += [func]
 
         kind = "__sea_type_int__"
 
-        self.transpiler.header("\n".join((
+        transpiler.header("\n".join((
             f"__sea_type_nat__ {func}({kind} start, {kind} stop, {kind} step)", "{",
             "\tif(step == 0) return 1;", "",
             "\t__sea_type_nat__ count = 0;", "",
@@ -171,12 +174,13 @@ class PostfixAccessExpression(Node):
 
         return func
 
-    def write_array_split_func(self, kind):
+    @classmethod
+    def write_array_split_func(cls, transpiler, kind):
         func = f"__sea_func_split_array_{kind}__"
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
+        if func in cls.wrote: return func
+        cls.wrote += [func]
 
-        index = self.write_array_index_func()
+        index = cls.write_array_index_func(transpiler)
 
         kind = f"__sea_type_{kind}__"
         arr_kind = "__sea_type_array__"
@@ -184,7 +188,7 @@ class PostfixAccessExpression(Node):
 
         numbers = f"{int_kind} start, {int_kind} stop, {int_kind} step"
 
-        self.transpiler.header("\n".join((
+        transpiler.header("\n".join((
             f"{arr_kind} {func}({arr_kind} out, {arr_kind} in, {numbers})", "{",
             "\tif(step < 0) start = stop;",
             "\tfor(__sea_type_nat__ i = 0; i < out.size; i++) {",
@@ -195,19 +199,20 @@ class PostfixAccessExpression(Node):
 
         return f"{func}"
 
-    def write_str_split_func(self):
+    @classmethod
+    def write_str_split_func(cls, transpiler):
         func = "__sea_func_split_str__"
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
+        if func in cls.wrote: return func
+        cls.wrote += [func]
 
-        index = self.write_str_index_func()
+        index = cls.write_str_index_func(transpiler)
 
         arr_kind = "__sea_type_array__"
         int_kind = "__sea_type_int__"
 
         numbers = f"{int_kind} start, {int_kind} stop, {int_kind} step"
 
-        self.transpiler.header("\n".join((
+        transpiler.header("\n".join((
             f"{arr_kind} {func}({arr_kind} out, {arr_kind} in, {numbers})", "{",
             "\tif(step < 0) start = stop;",
             "\tfor(__sea_type_nat__ i = 0; i < out.size; i++) {",

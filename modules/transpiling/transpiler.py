@@ -79,7 +79,7 @@ class Transpiler:
         r_type = FunctionKind(None, None, 0, None)
         null_array = Expression("", '__sea_special_null_array__')
         parameters = [
-            FunctionKind("invar", "str", 0, None),
+            FunctionKind("invar", "str", 0, None, ("string", null_array)),
             FunctionKind("invar", "str", 0, None, ("end", null_array))
             ]
 
@@ -90,7 +90,8 @@ class Transpiler:
 
         self.standard_function(r_type, "print", parameters, "\n".join((
             "\nvoid __sea_fun_print__(__sea_type_array__ s, __sea_type_array__ end)", "{",
-            '\tprintf("%s%s", (char *)s.data, (end.data) ? (char *)end.data : "\\n");', "}"
+            '\tprintf("%s%s", (s.data) ? (char *)s.data : "", '
+            '(end.data) ? (char *)end.data : "\\n");', "}"
         )), ["stdio"])
 
         r_type = FunctionKind("var", "nat", 0, None)
@@ -133,8 +134,8 @@ class Transpiler:
 
         return statement.prefix(prefix).new(name)
 
-    def cache_new_temp(self, expression):
-        name = self.temp_name
+    def cache_new_temp(self, expression, name = None):
+        name = name or self.temp_name
         kind = expression.kind
 
         prefix = Expression(kind, expression.string)

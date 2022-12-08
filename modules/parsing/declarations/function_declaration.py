@@ -183,7 +183,7 @@ class FunctionParameter(Node):
             parameter = self.transpiler.symbols.new_invariable(self, name, f_kind.kind)
 
         if f_kind.defaults is not None:
-            f_kind.defaults[1].verify_assign(self, parameter.kind)
+            f_kind.defaults[1].verify_assign(self, Expression(parameter.kind))
 
         parameter.initialized = True
         parameter.arrays = f_kind.arrays

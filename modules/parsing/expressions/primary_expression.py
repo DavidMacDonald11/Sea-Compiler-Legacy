@@ -149,12 +149,12 @@ class Identifier(PrimaryNode):
 
         return expression
 
-# TODO str from char[], char[] from str
-# TODO foreach loop
 # TODO array ranges
 # TODO array generators
-# TODO "is" keyword
-# TODO main(str[] args = nullarr)
+# TODO "is" expression
+# TODO "in" expression
+# TODO ownership splits
+# TODO array element assignment
 
 class ArrayList(Node):
     @property

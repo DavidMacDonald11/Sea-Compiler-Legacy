@@ -103,6 +103,21 @@ class Expression:
 
         return self
 
+    def verify_index(self, node, expression):
+        expression.arrays -= 1
+        kind = expression.kind
+
+        if kind == "str" and expression.arrays < 0:
+            expression.kind = "char"
+            expression.arrays += 1
+            self.verify_assign(node, expression)
+            expression.cast(kind)
+        else:
+            self.verify_assign(node, expression)
+            expression.arrays += 1
+
+        return self
+
     @classmethod
     def resolve(cls, left, right, allow_str = False, allow_arr = False):
         kind1, kind2 = left.kind, right.kind

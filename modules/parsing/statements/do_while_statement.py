@@ -80,9 +80,11 @@ class DoWhileStatement(Node):
             if not isinstance(self.block, BlockStatement):
                 block.finish(self).add("\t")
                 statement.new("do {").append(block).new("}")
+                self.transpiler.context.loops -= 1
                 return statement.append(Statement(condition)).finish(self, semicolons = False)
 
             statement.new("do").append(block).new_append(Statement(condition))
+            self.transpiler.context.loops -= 1
             return statement.finish(self, semicolons = False)
 
         label = self.transpiler.symbols.new_label(self, self.label.string)

@@ -1,13 +1,30 @@
 fun main(str[] args) -> int:
-    str name = args[0]
-    print(name[::-1])
-
     int[] arr = [1, 2, 3, 4, 5]
-    arr = arr[0::-1]
 
-    nat i = 0
-    while i < len(arr):
-        print(arr[i] as str)
-        i += 1
+    for int32 num in arr[::-1]:
+        print(num as str, end = " ")
 
+    print()
+    str string = "That's Huge!"
+
+    for char c in string[1::2]:
+        print(c as str, end = " ")
+
+    print()
+    str[][] greetings = [["Hi", "Hello"], ["Bye", "Goodbye"]]
+
+    for str[] kind in greetings:
+        middle for str greeting in kind:
+            print(greeting, end = ": ")
+
+            for char c in greeting:
+                if c == 'o':
+                    print()
+                    break middle
+
+                print(c as str, end = " ")
+
+            print()
+
+    print()
     return 0
