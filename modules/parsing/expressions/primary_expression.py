@@ -136,7 +136,7 @@ class StringConstant(PrimaryNode):
             string = re.sub(r"\t", "\t", string)
 
         self.transpiler.include("string")
-        return self.transpiler.cache_new_temp_array(Expression("str", string), -1)
+        return self.transpiler.cache_new_temp_str(Expression("str", string))
 
 class Identifier(PrimaryNode):
     def transpile(self):

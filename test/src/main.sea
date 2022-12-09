@@ -9,12 +9,7 @@ fun print_array(int[] &arr):
     print("]")
 
 fun main(str[] args) -> int:
-    str string = "Hi" * 5
-    print(string)
-
-    int[][] array = [[1] * 3] * 10
-
-    for int[] arr in array:
-        print_array(&arr)
+    int[] arr = [1, 2] + [3, 4]
+    print_array(&arr)
 
     return 0
