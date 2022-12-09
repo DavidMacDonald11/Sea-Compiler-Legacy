@@ -168,7 +168,7 @@ class Transpiler:
 
         return expression.new(name)
 
-    def cache_new_temp_array(self, expression, size):
+    def cache_new_temp_array(self, expression, size, string = False):
         prefix = Expression(expression.kind, expression.string)
         buffer_name = self.temp_name
         kind = expression.kind
@@ -177,11 +177,12 @@ class Transpiler:
             prefix.add(f"__sea_type_{kind}__ {buffer_name} = ")
             size = f"strlen({buffer_name})"
         else:
-            if kind == "str" or expression.arrays > 1:
+            if not string and kind == "str" or expression.arrays > 1:
                 kind = "array"
             elif self.context.array is not None:
                 if self.context.array.kind != "str":
                     prefix.cast(self.context.array.kind)
+                    expression.cast(self.context.array.kind)
 
                 kind = "array" if expression.arrays > 1 else self.context.array.kind
 

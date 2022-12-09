@@ -1,31 +1,26 @@
+fun print_array(nat[] &arr):
+    nat i = len(arr)
+    print("[", "")
+
+    for nat num in arr:
+        print(num as str, ", " if i > 1 else "")
+        i -= 1
+
+    print("]")
+
 fun main(str[] args) -> int:
-    int[] arr = [1, 2, 3, 4, 5]
+    nat[] arr1 = [10, 11] + [9, 8]
+    print_array(&arr1)
 
-    for int32 num in arr[::-1]:
-        print(num as str, end = " ")
+    nat[][] arr2 = [[1, 2], [3, 4]] + [[5], [0]]
 
-    print()
-    str string = "That's Huge!"
+    for nat[] arr in arr2:
+        print_array(&arr)
 
-    for char c in string[1::2]:
-        print(c as str, end = " ")
+    str[] strings = ["Hello", "World!"] + ["Goodbye", "Mom"]
+    strings += ["Dear"]
 
-    print()
-    str[][] greetings = [["Hi", "Hello"], ["Bye", "Goodbye"]]
-
-    for str[] kind in greetings:
-        middle for str greeting in kind:
-            print(greeting, end = ": ")
-
-            for char c in greeting:
-                if c == 'o':
-                    print()
-                    break middle
-
-                print(c as str, end = " ")
-
-            print()
-
-    print((True xor False) as str)
+    for str s in strings:
+        print(s)
 
     return 0

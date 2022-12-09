@@ -272,7 +272,10 @@ class FunctionKind:
         expression2 = Expression(arg.kind)
         kind = Expression.resolve(expression1, expression2, allow_str = True).kind
 
-        if kind != self.kind:
+        if self.arrays > 0 and self.kind != arg.kind:
+            message = f"{message} must be array(s) of {self.kind}; found array(s) of {arg.kind}"
+            node.transpiler.warnings.error(node, message)
+        elif kind != self.kind:
             message = f"{message} must be {self.kind}; found {arg.kind}"
             node.transpiler.warnings.error(node, message)
 

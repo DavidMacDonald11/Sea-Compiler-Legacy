@@ -39,7 +39,6 @@ class AugmentedAssignmentStatement(Node):
     def transpile(self):
         name = self.identifier.string
         operator = self.operator.string
-        expression = self.expression.transpile()
         self.transpiler.symbols.at(self, name)
 
         op = operator[:-1]

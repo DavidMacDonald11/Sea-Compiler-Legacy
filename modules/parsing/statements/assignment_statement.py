@@ -1,7 +1,7 @@
 from transpiling.expression import OwnershipExpression
 from transpiling.statement import Statement
 from ..expressions.expression import Expression
-from ..expressions.primary_expression import Identifier, ArrayList
+from ..expressions.primary_expression import Identifier
 from ..node import Node
 
 class AssignmentStatement(Node):
@@ -162,7 +162,7 @@ class AssignmentList(Node):
             if declaration:
                 identifier.arrays = self.kind[1]
 
-            if identifier.arrays > 0 and self.expression.of(ArrayList):
+            if identifier.arrays > 0:
                 self.transpiler.context.array = identifier
                 statement = Statement(self.expression.transpile()).cast(identifier.kind)
                 self.transpiler.context.array = None
