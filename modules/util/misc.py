@@ -43,3 +43,7 @@ def set_add(items, new_items):
         items += [item]
 
     return items
+
+def is_integer(expression):
+    kind = expression.kind
+    return "int" in kind or "nat" in kind or kind in ("bool", "char")

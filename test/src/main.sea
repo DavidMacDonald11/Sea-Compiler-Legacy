@@ -1,26 +1,20 @@
-fun print_array(nat[] &arr):
-    nat i = len(arr)
+fun print_array(int[] &arr):
+    int i = len(arr)
     print("[", "")
 
-    for nat num in arr:
+    for int num in arr:
         print(num as str, ", " if i > 1 else "")
         i -= 1
 
     print("]")
 
 fun main(str[] args) -> int:
-    nat[] arr1 = [10, 11] + [9, 8]
-    print_array(&arr1)
+    str string = "Hi" * 5
+    print(string)
 
-    nat[][] arr2 = [[1, 2], [3, 4]] + [[5], [0]]
+    int[][] array = [[1] * 3] * 10
 
-    for nat[] arr in arr2:
+    for int[] arr in array:
         print_array(&arr)
-
-    str[] strings = ["Hello", "World!"] + ["Goodbye", "Mom"]
-    strings += ["Dear"]
-
-    for str s in strings:
-        print(s)
 
     return 0

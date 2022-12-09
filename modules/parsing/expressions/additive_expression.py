@@ -32,8 +32,7 @@ class AdditiveExpression(BinaryOperation):
 
         if left.kind == "str" and right.kind not in ("char", "str"):
             self.transpiler.warnings.error(self, "Can only add str and char values to str")
-
-        if right.kind == "str" and left.kind not in ("char", "str"):
+        elif right.kind == "str" and left.kind not in ("char", "str"):
             self.transpiler.warnings.error(self, "Can only add str and char values to str")
 
         r_size = f"{right}.size" if (right.kind == "str") else "1"
