@@ -35,10 +35,26 @@ class Transpiler:
             f"{self.lines.strip()}",
             "/* FILE CONTENTS */\n",
             "int main(__sea_type_nat__ argc, __sea_type_str__ argv[])", "{",
-            "\t__sea_type_array__ str_args[argc];\n",
-            "\tfor(__sea_type_nat__ i = 0; i < argc; i++)", "\t{",
-            "\t\tstr_args[i] = (__sea_type_array__){argv[i], strlen(argv[i])};", "\t}\n",
-            "\treturn __sea_fun_main__((__sea_type_array__){str_args, argc});", "}\n"
+            "\t#ifndef __sea_const_main_no_params__",
+            "\t\t__sea_type_array__ str_args[argc];\n",
+            "\t\tfor(__sea_type_nat__ i = 0; i < argc; i++)", "\t\t{",
+            "\t\t\tstr_args[i] = (__sea_type_array__){argv[i], strlen(argv[i])};", "\t\t}\n",
+            "\t\t#ifdef __sea_const_main_pointer_params__",
+            "\t\t\t__sea_type_array__ __sea_main_array__ = (__sea_type_array__){str_args, argc};",
+            "\t\t\t#define __sea_main_args__ &__sea_main_array__",
+            "\t\t#else",
+            "\t\t\t#define __sea_main_args__ (__sea_type_array__){str_args, argc}",
+            "\t\t#endif",
+            "\t#else",
+            "\t\t#define __sea_main_args__",
+            "\t#endif\n",
+            "\t#ifdef __sea_const_main_no_return__",
+            "\t\t__sea_fun_main__(__sea_main_args__);",
+            "\t#elif __sea_const_main_returns_pointer__",
+            "\t\treturn *__sea_fun_main__(__sea_main_args__);",
+            "\t#else",
+            "\t\treturn __sea_fun_main__(__sea_main_args__);",
+            "\t#endif", "}"
         )))
 
         self.file.close()
@@ -76,18 +92,12 @@ class Transpiler:
             "__sea_type_array__ __sea_special_null_array__ = {0, 0};"
         )))
 
-
         r_type = FunctionKind(None, None, 0, None)
         null_array = Expression("", '__sea_special_null_array__')
         parameters = [
             FunctionKind("invar", "str", 0, None, ("string", null_array)),
             FunctionKind("invar", "str", 0, None, ("end", null_array))
             ]
-
-        main = self.symbols.new_function(None, "main")
-        main.return_type = FunctionKind(None, "int", 0, None)
-        main.parameters = [FunctionKind("var", "str", 1, None)]
-        main.declared = True
 
         self.standard_function(r_type, "print", parameters, "\n".join((
             "void __sea_fun_print__(__sea_type_array__ s, __sea_type_array__ end)", "{",

@@ -1,5 +1,5 @@
 from .symbol import Symbol
-from ..expression import Expression, OwnershipExpression
+from ..expression import Expression, OwnershipExpression, FLOATING_TYPES
 
 class Function(Symbol):
     @property
@@ -33,10 +33,7 @@ class Function(Symbol):
             self.parameters = params
             return
 
-        if self.name == "main":
-            message = "Main function must be declared 'fun main(str[] args) -> int'"
-        else:
-            message = "Function definition parameters conflict with previous function declaration"
+        message = "Function definition parameters conflict with previous function declaration"
 
         if len(params) != len(self.parameters):
             node.transpiler.warnings.error(node, message)
@@ -100,6 +97,62 @@ class StandardFunction(Function):
     def __init__(self, name):
         self.define = None
         super().__init__(name)
+
+class MainFunction(Function):
+    def set_parameters(self, node, parameters):
+        params = []
+
+        if parameters is not None:
+            for parameter in parameters.parameters:
+                params += [parameter.transpile_qualifiers()]
+
+        if len(params) > 2:
+            node.transpiler.warnings.error(node, "Main takes, at most, one argument (str[] args)")
+        elif len(params) == 1 and (params[0].kind != "str" or params[0].arrays != 1):
+            node.transpiler.warnings.error(node, "Main can only take a 'str[]' parameter")
+        elif len(params) == 0:
+            node.transpiler.write("#define __sea_const_main_no_params__")
+
+        if len(params) == 1 and params[0].borrow is not None:
+            node.transpiler.write("#define __sea_const_main_pointer_params__")
+
+        if not self.declared:
+            self.parameters = params
+            return
+
+        message = "Function definition parameters conflict with previous function declaration"
+
+        if len(params) != len(self.parameters):
+            node.transpiler.warnings.error(node, message)
+            return
+
+        for param, parameter in zip(params, self.parameters):
+            if param != parameter:
+                node.transpiler.warnings.error(node, message)
+                return
+
+    def set_return_type(self, node, return_type):
+        if return_type is not None:
+            return_type = FunctionKind(*return_type.components)
+        else:
+            return_type = FunctionKind(None, None, 0, None)
+
+        if return_type.kind in (*FLOATING_TYPES, "str"):
+            message = "Main can only return integers, naturals, or nothing"
+            node.transpiler.warnings.error(node, message)
+        elif return_type.kind in (None, ""):
+            node.transpiler.write("#define __sea_const_main_no_return__")
+
+        if return_type.borrow is not None:
+            node.transpiler.write("#define __sea_const_main_returns_pointer__")
+
+        if not self.declared:
+            self.return_type = return_type
+            return
+
+        if self.return_type != return_type:
+            message = "Function definition return type conflicts with previous function declaration"
+            node.transpiler.warnings.error(node, message)
 
 class FunctionKind:
     @property

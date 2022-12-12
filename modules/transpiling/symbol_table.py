@@ -1,7 +1,7 @@
 from .symbols.label import Label
 from .symbols.variable import Variable
 from .symbols.invariable import Invariable
-from .symbols.function import Function, StandardFunction
+from .symbols.function import Function, StandardFunction, MainFunction
 
 class SymbolTable:
     count = 0
@@ -75,7 +75,7 @@ class SymbolTable:
             node.transpiler.warnings.error(node, f"Cannot redefine function '{name}'")
             return None
 
-        return self._new_symbol(Function, node, name)
+        return self._new_symbol(Function if name != "main" else MainFunction, node, name)
 
     def new_standard_function(self, r_type, name, parameters, define):
         func = self._new_symbol(StandardFunction, None, name)
