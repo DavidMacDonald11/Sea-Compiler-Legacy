@@ -50,6 +50,7 @@ class Transpiler:
             "\t#endif\n",
             "\t#ifdef __sea_const_main_no_return__",
             "\t\t__sea_fun_main__(__sea_main_args__);",
+            "\t\treturn 0;",
             "\t#elif __sea_const_main_returns_pointer__",
             "\t\treturn *__sea_fun_main__(__sea_main_args__);",
             "\t#else",
