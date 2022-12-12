@@ -1,11 +1,10 @@
 from util.misc import is_integer
 from transpiling.expression import Expression
+from transpiling.utils import util, new_util
 from .unary_expression import UnaryExpression
 from ..node import BinaryOperation
 
 class MultiplicativeExpression(BinaryOperation):
-    wrote = []
-
     @classmethod
     def construct(cls):
         return cls.construct_binary(["*", "/"], UnaryExpression)
@@ -40,12 +39,12 @@ class MultiplicativeExpression(BinaryOperation):
         if left.kind != "str":
             right, left = left, right
 
-        size_func = type(self).write_size_func(self.transpiler)
+        size_func = util("array_multiply_size")
         cast = "(__sea_type_nat__)" if "nat" in right.kind else ""
         size = f"{size_func}({left}, {cast}({right}))"
 
         result = self.transpiler.cache_new_temp_array(Expression("str"), size, string = True)
-        func = type(self).write_str_multiply_func(self.transpiler)
+        func = util("str_multiply")
         result.add(f"{func}(", f", {left})")
 
         return self.transpiler.cache_new_temp(result)
@@ -63,7 +62,7 @@ class MultiplicativeExpression(BinaryOperation):
         if left.arrays == 0:
             right, left = left, right
 
-        size_func = type(self).write_size_func(self.transpiler)
+        size_func = util("array_multiply_size")
         cast = "(__sea_type_nat__)" if "nat" in right.kind else ""
         size = f"{size_func}({left}, {cast}(({right} == 0) ? 1 : {right}))"
 
@@ -71,59 +70,49 @@ class MultiplicativeExpression(BinaryOperation):
         result = self.transpiler.cache_new_temp_array(result, size, string = True)
 
         kind = left.kind if left.kind != "str" and left.arrays < 2 else "array"
-        func = type(self).write_array_multiply_func(self.transpiler, kind)
+        func = util(self.util_array_multiply(kind))
         result.add(f"{func}(", f", {left})")
 
         print(result.arrays, result.kind)
 
         return self.transpiler.cache_new_temp(result)
 
-    @classmethod
-    def write_size_func(cls, transpiler):
-        func = "__sea_func_array_mul_size__"
-        if func in cls.wrote: return func
-        cls.wrote += [func]
-
-        transpiler.header("\n".join((
+    @new_util("array_multiply_size")
+    @staticmethod
+    def util_array_multiply_size(func):
+        return "\n".join((
             f"#define {func}(ARR, MUL) (_Generic((MUL), __sea_type_nat__: MUL, \\",
             "\tdefault: (MUL < 0) ? 0 : MUL) * ARR.size)"
-        )))
+        ))
 
-        return func
-
-    @classmethod
-    def write_str_multiply_func(cls, transpiler):
-        func = "__sea_func_str_mul__"
-        if func in cls.wrote: return func
-        cls.wrote += [func]
-
+    @new_util("str_multiply")
+    @staticmethod
+    def util_str_multiply(func):
         array = "__sea_type_array__"
         kind = "__sea_type_str__"
 
-        transpiler.header("\n".join((
+        return "\n".join((
             f"{array} {func}({array} out, {array} in)", "{",
             "\tfor(__sea_type_nat__ i = 0; i < out.size; i++)", "\t{",
             f"\t\t(({kind})out.data)[i] = (({kind})in.data)[i % in.size];", "\t}",
             f"\t(({kind})out.data)[out.size] = '\\0';",
             "\treturn out;", "}"
-        )))
+        ))
 
-        return func
-
-    @classmethod
-    def write_array_multiply_func(cls, transpiler, kind):
-        func = f"__sea_func_array_mul_{kind}__"
-        if func in cls.wrote: return func
-        cls.wrote += [func]
+    @staticmethod
+    def util_array_multiply(kind):
+        name = "array_multiply"
 
         array = "__sea_type_array__"
         kind = f"__sea_type_{kind}__"
 
-        transpiler.header("\n".join((
-            f"{array} {func}({array} out, {array} in)", "{",
-            "\tfor(__sea_type_nat__ i = 0; i < out.size; i++)", "\t{",
-            f"\t\t(({kind} *)out.data)[i] = (({kind} *)in.data)[i % in.size];", "\t}",
-            "\treturn out;", "}"
-        )))
+        @new_util(name)
+        def func(func):
+            return "\n".join((
+                f"{array} {func}({array} out, {array} in)", "{",
+                "\tfor(__sea_type_nat__ i = 0; i < out.size; i++)", "\t{",
+                f"\t\t(({kind} *)out.data)[i] = (({kind} *)in.data)[i % in.size];", "\t}",
+                "\treturn out;", "}"
+            ))
 
-        return func
+        return name

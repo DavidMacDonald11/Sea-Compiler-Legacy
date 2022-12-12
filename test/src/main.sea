@@ -9,7 +9,7 @@ fun print_array(int[] &arr):
     print("]")
 
 fun main(str[] args) -> int:
-    int[] arr = [1, 2] + [3, 4]
+    int[] arr = [1, 2] + [3, ~4.2][:]
     print_array(&arr)
 
     return 0

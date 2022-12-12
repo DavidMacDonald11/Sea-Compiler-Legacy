@@ -1,11 +1,10 @@
 from transpiling.expression import Expression
+from transpiling.utils import util, new_util
 from .unary_expression import RoundExpression
 from .cast_expression import CastExpression
 from ..node import BinaryOperation
 
 class RemainderExpression(BinaryOperation):
-    wrote = []
-
     @classmethod
     def construct(cls):
         return cls.construct_binary(["mod"], CastExpression)
@@ -25,25 +24,25 @@ class RemainderExpression(BinaryOperation):
             self.transpiler.include("math")
 
             if "imag" in result.kind :
-                result.cast(result.kind.replace("imag", "cplex"))
+                result.cast_replace("imag", "cplex")
 
-            func = self.write_func(result.kind)
+            func = util(self.util_mod(result.kind))
             return result.new(f"{func}({left}, {right})")
 
         return result.new(f"({left}) % ({right})")
 
-    def write_func(self, kind):
-        func = f"__sea_func_mod_{kind}__"
+    @staticmethod
+    def util_mod(kind):
+        name = f"mod_{kind}"
 
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
+        @new_util(name)
+        def func(func):
+            floor = util(RoundExpression.util_round("floor", kind))
+            kind = f"__sea_type_{kind}"
 
-        round_func = RoundExpression.write_func(self.transpiler, "floor", kind)
-        kind = f"__sea_type_{kind}"
+            return "\n".join((
+                f"{kind} {func}({kind} left, {kind} right)", "{",
+                f"\treturn left - right * {floor}(left / right);", "}\n"
+            ))
 
-        self.transpiler.header("\n".join((
-            f"{kind} {func}({kind} left, {kind} right)", "{",
-            f"\treturn left - right * {round_func}(left / right);", "}\n"
-        )))
-
-        return func
+        return name

@@ -1,4 +1,5 @@
 from lexing.token import PREFIX_UNARY_OPERATORS
+from transpiling.utils import util, new_util
 from .primary_expression import Identifier, NumericConstant
 from .exponential_expression import ExponentialExpression
 from ..node import Node
@@ -38,7 +39,7 @@ class UnaryPlusExpression(UnaryExpression):
         expression = self.expression.transpile().operate(self)
 
         if "int" in expression.kind and self.expression.of(NumericConstant):
-            return expression.new("%sU").cast(expression.kind.replace("int", "nat"))
+            return expression.new("%sU").cast_replace("int", "nat")
 
         return expression
 
@@ -47,7 +48,7 @@ class UnaryMinusExpression(UnaryExpression):
         expression = self.expression.transpile().operate(self).cast_up()
 
         if "nat" in expression.kind:
-            expression.cast(expression.kind.replace("nat", "int"))
+            expression.cast_replace("nat", "int")
 
         return expression.add("-")
 
@@ -56,8 +57,6 @@ class BitwiseNotExpression(UnaryExpression):
         return self.expression.transpile().operate(self).cast_up().add("~")
 
 class RoundExpression(UnaryExpression):
-    wrote = []
-
     def transpile(self):
         expression = self.expression.transpile().operate(self).cast_up()
         kind = expression.kind
@@ -73,28 +72,26 @@ class RoundExpression(UnaryExpression):
 
         if "imag" in kind or "cplex" in kind:
             self.transpiler.include("complex")
-            func = type(self).write_func(self.transpiler, func, kind)
+            func = util(self.util_round(func, kind))
 
         return expression.add(f"({func}(", "))")
 
-    @classmethod
-    def write_func(cls, transpiler, func, kind):
-        sea_func = f"__sea_func_{func}_{kind}__"
+    @staticmethod
+    def util_round(s_func, kind):
+        name = f"{s_func}_{kind}"
 
-        if sea_func in cls.wrote: return sea_func
-        cls.wrote += [sea_func]
+        @new_util(name)
+        def func(func):
+            long = "l" if kind in ("imag", "cplex") else ""
+            real_comp = "" if "imag" in kind else f"{s_func}{long}(creal{long}(num)) + "
+            kind = f"__sea_type_{kind}__"
 
-        c_kind = f"__sea_type_{kind}__"
+            return "\n".join((
+                f"{kind} {func}({kind} num)", "{",
+                f"\treturn {real_comp}{s_func}{long}(cimag{long}(num)) * 1.0j;", "}\n"
+            ))
 
-        long = "l" if kind in ("imag", "cplex") else ""
-        real_comp = "" if "imag" in kind else f"{func}{long}(creal{long}(num)) + "
-
-        transpiler.header("\n".join((
-            f"{c_kind} {sea_func}({c_kind} num)", "{",
-            f"\treturn {real_comp}{func}{long}(cimag{long}(num)) * 1.0j;", "}\n"
-        )))
-
-        return sea_func
+        return name
 
 class OwnershipExpression(UnaryExpression):
     def transpile(self):

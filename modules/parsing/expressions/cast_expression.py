@@ -58,7 +58,7 @@ class CastExpression(Node):
         if expression.kind == "bool":
             expression.add("(", ') ? "True" : "False"').cast("str")
         elif "imag" in expression.kind:
-            expression.drop_imaginary(self).cast(expression.kind.replace("imag", "real"))
+            expression.drop_imaginary(self).cast_replace("imag", "real")
             format_tag = f"{format_tag}i"
         elif "cplex" in expression.kind:
             expression, format_tag = self.transpile_str_cplex(expression, format_tag)

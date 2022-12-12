@@ -3,6 +3,7 @@ from .symbol_table import SymbolTable
 from .expression import Expression
 from .statement import Statement
 from .symbols.function import FunctionKind
+from .utils import set_transpiler, util, new_util
 
 class Transpiler:
     @property
@@ -17,9 +18,11 @@ class Transpiler:
         self.symbols = SymbolTable()
         self.includes = []
         self.wrote = []
+        self.head = ""
         self.lines = ""
         self.temps = -1
 
+        set_transpiler(self)
         self.standard()
 
     def __del__(self):
@@ -28,15 +31,16 @@ class Transpiler:
     def close(self):
         if self.file.closed: return
 
-        self.header("\n".join((
-            "\n/* FILE CONTENTS */",
+        self.file.write("\n".join((
+            f"\n{self.head.strip()}\n",
+            "/* FILE CONTENTS */",
             f"{self.lines.strip()}",
             "/* FILE CONTENTS */\n",
             "int main(__sea_type_nat__ argc, __sea_type_str__ argv[])", "{",
             "\t__sea_type_array__ str_args[argc];\n",
             "\tfor(__sea_type_nat__ i = 0; i < argc; i++)", "\t{",
             "\t\tstr_args[i] = (__sea_type_array__){argv[i], strlen(argv[i])};", "\t}\n",
-            "\treturn __sea_fun_main__((__sea_type_array__){str_args, argc});", "}"
+            "\treturn __sea_fun_main__((__sea_type_array__){str_args, argc});", "}\n"
         )))
 
         self.file.close()
@@ -45,7 +49,6 @@ class Transpiler:
         self.include("stdint")
         self.include("limits")
         self.include("string")
-        self.header()
 
         for i in range(3, 7):
             bits = 2 ** i
@@ -69,13 +72,12 @@ class Transpiler:
         self.alias("__sea_type_char__*", "__sea_type_str__")
 
         self.header("\n".join((
-            "typedef struct {",
+            "\ntypedef struct {",
             "\tvoid *data;", "\t__sea_type_nat__ size;",
-            "} __sea_type_array__;",
+            "} __sea_type_array__;\n",
             "__sea_type_array__ __sea_special_null_array__ = {0, 0};"
         )))
 
-        self.header()
 
         r_type = FunctionKind(None, None, 0, None)
         null_array = Expression("", '__sea_special_null_array__')
@@ -90,7 +92,7 @@ class Transpiler:
         main.declared = True
 
         self.standard_function(r_type, "print", parameters, "\n".join((
-            "\nvoid __sea_fun_print__(__sea_type_array__ s, __sea_type_array__ end)", "{",
+            "void __sea_fun_print__(__sea_type_array__ s, __sea_type_array__ end)", "{",
             '\tprintf("%s%s", (s.data) ? (char *)s.data : "", '
             '(end.data) ? (char *)end.data : "\\n");', "}"
         )), ["stdio"])
@@ -99,7 +101,7 @@ class Transpiler:
         parameters = [FunctionKind("invar", "any", 0, None)]
 
         self.standard_function(r_type, "len", parameters, "\n".join((
-            "\n#define __sea_fun_len__(X) _Generic((X), __sea_type_array__: X, \\",
+            "#define __sea_fun_len__(X) _Generic((X), __sea_type_array__: X, \\",
             "\tdefault: __sea_special_null_array__).size"
         )), [])
 
@@ -115,13 +117,13 @@ class Transpiler:
     def include(self, header):
         if header not in self.includes:
             self.includes += [header]
-            self.header(f"#include <{header}.h>")
+            self.file.write(f"#include <{header}.h>\n")
 
-    def header(self, string = "", end = "\n"):
-        self.file.write(f"{string}{end}")
+    def header(self, string = "", end = "\n\n"):
+        self.head += f"{string}{end}"
 
     def alias(self, c_name, sea_name):
-        self.header(f"typedef {c_name} {sea_name};")
+        self.header(f"typedef {c_name} {sea_name};", "\n")
 
     def write(self, string = "", end = "\n"):
         self.lines += f"{string}{end}"
@@ -153,7 +155,7 @@ class Transpiler:
         buffer = self.temp_name
         name = self.temp_name
 
-        func = self.write_buffer_func()
+        func = util("new_casted_str")
         prefix.add(f"{func}({name}, {buffer}, {size}, ", ")")
         Statement.cached += [prefix]
 
@@ -164,7 +166,7 @@ class Transpiler:
         buffer = self.temp_name
         name = self.temp_name
 
-        func = self.write_str_array_func()
+        func = util("new_str")
         prefix.add(f"{func}({buffer}, {name}, ", ")")
         Statement.cached += [prefix]
 
@@ -193,7 +195,7 @@ class Transpiler:
         else:
             assign = False
 
-        func = self.write_array_func(assign)
+        func = util(self.util_new_array(assign))
         prefix.add(f"{func}({name}, {kind}, {buffer}, {size}", ")")
         Statement.cached += [prefix]
 
@@ -206,43 +208,36 @@ class Transpiler:
         type(self.symbols).count -= 1
         self.symbols = self.symbols.parent
 
-    def write_buffer_func(self):
-        func = "__sea_func_buffer__"
-        if func in self.wrote: return func
-        self.wrote += [func]
-
-        self.header("\n".join((
+    @new_util("new_casted_str")
+    @staticmethod
+    def util_new_casted_str(func):
+        return "\n".join((
             f"#define {func}(ARRAY, BUFFER, SIZE, STR, THING) \\",
             "\t__sea_type_nat__ SIZE = snprintf(NULL, 0, STR, THING); \\",
             "\t__sea_type_char__ BUFFER[1 + SIZE]; \\",
             "\tsprintf(BUFFER, STR, THING); \\",
-            "__sea_type_array__ ARRAY = {BUFFER, SIZE}"
-        )))
+            "\t__sea_type_array__ ARRAY = {BUFFER, SIZE}"
+        ))
 
-        return func
-
-    def write_str_array_func(self):
-        func = "__sea_func_str_array__"
-        if func in self.wrote: return func
-        self.wrote += [func]
-
-        self.header("\n".join((
+    @new_util("new_str")
+    @staticmethod
+    def util_new_str(func):
+        return "\n".join((
             f"#define {func}(STR, ARRAY, LITERAL) \\",
             "\t__sea_type_str__ STR = LITERAL; \\",
             "\t__sea_type_array__ ARRAY = {STR, strlen(STR)}"
-        )))
+        ))
 
-        return func
+    @staticmethod
+    def util_new_array(assign):
+        name = f"new_array{'_assign' if assign else ''}"
 
-    def write_array_func(self, assign):
-        func = f"__sea_func_array{'_assign' if assign else ''}__"
-        if func in self.wrote: return func
-        self.wrote += [func]
+        @new_util(name)
+        def func(func):
+            return "\n".join((
+                f"#define {func}(ARRAY, TYPE, BUFFER, SIZE{', ...' if assign else ''}) \\",
+                f"\tTYPE BUFFER[SIZE]{' = {__VA_ARGS__}' if assign else ''}; \\",
+                "\t__sea_type_array__ ARRAY = {BUFFER, SIZE}",
+            ))
 
-        self.header("\n".join((
-            f"#define {func}(ARRAY, TYPE, BUFFER, SIZE{', ...' if assign else ''}) \\",
-            f"\tTYPE BUFFER[SIZE]{' = {__VA_ARGS__}' if assign else ''};\\",
-            "\t__sea_type_array__ ARRAY = {BUFFER, SIZE}",
-        )))
-
-        return func
+        return name

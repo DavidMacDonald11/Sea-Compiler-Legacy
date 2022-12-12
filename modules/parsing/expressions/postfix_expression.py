@@ -1,5 +1,6 @@
 from lexing.token import POSTFIX_UNARY_OPERATORS
 from transpiling.expression import FLOATING_TYPES
+from transpiling.utils import util, new_util
 from .primary_expression import PrimaryExpression
 from .postfix_call_expression import PostfixCallExpression
 from .postfix_access_expression import PostfixAccessExpression
@@ -45,8 +46,6 @@ class PercentExpression(PostfixExpression):
         return expression.add("(", " / 100)").cast_up()
 
 class FactorialExpression(PostfixExpression):
-    wrote = []
-
     def transpile(self):
         expression = self.expression.transpile().operate(self)
 
@@ -59,25 +58,20 @@ class FactorialExpression(PostfixExpression):
             self.transpiler.warnings.warn(self, message)
 
         expression.cast("nat")
-        func = self.write_func()
+        func = util("factorial")
         return expression.add(f"({func}(", "))")
 
-    def write_func(self):
-        func = "__sea_func_factorial__"
-
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
-
+    @new_util("factorial")
+    @staticmethod
+    def util_factorial(func):
         kind = "__sea_type_nat__"
 
-        self.transpiler.header("\n".join((
+        return "\n".join((
             f"{kind} {func}({kind} num)", "{",
             f"\t{kind} result = 1;",
             f"\tfor({kind} i = 2; i <= num; i++) result *= i;",
             "\treturn result;", "}\n"
-        )))
-
-        return func
+        ))
 
 class TestExpression(PostfixExpression):
     def transpile(self):

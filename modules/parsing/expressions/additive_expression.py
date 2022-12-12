@@ -1,10 +1,9 @@
 from transpiling.expression import Expression
+from transpiling.utils import util, new_util
 from .multiplicative_expression import MultiplicativeExpression
 from ..node import BinaryOperation
 
 class AdditiveExpression(BinaryOperation):
-    wrote = []
-
     @classmethod
     def construct(cls):
         return cls.construct_binary(["+", "-"], MultiplicativeExpression)
@@ -37,7 +36,7 @@ class AdditiveExpression(BinaryOperation):
 
         r_size = f"{right}.size" if (right.kind == "str") else "1"
         l_size = f"{left}.size" if (left.kind == "str") else "1"
-        append = type(self).write_str_append_func(self.transpiler)
+        append = util("str_append")
 
         result = Expression.resolve(left, right, True, True).cast_up()
         self.transpiler.cache_new_temp_array(result, f"{r_size} + {l_size}", string = True)
@@ -48,16 +47,13 @@ class AdditiveExpression(BinaryOperation):
 
         return self.transpiler.cache_new_temp(result)
 
-    @classmethod
-    def write_str_append_func(cls, transpiler):
-        func = "__sea_func_str_append__"
-        if func in cls.wrote: return func
-        cls.wrote += [func]
-
-        helper = "__sea_func_str_append"
+    @new_util("str_append")
+    @staticmethod
+    def util_str_append(func):
+        helper = "__sea_hutil_str_append"
         kind = "__sea_type_array__"
 
-        transpiler.header("\n".join((
+        return "\n".join((
             f"{kind} {helper}_char__({kind} out, {kind} str, __sea_type_char__ c)", "{",
             "\t__sea_type_nat__ i = 0;",
             "\tfor(; i < str.size; i++) "
@@ -86,9 +82,7 @@ class AdditiveExpression(BinaryOperation):
             f"#define {func}(OUT, STR1, STR2) _Generic((STR2), \\",
             f"\t__sea_type_char__: {helper}_char__, \\",
             f"\tdefault: {helper}_order__(OUT, STR1, STR2))(OUT, STR1, STR2)"
-        )))
-
-        return func
+        ))
 
     def transpile_array(self, left, right):
         if left.arrays != right.arrays:
@@ -109,29 +103,29 @@ class AdditiveExpression(BinaryOperation):
         l_kind = left.kind if left.kind != "str" and left.arrays < 2 else "array"
         r_kind = right.kind if right.kind != "str" and right.arrays < 2 else "array"
 
-        append = type(self).write_array_append_func(self.transpiler, o_kind, l_kind, r_kind)
+        append = util(self.util_array_append(o_kind, l_kind, r_kind))
         result.add(f"{append}(", f", {left}, {right})")
         return self.transpiler.cache_new_temp(result)
 
-    @classmethod
-    def write_array_append_func(cls, transpiler, o_kind, l_kind, r_kind):
-        func = f"__sea_func_array_append_{l_kind}_{r_kind}_{o_kind}__"
-        if func in cls.wrote: return func
-        cls.wrote += [func]
+    @staticmethod
+    def util_array_append(o_kind, l_kind, r_kind):
+        name = f"array_append_{l_kind}_{r_kind}_into_{o_kind}"
 
         kind = "__sea_type_array__"
         o_kind = f"__sea_type_{o_kind}__"
         l_kind = f"__sea_type_{l_kind}__"
         r_kind = f"__sea_type_{r_kind}__"
 
-        transpiler.header("\n".join((
-            f"{kind} {func}({kind} out, {kind} left, {kind} right)", "{",
-            "\t__sea_type_nat__ i = 0;",
-            "\tfor(; i < left.size; i++) "
-            f"(({o_kind} *)out.data)[i] = (({l_kind} *)left.data)[i];",
-            "\tfor(i = 0; i < right.size; i++) "
-            f"(({o_kind} *)out.data)[left.size + i] = (({r_kind} *)right.data)[i];",
-            "\treturn out;", "}"
-        )))
+        @new_util(name)
+        def func(func):
+            return "\n".join((
+                f"{kind} {func}({kind} out, {kind} left, {kind} right)", "{",
+                "\t__sea_type_nat__ i = 0;",
+                "\tfor(; i < left.size; i++) "
+                f"(({o_kind} *)out.data)[i] = (({l_kind} *)left.data)[i];",
+                "\tfor(i = 0; i < right.size; i++) "
+                f"(({o_kind} *)out.data)[left.size + i] = (({r_kind} *)right.data)[i];",
+                "\treturn out;", "}"
+            ))
 
-        return func
+        return name

@@ -26,6 +26,6 @@ class ExponentialExpression(BinaryOperation):
 
         if any(map(lambda x: x in result.kind), ("imag", "cplex")):
             self.transpiler.include("complex")
-            return result.add("(cpow", ")").cast(result.kind.replace("imag", "cplex"))
+            return result.add("(cpow", ")").cast_replace("imag", "cplex")
 
         raise NotImplementedError(f"ExponentialExpression of {result.kind}")

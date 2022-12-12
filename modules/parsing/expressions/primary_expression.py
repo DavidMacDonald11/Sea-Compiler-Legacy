@@ -1,6 +1,7 @@
 import re
 from lexing.token import PRIMARY_KEYWORDS
 from transpiling.expression import Expression
+from transpiling.utils import util, new_util
 from ..node import Node, PrimaryNode
 
 class PrimaryExpression(Node):
@@ -249,8 +250,6 @@ class ParenthesesExpression(Node):
         return self.expression.transpile().add("(", ")")
 
 class NormExpression(ParenthesesExpression):
-    wrote = []
-
     @classmethod
     def construct(cls):
         cls.parser.expecting_has("||")
@@ -272,7 +271,7 @@ class NormExpression(ParenthesesExpression):
             return expression
 
         if "int" in kind:
-            func = self.write_generic_func("int" if kind == "int" else "int64")
+            func = util(self.util_norm("int" if kind == "int" else "int64"))
             return expression.add(f"({func}", ")").cast("nat")
 
         if kind in ("real32", "real64"):
@@ -289,18 +288,18 @@ class NormExpression(ParenthesesExpression):
 
         raise NotImplementedError(f"NormExpression of {kind}")
 
-    def write_generic_func(self, kind):
-        func = f"__sea_func_norm_{kind}__"
+    @staticmethod
+    def util_norm(kind):
+        name = f"norm_{kind}"
 
-        if func in type(self).wrote: return func
-        type(self).wrote += [func]
+        @new_util(name)
+        def func(func):
+            return "\n".join((
+                f"__sea_type_{kind}__ {func}({kind} num)", "{",
+                "\treturn (num < 0) ? -num : num; ", "}\n"
+            ))
 
-        self.transpiler.header("\n".join((
-            f"__sea_type_{kind}__ {func}({kind} num)", "{",
-            "\treturn (num < 0) ? -num : num; ", "}\n"
-        )))
-
-        return func
+        return name
 
 class PrimaryKeyword(PrimaryNode):
     def transpile(self):

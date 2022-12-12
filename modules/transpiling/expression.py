@@ -51,6 +51,10 @@ class Expression:
         self.kind = kind
         return self
 
+    def cast_replace(self, old, new):
+        self.kind = self.kind.replace(old, new)
+        return self
+
     def cast_up(self):
         self.kind = "nat8" if self.kind in ("bool", "char") else self.kind
         return self

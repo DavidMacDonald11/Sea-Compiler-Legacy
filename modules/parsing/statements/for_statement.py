@@ -1,8 +1,8 @@
 from transpiling.expression import Expression
 from transpiling.statement import Statement
+from transpiling.utils import util
 from .block_statement import BlockStatement
 from ..declarations.full_type import FullType
-from ..expressions.postfix_access_expression import PostfixAccessExpression
 from ..node import Node
 
 class ForStatement(Node):
@@ -88,11 +88,11 @@ class ForStatement(Node):
         self.transpiler.cache_new_temp(expression)
 
         if expression.kind == "str" and expression.arrays == 0:
-            index = PostfixAccessExpression.write_str_index_func(self.transpiler)
+            index = util("str_index")
             kind = "char"
             access = f"{index}({expression}, {i})"
         else:
-            index = PostfixAccessExpression.write_array_index_func(self.transpiler)
+            index = util("array_index")
             kind = "array" if expression.kind == "str" or expression.arrays > 1 else expression.kind
             access = f"{index}(__sea_type_{kind}__, {expression}, {i})"
 
