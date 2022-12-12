@@ -84,8 +84,8 @@ class ForStatement(Node):
         identifier.initialized = True
         name = identifier.c_name
 
-        i = self.transpiler.cache_new_temp(Expression("nat", "0"))
-        self.transpiler.cache_new_temp(expression)
+        i = self.transpiler.temps.cache_new(Expression("nat", "0"))
+        self.transpiler.temps.cache_new(expression)
 
         if expression.kind == "str" and expression.arrays == 0:
             index = util("str_index")

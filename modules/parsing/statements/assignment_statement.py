@@ -184,10 +184,10 @@ class AssignmentList(Node):
 
         return statement
 
-    def handle_temporaries(self, statement):  # sourcery skip: use-next
+    def handle_temporaries(self, statement):
         for identifier in self.others:
             if identifier in statement.expression.identifiers:
-                self.transpiler.new_temp(statement)
+                self.transpiler.temps.new(statement)
                 return True
 
         return False

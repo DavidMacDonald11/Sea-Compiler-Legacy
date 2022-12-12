@@ -1,26 +1,24 @@
 from .context import Context
 from .symbol_table import SymbolTable
 from .expression import Expression
-from .statement import Statement
 from .symbols.function import FunctionKind
-from .utils import set_transpiler, util, new_util
+from .temps import Temps
+from .utils import set_transpiler
 
 class Transpiler:
     @property
     def temp_name(self):
-        self.temps += 1
-        return f"__sea_temp_value_{self.temps}__"
+        return "__sea_temp_value_69__"
 
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
         self.context = Context()
         self.symbols = SymbolTable()
+        self.temps = Temps(self.context)
         self.includes = []
-        self.wrote = []
         self.head = ""
         self.lines = ""
-        self.temps = -1
 
         set_transpiler(self)
         self.standard()
@@ -128,116 +126,9 @@ class Transpiler:
     def write(self, string = "", end = "\n"):
         self.lines += f"{string}{end}"
 
-    def new_temp(self, statement, kind = None):
-        kind = kind or (statement.expression.kind, 0)
-        name =  self.temp_name
-
-        prefix = Expression(kind[0], statement.expression.string, kind[1])
-        prefix.add(f"__sea_type_{kind[0]}__ {'*' * kind[1]}{name} = ")
-
-        return statement.prefix(prefix).new(name)
-
-    def cache_new_temp(self, expression, name = None, string = False):
-        name = name or self.temp_name
-        kind = expression.kind
-
-        prefix = Expression(kind, expression.string)
-        kind = "array" if not string and kind == "str" or expression.arrays > 0 else kind
-        prefix.add(f"__sea_type_{kind}__ {name} = ")
-        Statement.cached += [prefix]
-
-        return expression.new(name)
-
-    def cache_new_temp_buffer(self, expression):
-        prefix = Expression(expression.kind, expression.string)
-
-        size = self.temp_name
-        buffer = self.temp_name
-        name = self.temp_name
-
-        func = util("new_casted_str")
-        prefix.add(f"{func}({name}, {buffer}, {size}, ", ")")
-        Statement.cached += [prefix]
-
-        return expression.new(name)
-
-    def cache_new_temp_str(self, expression):
-        prefix = Expression(expression.kind, expression.string)
-        buffer = self.temp_name
-        name = self.temp_name
-
-        func = util("new_str")
-        prefix.add(f"{func}({buffer}, {name}, ", ")")
-        Statement.cached += [prefix]
-
-        return expression.new(name)
-
-    def cache_new_temp_array(self, expression, size, string = False):
-        prefix = Expression(expression.kind, expression.string)
-        kind = expression.kind
-
-        if not string and kind == "str" or expression.arrays > 1:
-            kind = "array"
-        elif self.context.array is not None:
-            if self.context.array.kind != "str":
-                prefix.cast(self.context.array.kind)
-                expression.cast(self.context.array.kind)
-
-            kind = "array" if expression.arrays > 1 else self.context.array.kind
-
-        name = self.temp_name
-        buffer = self.temp_name
-        kind = f"__sea_type_{kind}__"
-
-        if prefix.string != "":
-            assign = True
-            prefix.new(f", {prefix.string[1:-1]}")
-        else:
-            assign = False
-
-        func = util(self.util_new_array(assign))
-        prefix.add(f"{func}({name}, {kind}, {buffer}, {size}", ")")
-        Statement.cached += [prefix]
-
-        return expression.new(name)
-
     def push_symbol_table(self):
         self.symbols = SymbolTable(self.symbols)
 
     def pop_symbol_table(self):
         type(self.symbols).count -= 1
         self.symbols = self.symbols.parent
-
-    @new_util("new_casted_str")
-    @staticmethod
-    def util_new_casted_str(func):
-        return "\n".join((
-            f"#define {func}(ARRAY, BUFFER, SIZE, STR, THING) \\",
-            "\t__sea_type_nat__ SIZE = snprintf(NULL, 0, STR, THING); \\",
-            "\t__sea_type_char__ BUFFER[1 + SIZE]; \\",
-            "\tsprintf(BUFFER, STR, THING); \\",
-            "\t__sea_type_array__ ARRAY = {BUFFER, SIZE}"
-        ))
-
-    @new_util("new_str")
-    @staticmethod
-    def util_new_str(func):
-        return "\n".join((
-            f"#define {func}(STR, ARRAY, LITERAL) \\",
-            "\t__sea_type_str__ STR = LITERAL; \\",
-            "\t__sea_type_array__ ARRAY = {STR, strlen(STR)}"
-        ))
-
-    @staticmethod
-    def util_new_array(assign):
-        name = f"new_array{'_assign' if assign else ''}"
-
-        @new_util(name)
-        def func(func):
-            return "\n".join((
-                f"#define {func}(ARRAY, TYPE, BUFFER, SIZE{', ...' if assign else ''}) \\",
-                f"\tTYPE BUFFER[SIZE]{' = {__VA_ARGS__}' if assign else ''}; \\",
-                "\t__sea_type_array__ ARRAY = {BUFFER, SIZE}",
-            ))
-
-        return name

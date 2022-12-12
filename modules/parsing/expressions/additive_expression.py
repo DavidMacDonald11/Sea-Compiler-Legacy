@@ -39,13 +39,13 @@ class AdditiveExpression(BinaryOperation):
         append = util("str_append")
 
         result = Expression.resolve(left, right, True, True).cast_up()
-        self.transpiler.cache_new_temp_array(result, f"{r_size} + {l_size}", string = True)
+        self.transpiler.temps.cache_new_array(result, f"{r_size} + {l_size}", string = True)
 
         l_cast = "" if left.kind == "str" else "(__sea_type_char__)"
         r_cast = "" if right.kind == "str" else "(__sea_type_char__)"
         result.add(f"{append}(", f", {l_cast}({left}), {r_cast}({right}))")
 
-        return self.transpiler.cache_new_temp(result)
+        return self.transpiler.temps.cache_new(result)
 
     @new_util("str_append")
     @staticmethod
@@ -97,7 +97,7 @@ class AdditiveExpression(BinaryOperation):
             self.transpiler.warnings.error(self, "Cannot add str array to non-str array")
 
         result = Expression.resolve(left, right, True, True).cast_up()
-        self.transpiler.cache_new_temp_array(result, f"{right}.size + {left}.size")
+        self.transpiler.temps.cache_new_array(result, f"{right}.size + {left}.size")
 
         o_kind = result.kind if result.kind != "str" and result.arrays < 2 else "array"
         l_kind = left.kind if left.kind != "str" and left.arrays < 2 else "array"
@@ -105,7 +105,7 @@ class AdditiveExpression(BinaryOperation):
 
         append = util(self.util_array_append(o_kind, l_kind, r_kind))
         result.add(f"{append}(", f", {left}, {right})")
-        return self.transpiler.cache_new_temp(result)
+        return self.transpiler.temps.cache_new(result)
 
     @staticmethod
     def util_array_append(o_kind, l_kind, r_kind):
