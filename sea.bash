@@ -224,7 +224,8 @@ done <"$manifest"
 
 if [[ "$mode" == "l" || "$mode" == "r" ]]
 then
-    eval gcc "$objects" -o "$out_dir/main" -lm -lgcc_s -lgcc -lc && eval rm -r "$generated"
+    eval gcc "$objects" -o "$out_dir/main" -lm -lgcc_s -lgcc -lc &&
+    [[ "$options" != *"d"* ]] && eval rm -r "$generated"
 fi
 
 if [[ "$mode" == "r" ]]
