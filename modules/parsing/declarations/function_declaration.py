@@ -55,6 +55,7 @@ class FunctionDeclaration(Node):
 
         if is_definition:
             self.transpiler.push_symbol_table()
+            function.symbols = self.transpiler.symbols
 
             if self.parameters is not None:
                 self.parameters.is_def = True
@@ -188,6 +189,8 @@ class FunctionParameter(Node):
         parameter.initialized = True
         parameter.arrays = f_kind.arrays
         parameter.ownership = f_kind.borrow
+        parameter.heap = (f_kind.borrow == "$")
+
         kind = self.full_type.transpile()
 
         if parameter.ownership is not None:

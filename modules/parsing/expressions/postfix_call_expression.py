@@ -19,6 +19,8 @@ class PostfixCallExpression(Node):
         return cls(arguments)
 
     def transpile(self):
+        self.transpiler.context.calls += 1
+
         if not isinstance(self.expression, Identifier):
             self.transpiler.warnings.error(self, "Cannot call a non-function")
             return Expression("", f"/*{self.expression.transpile()}(...)*/")
@@ -30,7 +32,10 @@ class PostfixCallExpression(Node):
             self.transpiler.warnings.error(self, "Cannot call a non-function")
             return Expression("", f"/*{self.expression.transpile()}(...)*/")
 
-        return function.call(self, self.arguments)
+        expression = function.call(self, self.arguments)
+        self.transpiler.context.calls -= 1
+
+        return expression
 
 class ArgumentExpressionList(Node):
     @property
@@ -133,6 +138,9 @@ class FunctionArgument(Node):
         if isinstance(expression, OwnershipExpression):
             qualifier = "invar" if expression.invariable else "var"
             borrow = expression.operator
+
+            if borrow == "$":
+                self.transpiler.temps.new_heap(expression, cache = True)
         else:
             qualifier = "var"
             borrow = None

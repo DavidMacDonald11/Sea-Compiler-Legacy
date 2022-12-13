@@ -13,6 +13,9 @@ class AssignmentStatement(Node):
         self.expression_lists = expression_lists
         self.identifiers = []
 
+    def __len__(self):
+        return len(self.expression_lists)
+
     @classmethod
     def construct(cls):
         taken = cls.parser.take()
@@ -135,6 +138,7 @@ class AssignmentList(Node):
         return statement
 
     def transpile(self):
+        self.transpiler.context.in_assign = True
         count = len(self.identifiers)
         expression = self.expression.transpile()
 
@@ -182,6 +186,7 @@ class AssignmentList(Node):
                 kind = "array" if self.kind[1] > 0 or self.kind[0] == "str" else self.kind[0]
                 statement.add(f"__sea_type_{kind}__ ")
 
+        self.transpiler.context.in_assign = False
         return statement
 
     def handle_temporaries(self, statement):

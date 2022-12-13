@@ -1,3 +1,4 @@
+from transpiling.statement import Statement
 from .assignment_statement import AssignmentStatement, AssignmentList
 from ..node import Node
 
@@ -47,3 +48,5 @@ class IdentifierDefinition(Node):
             self.transpiler.warnings.error(self, message)
 
         owner2.fun_local = owner1.fun_local
+        owner2.fun_ptr = owner1.fun_ptr
+        owner2.heap = owner1.heap

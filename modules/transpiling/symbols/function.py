@@ -66,7 +66,15 @@ class Function(Symbol):
         expression = Expression(self.kind, f"{self.c_name}({args})")
         expression.identifiers += [self.name]
 
-        return self.set_expression(expression)
+        expression = self.set_expression(expression)
+
+        in_assign = node.transpiler.context.in_assign
+        in_call = node.transpiler.context.calls > 1
+
+        if not in_assign and not in_call and isinstance(expression, OwnershipExpression):
+            expression.add("free(", ")")
+
+        return expression
 
     def return_expression(self):
         self.returned = True
@@ -90,6 +98,7 @@ class Function(Symbol):
         args = (self.return_type.borrow, expression.kind, expression.string, expression.arrays)
         expression = OwnershipExpression(None, *args)
         expression.invariable = (self.return_type.qualifier != "var")
+        expression.heap = True
 
         return expression
 
@@ -328,7 +337,7 @@ class FunctionKind:
         if self.arrays > 0 and self.kind != arg.kind:
             message = f"{message} must be array(s) of {self.kind}; found array(s) of {arg.kind}"
             node.transpiler.warnings.error(node, message)
-        elif kind != self.kind:
+        elif kind != self.kind or kind == "str" and arg.kind != "str":
             message = f"{message} must be {self.kind}; found {arg.kind}"
             node.transpiler.warnings.error(node, message)
 

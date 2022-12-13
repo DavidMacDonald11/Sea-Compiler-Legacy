@@ -87,18 +87,20 @@ class ReturnStatement(Node):
         return cls(keyword, Expression.construct())
 
     def transpile(self):
-        statement = Statement().new("return")
+        statement = Statement()
 
         if not self.transpiler.context.in_function:
             self.transpiler.warnings.error(self, "Cannot use return statement outside of function")
-            return statement
+            return statement.new("return")
 
         function = self.transpiler.context.function
         func = function.return_expression()
         f_kind = self.expression_kind(func)
 
         statement = self.check_return_kinds(statement.cast(func.kind), func, f_kind)
-        return statement.show_kind()
+        freed = self.transpiler.symbols.free(function.symbols).drop().finish(self)
+
+        return freed.append(statement.show_kind()).drop()
 
     def check_return_kinds(self, statement, func, f_kind):
         if self.expression is None:
@@ -118,7 +120,7 @@ class ReturnStatement(Node):
         f_owner = isinstance(func, OwnershipExpression)
 
         if e_owner and expression.owners[0] is not None and expression.owners[0].fun_local:
-            self.transpiler.warnings.error(self, "Cannot return local identifier from function")
+            statement = self.transpiler.temps.new_heap(Statement(expression))
 
         if e_owner and f_owner:
             same = expression.operator == func.operator
@@ -129,7 +131,7 @@ class ReturnStatement(Node):
         same = same and expression.arrays == func.arrays
 
         if kind == func.kind and same:
-            return statement
+            return statement.add("return ")
 
         kind = self.expression_kind(expression.cast(kind))
         message = f"Function returns {f_kind}; found {kind}"
@@ -149,17 +151,17 @@ class ReturnStatement(Node):
         for line in Statement().lines[:-1]:
             statement.prefix(line)
 
-        statement.add(after = f" {expression}")
+        statement.add(after = f"{expression}")
         return statement, expression
 
     def expression_kind(self, expression):
-        e_dims = "" if expression.arrays == 0 else f"{expression.arrays}D"
+        e_dims = "" if expression.arrays == 0 else f"{expression.arrays}D "
 
         if not isinstance(expression, OwnershipExpression):
-            return f"var {e_dims} {expression.kind} value"
+            return f"var {e_dims}{expression.kind} value"
 
         e_qualifier = "invar" if expression.invariable else "var"
         e_borrow = expression.operator
         e_borrow = "ownership" if e_borrow == "$" else "borrow" if e_borrow == "&" else "value"
 
-        return f"{e_qualifier} {e_dims} {expression.kind} {e_borrow}"
+        return f"{e_qualifier} {e_dims}{expression.kind} {e_borrow}"

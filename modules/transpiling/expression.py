@@ -35,7 +35,9 @@ class Expression:
 
         indent = "\t" * node.transpiler.context.blocks
         end = ";" if semicolons else ""
-        end = f"{end} /*{self.kind}{'[]' * self.arrays}*/" if self._show_kind else end
+
+        arrays = f"{'[]' * self.arrays}"
+        end = f"{end} /*{self.kind}{arrays}*/" if self._show_kind else end
 
         return self.add(indent, end)
 
@@ -99,7 +101,7 @@ class Expression:
         if self.kind != "str" and expression.kind == "str":
             node.transpiler.warnings.error(node, "Cannot assign str value to non-str identifier")
 
-        if self.kind == "bool" and expression.kind != "bool":
+        if self.kind != "bool" and expression.kind == "bool":
             node.transpiler.warnings.error(node, "".join((
                 "Cannot assign non-bool value to bool identifier. ",
                 "(Consider using the '?' operator to get boolean value)"
@@ -168,6 +170,7 @@ class OwnershipExpression(Expression):
         self.owners = [owner, None]
         self.operator = operator
         self.invariable = False
+        self.heap = False
         super().__init__(kind, string, arrays)
 
     def drop_imaginary(self, node, any_kind = False):
@@ -176,3 +179,15 @@ class OwnershipExpression(Expression):
     def operate(self, node, bitwise = False, boolean = False, arrays = False):
         node.transpiler.warnings.error(node, "Cannot perform operations on ownership rvalue")
         return self
+
+    def finish(self, node, semicolons):
+        if self.finished: return self
+        self.finished = True
+
+        indent = "\t" * node.transpiler.context.blocks
+        end = ";" if semicolons else ""
+
+        arrays = f"{'[]' * self.arrays}"
+        end = f"{end} /*{self.kind}{arrays} {self.operator}*/" if self._show_kind else end
+
+        return self.add(indent, end)

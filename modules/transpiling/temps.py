@@ -1,4 +1,4 @@
-from .expression import Expression
+from .expression import Expression, OwnershipExpression
 from .statement import Statement
 from .utils import util, new_util
 
@@ -11,12 +11,40 @@ class Temps:
         self.i += 1
         return f"__sea_temp_{self.i}__"
 
+    def save(self, statement, prefix, cache):
+        if cache:
+            Statement.cached += [prefix]
+        else:
+            statement.prefix(prefix)
+
     def new(self, statement):
         name = self.new_name()
         prefix = Expression(statement.expression.kind, statement.expression.string)
         prefix.add(f"__sea_type_{prefix.kind}__ {name} = ")
 
         return statement.prefix(prefix).new(name)
+
+    def new_heap(self, statement, cache = False):
+        name = self.new_name()
+        expression = statement if cache else statement.expression
+
+        if isinstance(expression, OwnershipExpression):
+            expression.add("*(", ")")
+
+        prefix = Expression(expression.kind)
+        kind = prefix.kind
+        kind = "array" if kind == "str" or expression.arrays > 0 else kind
+        kind = f"__sea_type_{kind}__"
+
+        size = f"{expression}.size" if prefix.kind == "str" or expression.arrays > 0 else "1"
+        prefix.new(f"{kind} *{name} = ({kind} *)calloc({size}, sizeof({kind}))")
+        self.save(statement, prefix, cache)
+
+        prefix = OwnershipExpression(None, "$", expression.kind, expression.string)
+        prefix.add(f"*{name} = ")
+        self.save(statement, prefix, cache)
+
+        return statement.new(name)
 
     def cache_new(self, expression, string = False):
         name = self.new_name()

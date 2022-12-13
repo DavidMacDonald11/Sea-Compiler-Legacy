@@ -20,6 +20,7 @@ class Variable(Identifier):
         self.transfered = False
         self.fun_local = False
         self.ownership = None
+        self.heap = False
         self.arrays = 0
         super().__init__(name, kind, table_number)
 
@@ -43,7 +44,14 @@ class Variable(Identifier):
             self.fun_local = node.transpiler.context.in_function
 
             if isinstance(expression, OwnershipExpression):
+                if self.kind != expression.kind:
+                    node.transpiler.warnings.error(node, "".join((
+                        "Assignment to ownership/borrow must be of the exact same type ",
+                        f"({expression.kind})"
+                    )))
+
                 self.ownership = expression.operator
+                self.heap = expression.heap
 
         if self.transfered:
             node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
@@ -59,6 +67,7 @@ class Variable(Identifier):
     def transfer(self, expression, operator):
         expression = OwnershipExpression(self, operator, self.kind, expression.string)
         expression.arrays = self.arrays
+        expression.heap = self.heap
         self.transfered = (operator == "$")
 
         return expression.add("&")

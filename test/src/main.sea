@@ -1,13 +1,14 @@
-fun print_array(int[] &arr):
-    int i = len(arr)
-    print("[", "")
+fun test() -> var bool$:
+    bool y = True
+    return $y
 
-    for int num in arr:
-        print(num as str, ", " if i > 1 else "")
-        i -= 1
+fun borrow(bool &result):
+    pass
 
-    print("]")
+fun transfer(bool $result):
+    print(result as str)
 
-fun main():
-    int[] arr = [1, 2] + [3, ~4.2][:]
-    print_array(&arr)
+fun main() -> int:
+    transfer(test())
+
+    return 0

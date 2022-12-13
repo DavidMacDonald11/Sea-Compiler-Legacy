@@ -1,3 +1,4 @@
+from .statement import Statement
 from .symbols.label import Label
 from .symbols.variable import Variable
 from .symbols.invariable import Invariable
@@ -46,6 +47,25 @@ class SymbolTable:
 
                 message = f"Called function '{name}' has no definition"
                 symbol.caller.transpiler.warnings.error(symbol.caller, message)
+
+    def free(self, until = None):
+        statement = Statement()
+
+        if until is None:
+            until = self
+
+        for _, symbol in self.symbols.items():
+            if not isinstance(symbol, (Variable, Invariable)) or symbol.transfered: continue
+
+            if symbol.heap and symbol.ownership == "$":
+                symbol.transfered = True
+                statement.new_append(Statement().new(f"free({symbol.c_name})"))
+
+        if self is not until:
+            return statement.new_append(self.parent.free(until)).drop()
+
+        return statement
+
 
     def _new_symbol(self, cls, node, name, *args, **kwargs):
         if name in self.symbols:

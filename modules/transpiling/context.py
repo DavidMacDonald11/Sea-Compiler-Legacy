@@ -2,8 +2,10 @@ class Context:
     def __init__(self):
         self.blocks = 0
         self.loops = 0
+        self.calls = 0
         self.in_return = False
         self.in_ownership = False
+        self.in_assign = False
         self.function = None
         self.array = None
 

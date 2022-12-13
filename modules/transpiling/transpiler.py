@@ -6,10 +6,6 @@ from .temps import Temps
 from .utils import set_transpiler
 
 class Transpiler:
-    @property
-    def temp_name(self):
-        return "__sea_temp_value_69__"
-
     def __init__(self, warnings, filepath):
         self.warnings = warnings
         self.file = open(filepath, "w", encoding = "UTF-8")
@@ -61,8 +57,9 @@ class Transpiler:
         self.file.close()
 
     def standard(self):
-        self.include("stdint")
         self.include("limits")
+        self.include("stdint")
+        self.include("stdlib")
         self.include("string")
 
         for i in range(3, 7):

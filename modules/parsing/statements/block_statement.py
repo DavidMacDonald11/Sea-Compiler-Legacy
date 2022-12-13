@@ -61,6 +61,7 @@ class BlockStatement(Node):
         for statement in self.statements:
             block.new_append(statement.transpile())
 
+        block.drop().append(self.transpiler.symbols.free().drop().finish(self))
         self.transpiler.pop_symbol_table()
         self.transpiler.context.blocks -= 1
 
