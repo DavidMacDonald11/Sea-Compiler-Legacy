@@ -22,9 +22,7 @@ class AssignmentStatement(Node):
 
         if not cls.parser.next.has("=", ",") and not taken.has("["):
             cls.parser.i -= 1
-            expression = Expression.construct()
-
-            return cls([ExpressionList([expression])])
+            return cls([ExpressionList.construct()])
 
         cls.parser.i -= 1
         expression_lists = [ExpressionList.construct()]
@@ -139,21 +137,13 @@ class AssignmentList(Node):
 
     def transpile(self):
         self.transpiler.context.in_assign = True
-        count = len(self.identifiers)
-        expression = self.expression.transpile()
+        statement = self.transpile_identifiers()
+        self.transpiler.context.in_assign = False
 
-        if isinstance(expression, OwnershipExpression):
-            if count > 1:
-                message = "Cannot transfer ownership to multiple identifiers"
-                self.transpiler.warnings.warn(self, message)
-            elif count == 1 and self.kind is None:
-                message = "Must create new identifier to transfer ownership"
-                self.transpiler.warnings.warn(self, message)
+        return statement
 
-        return self.transpile_identifiers(expression)
-
-    def transpile_identifiers(self, expression):
-        statement = Statement(expression)
+    def transpile_identifiers(self):
+        statement = None
         temped = len(self.others) == 0
 
         for i, identifier in enumerate(self.identifiers[::-1]):
@@ -170,6 +160,8 @@ class AssignmentList(Node):
                 self.transpiler.context.array = identifier
                 statement = Statement(self.expression.transpile()).cast(identifier.kind)
                 self.transpiler.context.array = None
+            else:
+                statement = Statement(self.expression.transpile())
 
             if not temped:
                 temped = self.handle_temporaries(statement)
@@ -177,17 +169,21 @@ class AssignmentList(Node):
             access = identifier.c_access if identifier.ownership is not None else f"{identifier}"
             identifier.assign(self, statement.expression).add(f"{access} = ")
 
+            is_own = isinstance(statement.expression, OwnershipExpression)
+
             if declaration:
-                if isinstance(statement.expression, OwnershipExpression):
+                if is_own:
                     statement.expression.owners[1] = identifier
                     statement.add("*")
                     self.check(statement.expression)
 
                 kind = "array" if self.kind[1] > 0 or self.kind[0] == "str" else self.kind[0]
                 statement.add(f"__sea_type_{kind}__ ")
+            elif is_own:
+                message = "Must create new identifier to transfer ownership"
+                self.transpiler.warnings.error(self, message)
 
-        self.transpiler.context.in_assign = False
-        return statement
+        return statement or Statement()
 
     def handle_temporaries(self, statement):
         for identifier in self.others:

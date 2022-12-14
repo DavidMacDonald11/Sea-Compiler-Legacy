@@ -73,8 +73,6 @@ class MultiplicativeExpression(BinaryOperation):
         func = util(self.util_array_multiply(kind))
         result.add(f"{func}(", f", {left})")
 
-        print(result.arrays, result.kind)
-
         return self.transpiler.temps.cache_new(result)
 
     @new_util("array_multiply_size")

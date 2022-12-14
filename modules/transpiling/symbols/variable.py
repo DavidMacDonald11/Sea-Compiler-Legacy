@@ -26,7 +26,8 @@ class Variable(Identifier):
 
     def access(self, node):
         if self.transfered:
-            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
+            message = "Cannot access dead identifier after ownership swap"
+            node.transpiler.warnings.error(node, message)
 
         expression = Expression(self.kind, self.c_access)
         expression.identifiers += [self.name]
@@ -54,7 +55,8 @@ class Variable(Identifier):
                 self.heap = expression.heap
 
         if self.transfered:
-            node.transpiler.warnings.error(node, "Cannot use dead identifier after ownership swap")
+            message = "Cannot assign to dead identifier after ownership swap"
+            node.transpiler.warnings.error(node, message)
 
         if expression.kind == "":
             node.transpiler.warnings.error(node, "Function call has no return value")

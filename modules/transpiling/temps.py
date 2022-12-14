@@ -8,6 +8,11 @@ class Temps:
         self.context = context
         self.cached = []
 
+    def take_cached(self):
+        Statement.cached += self.cached
+        self.cached = []
+        return Statement()
+
     def new_name(self):
         self.i += 1
         return f"__sea_temp_{self.i}__"
@@ -189,4 +194,3 @@ class Temps:
 
 # TODO array/str non-ownership returns should use heap, and copy to stack
 # TODO all large arrays/str should be on heap
-# TODO int[][] matrix2 = func($matrix) doesn't work
