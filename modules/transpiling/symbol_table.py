@@ -115,8 +115,8 @@ class SymbolTable:
     def util_free_array(func):
         return "\n".join((
             f"void {func}(__sea_type_array__ *arr, __sea_type_nat__ dim)", "{",
-            "\tif(dim < 2)", "\t{",
-            "\t\tfree(arr->data);", "\t\treturn;", "\t}", "",
-            "\tfor(__sea_type_nat__ i = 0; i < arr->size; i++)", "\t{",
-            f"\t\t{func}(&((__sea_type_array__ *)arr->data)[i], dim - 1);", "\t}", "}"
+            "\tif(dim > 1)", "\t{",
+            "\t\tfor(__sea_type_nat__ i = 0; i < arr->size; i++)", "\t\t{",
+            f"\t\t\t{func}((__sea_type_array__ *)arr->data + i, dim - 1);", "\t\t}", "\t}\n",
+            "\tfree(arr->data);", "}"
         ))

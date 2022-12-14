@@ -30,17 +30,13 @@ class Transpiler:
             "/* FILE CONTENTS */",
             f"{self.lines.strip()}",
             "/* FILE CONTENTS */\n",
-            "int main(__sea_type_nat__ argc, __sea_type_str__ argv[])", "{",
+            "int main(int argc, __sea_type_str__ argv[])", "{",
             "\t#ifndef __sea_const_main_no_params__",
-            "\t\t__sea_type_array__ str_args[argc];\n",
+            "\t\t__sea_type_array__ str_args[(argc) ? argc : 1];",
+            '\t\tif(argc == 0) str_args[0] = (__sea_type_array__){"", 0};\n',
             "\t\tfor(__sea_type_nat__ i = 0; i < argc; i++)", "\t\t{",
             "\t\t\tstr_args[i] = (__sea_type_array__){argv[i], strlen(argv[i])};", "\t\t}\n",
-            "\t\t#ifdef __sea_const_main_pointer_params__",
-            "\t\t\t__sea_type_array__ __sea_main_array__ = (__sea_type_array__){str_args, argc};",
-            "\t\t\t#define __sea_main_args__ &__sea_main_array__",
-            "\t\t#else",
-            "\t\t\t#define __sea_main_args__ (__sea_type_array__){str_args, argc}",
-            "\t\t#endif",
+            "\t\t#define __sea_main_args__ (__sea_type_array__){str_args, argc}",
             "\t#else",
             "\t\t#define __sea_main_args__",
             "\t#endif\n",
@@ -68,7 +64,7 @@ class Transpiler:
             self.alias(f"uint_least{bits}_t", f"__sea_type_nat{bits}__")
 
         self.alias("__sea_type_nat8__", "__sea_type_bool__")
-        self.alias("__sea_type_nat8__", "__sea_type_char__")
+        self.alias("char", "__sea_type_char__")
         self.alias("intmax_t", "__sea_type_int__")
         self.alias("uintmax_t", "__sea_type_nat__")
 

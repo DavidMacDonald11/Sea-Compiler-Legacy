@@ -6,12 +6,6 @@ class Temps:
     def __init__(self, context):
         self.i = -1
         self.context = context
-        self.cached = []
-
-    def take_cached(self):
-        Statement.cached += self.cached
-        self.cached = []
-        return Statement()
 
     def new_name(self):
         self.i += 1
@@ -30,7 +24,7 @@ class Temps:
 
         return statement.prefix(prefix).new(name)
 
-    def new_heap(self, statement, cache = False, free = False):
+    def new_heap(self, statement, cache = False):
         name = self.new_name()
         expression = statement if cache else statement.expression
 
@@ -54,17 +48,12 @@ class Temps:
             prefix = Expression(expression.kind)
             expression.new(f"&{array}")
 
-        prefix.new(f"{kind} *{name} = ({kind} *){alloc}(1, sizeof({kind}))")
+        prefix.new(f"{kind} *{name} = {alloc}(1, sizeof({kind}))")
         self.save(statement, prefix, cache)
 
         prefix = OwnershipExpression(None, "$", expression.kind, expression.string)
         prefix.add(f"memcpy({name}, ", f", sizeof({kind}))")
         self.save(statement, prefix, cache)
-
-        if free:
-            postfix = Expression(expression.kind, expression.string)
-            postfix.add("free((", ")->data)")
-            self.cached += [postfix]
 
         return statement.new(name)
 
@@ -145,16 +134,16 @@ class Temps:
 
         return "\n".join((
             f"{kind} {func}({kind} *arr, {nat} dim, {nat} s, size_t size)", "{",
-            "\tvoid *data;",
+            "\tvoid *data;", "",
             "\tif(dim + s == 1)", "\t{",
             f"\t\tdata = {alloc}(arr->size + s, size);",
             "\t\tmemcpy(data, arr->data, (arr->size + s) * size);", "\t}",
             "\telse", "\t{",
-            f"\t\tdata = {alloc}(arr->size, sizeof({kind}));",
+            f"\t\tdata = {alloc}(arr->size, sizeof({kind}));", "",
             f"\t\tfor({nat} i = 0; i < arr->size; i++)", "\t\t{",
-            f"\t\t\t{kind} elem = (({kind} *)arr->data)[i];",
-            f"\t\t\t{kind} new_elem = {func}(&elem, dim - 1, s, size);",
-            f"\t\t\t(({kind} *)data)[i] = new_elem;", "\t\t}", "\t}", "",
+            f"\t\t\t{kind} *elem = &(({kind} *)arr->data)[i];",
+            f"\t\t\t{kind} new_elem = {func}(elem, dim - 1, s, size);",
+            f"\t\t\tmemcpy(({kind} *)data + i, &new_elem, sizeof({kind}));", "\t\t}", "\t}", "",
             f"\treturn ({kind}){{data, arr->size}};", "}"
         ))
 
@@ -193,4 +182,5 @@ class Temps:
         return name
 
 # TODO array/str non-ownership returns should use heap, and copy to stack
+# TODO stack array of heap str doesn't work
 # TODO all large arrays/str should be on heap

@@ -39,7 +39,8 @@ run: $(VENV)
 	cd test; ../sea.bash -d -m=r -o=bin src
 
 .PHONY: mem
-mem: run
+mem:
+	gcc test/bin/main.c -o test/bin/main -Wall -ggdb3 -lm -lgcc_s -lgcc -lc
 	valgrind --leak-check=full -s test/bin/main
 
 .PHONY: lint

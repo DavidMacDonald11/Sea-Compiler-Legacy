@@ -100,9 +100,6 @@ class ReturnStatement(Node):
         statement = self.check_return_kinds(statement.cast(func.kind), func, f_kind)
         freed = self.transpiler.symbols.free(function.symbols).drop().finish(self)
 
-        cached = self.transpiler.temps.take_cached().drop().finish(self)
-        freed.append(cached).drop()
-
         return freed.append(statement.show_kind()).drop()
 
     def check_return_kinds(self, statement, func, f_kind):

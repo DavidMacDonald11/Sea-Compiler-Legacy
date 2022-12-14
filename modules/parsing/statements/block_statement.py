@@ -62,10 +62,6 @@ class BlockStatement(Node):
             block.new_append(statement.transpile())
 
         block.drop().append(self.transpiler.symbols.free().drop().finish(self))
-
-        cached = self.transpiler.temps.take_cached().drop().finish(self)
-        block.drop().append(cached)
-
         self.transpiler.pop_symbol_table()
         self.transpiler.context.blocks -= 1
 

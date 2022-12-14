@@ -1,13 +1,16 @@
-fun use_matrix(var int[][][] $matrix) -> var int[][][] $:
-    return $matrix
+fun new_str() -> var str $:
+    str s = "Hi!"
+    return $s
 
 fun free_matrix(int[][][] $matrix):
     pass
 
-fun main() -> int:
-    int[][][] matrix = [[[1, 2, 3], [4, 5, 6]], [[6], [9]]]
-    int[][][] matrix2 = [[[1, 2, 3], [4, 5, 6]], [[6], [9]]]
-    int[][][] matrix3 = use_matrix($matrix)
+fun main(str[] args) -> int:
+    int[][][] matrix2 = [[[1], [2], [3], [4]], [[3], [4, 9, 2]]]
     free_matrix($matrix2)
 
+    str s = new_str()
+    str s2 = new_str()
+
+    print()
     return 0

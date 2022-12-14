@@ -131,11 +131,10 @@ class MainFunction(Function):
             node.transpiler.warnings.error(node, "Main takes, at most, one argument (str[] args)")
         elif len(params) == 1 and (params[0].kind != "str" or params[0].arrays != 1):
             node.transpiler.warnings.error(node, "Main can only take a 'str[]' parameter")
+        elif len(params) == 1 and params[0].borrow is not None:
+            node.transpiler.warnings.error(node, "Main cannot take a borrow/ownership")
         elif len(params) == 0:
             node.transpiler.write("#define __sea_const_main_no_params__")
-
-        if len(params) == 1 and params[0].borrow is not None:
-            node.transpiler.write("#define __sea_const_main_pointer_params__")
 
         if not self.declared:
             self.parameters = params

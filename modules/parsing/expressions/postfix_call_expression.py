@@ -140,7 +140,7 @@ class FunctionArgument(Node):
             borrow = expression.operator
 
             if borrow == "$" and not expression.heap:
-                self.transpiler.temps.new_heap(expression, cache = True, free = True)
+                self.transpiler.temps.new_heap(expression, cache = True)
         else:
             qualifier = "var"
             borrow = None
