@@ -3,6 +3,7 @@ from .symbols.label import Label
 from .symbols.variable import Variable
 from .symbols.invariable import Invariable
 from .symbols.function import Function, StandardFunction, MainFunction
+from .utils import util, new_util
 
 class SymbolTable:
     count = 0
@@ -59,13 +60,18 @@ class SymbolTable:
 
             if symbol.heap and symbol.ownership == "$":
                 symbol.transfered = True
+
+                if symbol.kind == "str" or symbol.arrays > 0:
+                    free = util("free_array")
+                    prefix = Statement().new(f"{free}({symbol.c_name}, {symbol.arrays})")
+                    statement.new_append(prefix)
+
                 statement.new_append(Statement().new(f"free({symbol.c_name})"))
 
         if self is not until:
             return statement.new_append(self.parent.free(until)).drop()
 
         return statement
-
 
     def _new_symbol(self, cls, node, name, *args, **kwargs):
         if name in self.symbols:
@@ -103,3 +109,14 @@ class SymbolTable:
         func.parameters = parameters
         func.define = define
         func.declared = True
+
+    @new_util("free_array")
+    @staticmethod
+    def util_free_array(func):
+        return "\n".join((
+            f"void {func}(__sea_type_array__ *arr, __sea_type_nat__ dim)", "{",
+            "\tif(dim < 2)", "\t{",
+            "\t\tfree(arr->data);", "\t\treturn;", "\t}", "",
+            "\tfor(__sea_type_nat__ i = 0; i < arr->size; i++)", "\t{",
+            f"\t\t{func}(&((__sea_type_array__ *)arr->data)[i], dim - 1);", "\t}", "}"
+        ))

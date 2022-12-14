@@ -1,14 +1,39 @@
-fun test() -> var bool$:
-    bool y = True
-    return $y
+fun array(int x) -> var int[]$:
+    int[] arr = [0] * x
+    return $arr
 
-fun borrow(bool &result):
+fun string(str s, int x) -> var str$:
+    str new_s = s * x
+    return $new_s
+
+fun print_array(int[] &arr):
+    print("Array: ", "")
+
+    for int num in arr:
+        print(num as str, " ")
+
+    print()
+
+fun free_string(str $s):
     pass
 
-fun transfer(bool $result):
-    print(result as str)
+fun take_matrix(var int[][] $matrix) -> var int[][] $:
+    return $matrix
+
+fun test_matrix():
+    int[][] matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    take_matrix($matrix)
 
 fun main() -> int:
-    transfer(test())
+    int[] arr = array(10)
+    print_array(&arr)
+
+    array(5)
+
+    str s = string("s", 5)
+    print("String: " + s)
+
+    free_string($s)
+    test_matrix()
 
     return 0

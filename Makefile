@@ -38,6 +38,10 @@ run: $(VENV)
 	mkdir test/bin
 	cd test; ../sea.bash -d -m=r -o=bin src
 
+.PHONY: mem
+mem: run
+	valgrind --leak-check=full -s test/bin/main
+
 .PHONY: lint
 lint: $(VENV)
 	$(PYTHON) -m pylint --rcfile=.pylintrc $(MODULES)

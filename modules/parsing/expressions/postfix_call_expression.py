@@ -139,8 +139,8 @@ class FunctionArgument(Node):
             qualifier = "invar" if expression.invariable else "var"
             borrow = expression.operator
 
-            if borrow == "$":
-                self.transpiler.temps.new_heap(expression, cache = True)
+            if borrow == "$" and not expression.heap:
+                self.transpiler.temps.new_heap(expression, cache = True, free = True)
         else:
             qualifier = "var"
             borrow = None

@@ -1,5 +1,7 @@
 from .symbol import Symbol
 from ..expression import Expression, OwnershipExpression, FLOATING_TYPES
+from ..statement import Statement
+from ..utils import util
 
 class Function(Symbol):
     @property
@@ -71,8 +73,18 @@ class Function(Symbol):
         in_assign = node.transpiler.context.in_assign
         in_call = node.transpiler.context.calls > 1
 
-        if not in_assign and not in_call and isinstance(expression, OwnershipExpression):
-            expression.add("free(", ")")
+        if in_assign or in_call or not isinstance(expression, OwnershipExpression):
+            return expression
+
+        if expression.kind == "str" or expression.arrays > 0:
+            node.transpiler.temps.cache_new(expression)
+            prefix = Expression(expression.kind, expression.string)
+
+            free = util("free_array")
+            prefix.add(f"{free}(", f", {expression.arrays})")
+            Statement.cached += [prefix]
+
+        expression.add("free(", ")")
 
         return expression
 
