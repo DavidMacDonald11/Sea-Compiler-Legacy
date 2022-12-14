@@ -36,7 +36,17 @@ class Transpiler:
             '\t\tif(argc == 0) str_args[0] = (__sea_type_array__){"", 0};\n',
             "\t\tfor(__sea_type_nat__ i = 0; i < argc; i++)", "\t\t{",
             "\t\t\tstr_args[i] = (__sea_type_array__){argv[i], strlen(argv[i])};", "\t\t}\n",
-            "\t\t#define __sea_main_args__ (__sea_type_array__){str_args, argc}",
+            "\t\t__sea_type_array__ stack_arr_args = {str_args, (argc) ? argc : 1};\n",
+            "\t\t#ifdef __sea_const_main_owner_params__",
+            "\t\t\t__sea_type_array__ arr_args_temp = "
+            "__sea_util_alloc_array__(&stack_arr_args, 1, 1, sizeof(__sea_type_char__));",
+            "\t\t\t__sea_type_array__ *arr_args = "
+            "__sea_util_alloc__(1, sizeof(__sea_type_array__));",
+            "\t\t\tmemcpy(arr_args, &arr_args_temp, sizeof(__sea_type_array__));",
+            "\t\t\t#define __sea_main_args__ arr_args",
+            "\t\t#else",
+            "\t\t\t#define __sea_main_args__ &stack_arr_args",
+            "\t\t#endif",
             "\t#else",
             "\t\t#define __sea_main_args__",
             "\t#endif\n",

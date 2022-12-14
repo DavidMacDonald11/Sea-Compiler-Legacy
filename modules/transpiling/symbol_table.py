@@ -63,7 +63,8 @@ class SymbolTable:
 
                 if symbol.kind == "str" or symbol.arrays > 0:
                     free = util("free_array")
-                    prefix = Statement().new(f"{free}({symbol.c_name}, {symbol.arrays})")
+                    string = int(symbol.kind == "str")
+                    prefix = Statement().new(f"{free}({symbol.c_name}, {symbol.arrays}, {string})")
                     statement.new_append(prefix)
 
                 statement.new_append(Statement().new(f"free({symbol.c_name})"))
@@ -114,9 +115,9 @@ class SymbolTable:
     @staticmethod
     def util_free_array(func):
         return "\n".join((
-            f"void {func}(__sea_type_array__ *arr, __sea_type_nat__ dim)", "{",
-            "\tif(dim > 1)", "\t{",
+            f"void {func}(__sea_type_array__ *arr, __sea_type_nat__ dim, __sea_type_nat__ s)", "{",
+            "\tif(dim + s > 1)", "\t{",
             "\t\tfor(__sea_type_nat__ i = 0; i < arr->size; i++)", "\t\t{",
-            f"\t\t\t{func}((__sea_type_array__ *)arr->data + i, dim - 1);", "\t\t}", "\t}\n",
+            f"\t\t\t{func}((__sea_type_array__ *)arr->data + i, dim - 1, s);", "\t\t}", "\t}\n",
             "\tfree(arr->data);", "}"
         ))

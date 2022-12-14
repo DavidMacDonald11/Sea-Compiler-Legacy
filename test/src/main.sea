@@ -1,16 +1,14 @@
-fun new_str() -> var str $:
-    str s = "Hi!"
-    return $s
+fun infinite(var int $num):
+    num += 1
 
-fun free_matrix(int[][][] $matrix):
-    pass
+    if num < 100:
+        print(num as str)
+        infinite($num)
 
-fun main(str[] args) -> int:
-    int[][][] matrix2 = [[[1], [2], [3], [4]], [[3], [4, 9, 2]]]
-    free_matrix($matrix2)
+    # No free
 
-    str s = new_str()
-    str s2 = new_str()
+fun main(str[] $args) -> int:
+    int num = 0
+    infinite($num)
 
-    print()
     return 0

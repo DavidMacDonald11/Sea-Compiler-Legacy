@@ -29,7 +29,14 @@ class Function(Symbol):
 
         if parameters is not None:
             for parameter in parameters.parameters:
-                params += [parameter.transpile_qualifiers()]
+                param = parameter.transpile_qualifiers()
+                params += [param]
+
+                if (param.kind == "str" or param.arrays > 0) and param.borrow is None:
+                    node.transpiler.warnings.error(node, "".join((
+                        "Functions cannot take strings or arrays by value. ",
+                        "(Use the '&' or '$' unary-prefix operator to pass by borrow or ownership)"
+                    )))
 
         if not self.declared:
             self.parameters = params
@@ -42,6 +49,8 @@ class Function(Symbol):
             return
 
         for param, parameter in zip(params, self.parameters):
+
+
             if param != parameter:
                 node.transpiler.warnings.error(node, message)
                 return
@@ -54,6 +63,13 @@ class Function(Symbol):
 
         if not self.declared:
             self.return_type = return_type
+
+            if (return_type.kind == "str" or return_type.arrays > 0) and return_type.borrow is None:
+                node.transpiler.warnings.error(node, "".join((
+                    "Functions cannot return strings or arrays by value. ",
+                    "(Use the '$' unary-prefix operator to return by borrow or ownership)"
+                )))
+
             return
 
         if self.return_type != return_type:
@@ -76,12 +92,16 @@ class Function(Symbol):
         if in_assign or in_call or not isinstance(expression, OwnershipExpression):
             return expression
 
+        return self.free_unsused_call(node, expression)
+
+    def free_unsused_call(self, node, expression):
         if expression.kind == "str" or expression.arrays > 0:
             node.transpiler.temps.cache_new(expression)
             prefix = Expression(expression.kind, expression.string)
 
             free = util("free_array")
-            prefix.add(f"{free}(", f", {expression.arrays})")
+            string = int(expression.kind == "str")
+            prefix.add(f"{free}(", f", {expression.arrays}, {string})")
             Statement.cached += [prefix]
 
         expression.add("free(", ")")
@@ -128,11 +148,17 @@ class MainFunction(Function):
                 params += [parameter.transpile_qualifiers()]
 
         if len(params) > 2:
-            node.transpiler.warnings.error(node, "Main takes, at most, one argument (str[] args)")
+            node.transpiler.warnings.error(node, "Main takes, at most, one argument (str[] $args)")
         elif len(params) == 1 and (params[0].kind != "str" or params[0].arrays != 1):
             node.transpiler.warnings.error(node, "Main can only take a 'str[]' parameter")
-        elif len(params) == 1 and params[0].borrow is not None:
-            node.transpiler.warnings.error(node, "Main cannot take a borrow/ownership")
+        elif len(params) == 1 and params[0].borrow is None:
+            node.transpiler.warnings.error(node, "".join((
+                    "Functions cannot take strings or arrays by value. ",
+                    "(Use the '&' or '$' unary-prefix operator to pass by borrow or ownership)"
+                )))
+        elif len(params) == 1 and params[0].borrow == "$":
+            util("alloc_array")
+            node.transpiler.write("#define __sea_const_main_owner_params__")
         elif len(params) == 0:
             node.transpiler.write("#define __sea_const_main_no_params__")
 

@@ -181,6 +181,8 @@ class Temps:
 
         return name
 
-# TODO array/str non-ownership returns should use heap, and copy to stack
+# TODO create a copy of array/str on assign
 # TODO stack array of heap str doesn't work
 # TODO all large arrays/str should be on heap
+# TODO check if heap for + and *
+# TODO conditional ownership prevents freeing of memory
