@@ -137,7 +137,7 @@ class StringConstant(PrimaryNode):
             string = re.sub(r"\t", "\t", string)
 
         self.transpiler.include("string")
-        return self.transpiler.temps.cache_new_str(Expression("str", string))
+        return self.transpiler.temps.new_str(Expression("str", string), cache = True)
 
 class Identifier(PrimaryNode):
     def transpile(self):
@@ -211,7 +211,7 @@ class ArrayList(Node):
         left.add("{", "}")
 
         self.verify_string_array(left, self.transpiler.context.array)
-        return self.transpiler.temps.cache_new_array(left, len(self.expressions))
+        return self.transpiler.temps.new_array(left, len(self.expressions), cache = True)
 
     def verify_string_array(self, left, array):
         if array is None:

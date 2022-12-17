@@ -1,14 +1,6 @@
-fun infinite(var int $num):
-    num += 1
-
-    if num < 100:
-        print(num as str)
-        infinite($num)
-
-    # No free
-
 fun main(str[] $args) -> int:
-    int num = 0
-    infinite($num)
+    str name = "David"
+    str name2 = name
+    print(name + ", " + name2)
 
     return 0

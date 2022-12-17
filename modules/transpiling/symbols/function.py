@@ -96,7 +96,7 @@ class Function(Symbol):
 
     def free_unsused_call(self, node, expression):
         if expression.kind == "str" or expression.arrays > 0:
-            node.transpiler.temps.cache_new(expression)
+            node.transpiler.temps.new(expression, cache = True)
             prefix = Expression(expression.kind, expression.string)
 
             free = util("free_array")

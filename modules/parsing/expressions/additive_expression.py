@@ -39,13 +39,13 @@ class AdditiveExpression(BinaryOperation):
         append = util("str_append")
 
         result = Expression.resolve(left, right, True, True).cast_up()
-        self.transpiler.temps.cache_new_array(result, f"{r_size} + {l_size}", string = True)
+        self.transpiler.temps.new_array(result, f"{r_size} + {l_size}", True, True)
 
         l_cast = "" if left.kind == "str" else "(__sea_type_char__)"
         r_cast = "" if right.kind == "str" else "(__sea_type_char__)"
         result.add(f"{append}(", f", {l_cast}({left}), {r_cast}({right}))")
 
-        return self.transpiler.temps.cache_new(result)
+        return self.transpiler.temps.new(result, cache = True)
 
     @new_util("str_append")
     @staticmethod
@@ -61,14 +61,14 @@ class AdditiveExpression(BinaryOperation):
             "\t((__sea_type_str__)out.data)[i++] = c;",
             "\t((__sea_type_str__)out.data)[i] = '\\0';",
             "\treturn out;", "}",
-            f"{kind} {helper}_char_left__({kind} out, __sea_type_char__ c, {kind} str)", "{",
+            f"\n{kind} {helper}_char_left__({kind} out, __sea_type_char__ c, {kind} str)", "{",
             "\t__sea_type_nat__ i = 0;",
             "\t((__sea_type_str__)out.data)[i++] = c;",
             "\tfor(i = 0; i < str.size; i++) "
             "((__sea_type_str__)out.data)[i + 1] = ((__sea_type_str__)str.data)[i];",
             "\t((__sea_type_str__)out.data)[i + 1] = '\\0';",
             "\treturn out;", "}",
-            f"{kind} {helper}_str__({kind} out, {kind} str1, {kind} str2)", "{",
+            f"\n{kind} {helper}_str__({kind} out, {kind} str1, {kind} str2)", "{",
             "\t__sea_type_nat__ i = 0;",
             "\tfor(; i < str1.size; i++) "
             "((__sea_type_str__)out.data)[i] = ((__sea_type_str__)str1.data)[i];",
@@ -76,10 +76,10 @@ class AdditiveExpression(BinaryOperation):
             "((__sea_type_str__)out.data)[str1.size + i] = ((__sea_type_str__)str2.data)[i];",
             "\t((__sea_type_str__)out.data)[str1.size + i] = '\\0';",
             "\treturn out;", "}",
-            f"#define {helper}_order__(OUT, STR1, STR2) _Generic((STR1), \\",
+            f"\n#define {helper}_order__(OUT, STR1, STR2) _Generic((STR1), \\",
             f"\t__sea_type_char__: {helper}_char_left__, \\",
             f"\tdefault: {helper}_str__)",
-            f"#define {func}(OUT, STR1, STR2) _Generic((STR2), \\",
+            f"\n#define {func}(OUT, STR1, STR2) _Generic((STR2), \\",
             f"\t__sea_type_char__: {helper}_char__, \\",
             f"\tdefault: {helper}_order__(OUT, STR1, STR2))(OUT, STR1, STR2)"
         ))
@@ -97,7 +97,7 @@ class AdditiveExpression(BinaryOperation):
             self.transpiler.warnings.error(self, "Cannot add str array to non-str array")
 
         result = Expression.resolve(left, right, True, True).cast_up()
-        self.transpiler.temps.cache_new_array(result, f"{right}.size + {left}.size")
+        self.transpiler.temps.new_array(result, f"{right}.size + {left}.size", cache = True)
 
         o_kind = result.kind if result.kind != "str" and result.arrays < 2 else "array"
         l_kind = left.kind if left.kind != "str" and left.arrays < 2 else "array"
@@ -105,7 +105,7 @@ class AdditiveExpression(BinaryOperation):
 
         append = util(self.util_array_append(o_kind, l_kind, r_kind))
         result.add(f"{append}(", f", {left}, {right})")
-        return self.transpiler.temps.cache_new(result)
+        return self.transpiler.temps.new(result, cache = True)
 
     @staticmethod
     def util_array_append(o_kind, l_kind, r_kind):

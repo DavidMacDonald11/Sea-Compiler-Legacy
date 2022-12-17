@@ -64,13 +64,13 @@ class CastExpression(Node):
             expression, format_tag = self.transpile_str_cplex(expression, format_tag)
 
         if "cplex" not in expression.kind:
-            expression = self.transpiler.temps.cache_new(expression, string = True)
+            expression = self.transpiler.temps.new(expression, string = True, cache = True)
 
         expression.add(f'"{format_tag}", ').cast("str")
-        return self.transpiler.temps.cache_new_str(expression, casted = True)
+        return self.transpiler.temps.new_str(expression, casted = True, cache = True)
 
     def transpile_str_cplex(self, expression, format_tag):
-        expression = self.transpiler.temps.cache_new(expression)
+        expression = self.transpiler.temps.new(expression, cache = True)
         kind, string = expression.kind, expression.string
 
         self.transpiler.include("complex")

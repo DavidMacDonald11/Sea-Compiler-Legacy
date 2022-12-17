@@ -17,12 +17,19 @@ class Temps:
         else:
             statement.prefix(prefix)
 
-    def new(self, statement):
+    def new(self, statement, string = False, cache = False):
         name = self.new_name()
-        prefix = Expression(statement.expression.kind, statement.expression.string)
-        prefix.add(f"__sea_type_{prefix.kind}__ {name} = ")
+        expression = statement if cache else statement.expression
 
-        return statement.prefix(prefix).new(name)
+        prefix = Expression(expression.kind, expression.string)
+        ptr = "*" if isinstance(expression, OwnershipExpression) else ""
+
+        kind = prefix.kind
+        kind = "array" if not string and kind == "str" or expression.arrays > 0 else kind
+        prefix.add(f"__sea_type_{kind}__ {ptr}{name} = ")
+
+        self.save(statement, prefix, cache)
+        return statement.new(name)
 
     def new_heap(self, statement, cache = False):
         name = self.new_name()
@@ -53,23 +60,12 @@ class Temps:
 
         prefix = OwnershipExpression(None, "$", expression.kind, expression.string)
         prefix.add(f"memcpy({name}, ", f", sizeof({kind}))")
-        self.save(statement, prefix, cache)
 
+        self.save(statement, prefix, cache)
         return statement.new(name)
 
-    def cache_new(self, expression, string = False):
-        name = self.new_name()
-        prefix = Expression(expression.kind, expression.string)
-        ptr = "*" if isinstance(expression, OwnershipExpression) else ""
-
-        kind = prefix.kind
-        kind = "array" if not string and kind == "str" or expression.arrays > 0 else kind
-        prefix.add(f"__sea_type_{kind}__ {ptr}{name} = ")
-        Statement.cached += [prefix]
-
-        return expression.new(name)
-
-    def cache_new_str(self, expression, casted = False):
+    def new_str(self, statement, casted = False, cache = False):
+        expression = statement if cache else statement.expression
         prefix = Expression(expression.kind, expression.string)
         buffer = self.new_name()
         name = self.new_name()
@@ -82,10 +78,11 @@ class Temps:
             func = util("new_casted_str")
             prefix.add(f"{func}({name}, {buffer}, {size}, ", ")")
 
-        Statement.cached += [prefix]
-        return expression.new(name)
+        self.save(statement, prefix, cache)
+        return statement.new(name)
 
-    def cache_new_array(self, expression, size, string = False):
+    def new_array(self, statement, size, string = False, cache = False):
+        expression = statement if cache else statement.expression
         prefix = Expression(expression.kind, expression.string)
         kind = expression.kind
 
@@ -111,9 +108,24 @@ class Temps:
 
         func = util(self.util_new_array(assign))
         prefix.add(f"{func}({name}, {kind}, {buffer}, {size}", ")")
-        Statement.cached += [prefix]
 
-        return expression.new(name)
+        self.save(statement, prefix, cache)
+        return statement.new(name)
+
+    def copy_str(self, statement, cache = False):
+        expression = statement if cache else statement.expression
+        buffer = self.new_name()
+        name, string = expression.string.split(" = ")
+
+        parts = name.split(" ")
+
+        if len(parts) > 1:
+            prefix = Expression(expression.kind, name)
+            self.save(statement, prefix, cache)
+            name = parts[1]
+
+        func = util("copy_str")
+        return statement.new(f"{func}({name}, {string}, {buffer})")
 
     @new_util("alloc")
     @staticmethod
@@ -181,7 +193,17 @@ class Temps:
 
         return name
 
-# TODO create a copy of array/str on assign
+    @new_util("copy_str")
+    @staticmethod
+    def util_copy_str(func):
+        return "\n".join((
+            f"#define {func}(OUT, IN, BUFFER) \\",
+            "\t__sea_type_char__ BUFFER[IN.size + 1]; \\",
+            "\tOUT = (__sea_type_array__){BUFFER, IN.size}; \\",
+            "\tmemcpy(BUFFER, IN.data, IN.size + 1)"
+        ))
+
+# TODO create a copy of array on assign
 # TODO stack array of heap str doesn't work
 # TODO all large arrays/str should be on heap
 # TODO check if heap for + and *

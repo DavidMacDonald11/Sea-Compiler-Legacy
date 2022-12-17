@@ -1,5 +1,6 @@
 from transpiling.expression import OwnershipExpression
 from transpiling.statement import Statement
+from transpiling.utils import util, new_util
 from ..expressions.expression import Expression
 from ..expressions.primary_expression import Identifier
 from ..node import Node
@@ -143,7 +144,7 @@ class AssignmentList(Node):
         return statement
 
     def transpile_identifiers(self):
-        statement = None
+        result = None
         temped = len(self.others) == 0
 
         for i, identifier in enumerate(self.identifiers[::-1]):
@@ -166,24 +167,23 @@ class AssignmentList(Node):
             if not temped:
                 temped = self.handle_temporaries(statement)
 
-            access = identifier.c_access if identifier.ownership is not None else f"{identifier}"
-            identifier.assign(self, statement.expression).add(f"{access} = ")
-
             is_own = isinstance(statement.expression, OwnershipExpression)
 
-            if declaration:
-                if is_own:
-                    statement.expression.owners[1] = identifier
-                    statement.add("*")
-                    self.check(statement.expression)
+            access = identifier.c_access if identifier.ownership is not None else f"{identifier}"
+            identifier.assign(self, statement.expression).add(f"{access} = ")
+            self.check_declaration(statement, declaration, identifier, is_own)
 
-                kind = "array" if self.kind[1] > 0 or self.kind[0] == "str" else self.kind[0]
-                statement.add(f"__sea_type_{kind}__ ")
-            elif is_own:
-                message = "Must create new identifier to transfer ownership"
-                self.transpiler.warnings.error(self, message)
+            copyable = len(statement.expression.identifiers) > 0
 
-        return statement or Statement()
+            if (identifier.kind == "str" or identifier.arrays > 0) and copyable and not is_own:
+                statement = self.copy_array(statement)
+
+            if result is not None:
+                result.append(statement).drop()
+            else:
+                result = statement
+
+        return result or Statement()
 
     def handle_temporaries(self, statement):
         for identifier in self.others:
@@ -192,3 +192,23 @@ class AssignmentList(Node):
                 return True
 
         return False
+
+    def check_declaration(self, statement, declaration, identifier, is_own):
+        if declaration:
+            if is_own:
+                statement.expression.owners[1] = identifier
+                statement.add("*")
+                self.check(statement.expression)
+
+            kind = "array" if self.kind[1] > 0 or self.kind[0] == "str" else self.kind[0]
+            statement.add(f"__sea_type_{kind}__ ")
+        elif is_own:
+            message = "Must create new identifier to transfer ownership"
+            self.transpiler.warnings.error(self, message)
+
+    def copy_array(self, statement):
+        if statement.expression.kind == "str":
+            return self.transpiler.temps.copy_str(statement)
+
+        # TODO copy arr
+        return statement

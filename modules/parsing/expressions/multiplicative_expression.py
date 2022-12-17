@@ -43,11 +43,11 @@ class MultiplicativeExpression(BinaryOperation):
         cast = "(__sea_type_nat__)" if "nat" in right.kind else ""
         size = f"{size_func}({left}, {cast}({right}))"
 
-        result = self.transpiler.temps.cache_new_array(Expression("str"), size, string = True)
+        result = self.transpiler.temps.new_array(Expression("str"), size, True, True)
         func = util("str_multiply")
         result.add(f"{func}(", f", {left})")
 
-        return self.transpiler.temps.cache_new(result)
+        return self.transpiler.temps.new(result, cache = True)
 
     def transpile_array(self, left, right):
         message = "Can only multiply array with int or nat"
@@ -67,13 +67,13 @@ class MultiplicativeExpression(BinaryOperation):
         size = f"{size_func}({left}, {cast}(({right} == 0) ? 1 : {right}))"
 
         result = Expression(left.kind, "", left.arrays)
-        result = self.transpiler.temps.cache_new_array(result, size, string = True)
+        result = self.transpiler.temps.new_array(result, size, string = True, cache = True)
 
         kind = left.kind if left.kind != "str" and left.arrays < 2 else "array"
         func = util(self.util_array_multiply(kind))
         result.add(f"{func}(", f", {left})")
 
-        return self.transpiler.temps.cache_new(result)
+        return self.transpiler.temps.new(result, cache = True)
 
     @new_util("array_multiply_size")
     @staticmethod

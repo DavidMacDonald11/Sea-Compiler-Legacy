@@ -71,9 +71,9 @@ class PostfixAccessExpression(Node):
         expression, start, stop, step = self.transpile_args(expression)
         size_func = util("split_size")
         size = Expression("nat", f"{size_func}({start}, {stop}, {step})")
-        size = self.transpiler.temps.cache_new(size)
+        size = self.transpiler.temps.new(size, cache = True)
 
-        result = self.transpiler.temps.cache_new_array(expression.copy().new(""), size)
+        result = self.transpiler.temps.new_array(expression.copy().new(""), size, cache = True)
 
         if expression.kind == "str" and expression.arrays == 0:
             func = util("str_split")
@@ -84,7 +84,7 @@ class PostfixAccessExpression(Node):
         return expression.add(f"{func}({result}, ", f", {start}, {stop}, {step})")
 
     def transpile_args(self, expression):
-        array = self.transpiler.temps.cache_new(expression)
+        array = self.transpiler.temps.new(expression, cache = True)
 
         if len(self.splits) < 3 or self.splits[2] is None:
             step = Expression("nat8", "1")
