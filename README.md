@@ -1,3 +1,6 @@
+# Discontinued
+Please visit the [Sea Compiler](https://github.com/DavidMacDonald11/Sea-Compiler) repository for the updated version of this project!
+
 # The Sea Programming Language
 The Sea language began as a translation of the C language, with Python-like syntax.
 Now, it is more of an overhaul than first anticipated.
